@@ -49,3 +49,18 @@ button:not([data-slot]):not(.primary):not(.unit):not(.available):not(.taken):not
 .roomtabs button[data-state=active] {
   color: var(--tracker-text) !important;
 }
+
+/* Keep the home logo easy to tap on desktop and mobile. */
+.brand > a[aria-label="Berlayar Rise tracker home"] {
+  display: inline-flex;
+  align-items: center;
+  min-width: 44px;
+  min-height: 44px;
+  flex-shrink: 0;
+  border-radius: 4px;
+  touch-action: manipulation;
+}
+.brand > a[aria-label="Berlayar Rise tracker home"]:focus-visible {
+  outline: 3px solid #183c2c;
+  outline-offset: 4px;
+}
