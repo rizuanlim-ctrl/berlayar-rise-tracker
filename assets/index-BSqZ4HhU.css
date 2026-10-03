@@ -23,3 +23,29 @@ h1, h2, h3, h4, h5, h6,
 input, select, textarea {
   color: #183c2c;
 }
+
+/* Match neutral tracker text to the Room categories card fill. */
+:root {
+  --tracker-text: #183c2c;
+  --foreground: var(--tracker-text);
+  --card-foreground: var(--tracker-text);
+  --popover-foreground: var(--tracker-text);
+  --secondary-foreground: var(--tracker-text);
+  --accent-foreground: var(--tracker-text);
+  --sidebar-foreground: var(--tracker-text);
+}
+body,
+h1, h2, h3, h4, h5, h6,
+input, select, textarea {
+  color: var(--tracker-text);
+}
+button:not([data-slot]):not(.primary):not(.unit):not(.available):not(.taken):not(.unverified),
+.roomtabs button,
+.workhead [data-slot=tabs-trigger],
+.viewtabs [data-slot=tabs-trigger],
+[data-slot=select-trigger] {
+  color: var(--tracker-text);
+}
+.roomtabs button[data-state=active] {
+  color: var(--tracker-text) !important;
+}
