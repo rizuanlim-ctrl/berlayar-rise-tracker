@@ -26,3 +26,10 @@ html:lang(ta) body :is(button,small,.unit-status-text,.unittype){line-height:1.6
 html:lang(ms) body,html:lang(ms) body :is(button,input,textarea,select,p,span,label,legend,summary,small,strong,h1,h2,h3,h4,td,th,a){font-family:Manrope,Arial,system-ui,sans-serif!important;letter-spacing:normal;word-break:normal;overflow-wrap:break-word}
 html:lang(ms) body :is(p,label,legend,summary,td,th){line-height:1.7!important}
 html:lang(ms) body :is(button,small,.unit-status-text,.unittype){line-height:1.65!important}
+
+/* Language selector at 70% of its previous size, with fixed positions. */
+.app .topbar .language-picker{gap:4.2px}
+.app .topbar .language-picker>span{font-size:9.8px!important;height:18.2px;min-height:18.2px;line-height:1.6;white-space:nowrap}
+.app .topbar .language-buttons{width:70%;gap:5.6px;grid-template-columns:repeat(4,minmax(0,1fr));justify-self:start}
+.app .topbar .language-buttons .language-button{height:33.6px;min-height:33.6px;min-width:0;width:100%;padding:5.6px!important;border-radius:4.9px;font-size:9.8px!important;line-height:1.6}
+@media(max-width:600px){.app .topbar .language-buttons{width:70%;grid-template-columns:repeat(2,minmax(0,1fr));gap:5.6px}.app .topbar .language-buttons .language-button{height:33.6px;min-height:33.6px}.app .topbar .language-picker>span{height:18.2px;min-height:18.2px}}
