@@ -39,3 +39,10 @@ html:lang(ms) body :is(button,small,.unit-status-text,.unittype){line-height:1.6
 .app .topbar .language-picker>span{justify-self:end;justify-content:flex-end;max-width:70%;text-align:right}
 .app .topbar .language-buttons{justify-self:end}
 @media(max-width:1000px){.app .topbar .language-picker{justify-items:end}.app .topbar .language-buttons{justify-self:end}}
+
+/* Align secondary controls below the selector; allow translated text to wrap. */
+.app .topbar .topactions{justify-content:flex-end!important;column-gap:10px;row-gap:8px}
+.app .topbar .topactions>.large-text-button,.app .topbar .topactions>.export-excel{flex:0 0 auto;max-width:100%;white-space:normal}
+.app .topbar .topactions>.private{flex:0 1 auto;min-width:0;max-width:100%;margin:0;white-space:normal;overflow-wrap:break-word;line-height:1.6}
+.app .topbar .topactions>.private svg{flex-shrink:0}
+@media(max-width:720px){.app .topbar .topactions{justify-content:flex-end!important}.app .topbar .topactions>.export-excel{align-self:center;margin-top:0}}
