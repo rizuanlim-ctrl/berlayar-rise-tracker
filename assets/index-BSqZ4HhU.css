@@ -15,3 +15,11 @@ html,body,#root,.app{width:100%;min-width:0}main{width:100%;min-width:0;padding:
 .stats .queuecard small {
   color: #fff !important;
 }
+body {
+  color: #183c2c;
+}
+
+h1, h2, h3, h4, h5, h6,
+input, select, textarea {
+  color: #183c2c;
+}
