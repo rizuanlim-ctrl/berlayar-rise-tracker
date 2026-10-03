@@ -33,3 +33,9 @@ html:lang(ms) body :is(button,small,.unit-status-text,.unittype){line-height:1.6
 .app .topbar .language-buttons{width:70%;gap:5.6px;grid-template-columns:repeat(4,minmax(0,1fr));justify-self:start}
 .app .topbar .language-buttons .language-button{height:33.6px;min-height:33.6px;min-width:0;width:100%;padding:5.6px!important;border-radius:4.9px;font-size:9.8px!important;line-height:1.6}
 @media(max-width:600px){.app .topbar .language-buttons{width:70%;grid-template-columns:repeat(2,minmax(0,1fr));gap:5.6px}.app .topbar .language-buttons .language-button{height:33.6px;min-height:33.6px}.app .topbar .language-picker>span{height:18.2px;min-height:18.2px}}
+
+/* Reserve the header's right column for the compact language selector. */
+.app .topbar .language-picker{justify-items:end}
+.app .topbar .language-picker>span{justify-self:end;justify-content:flex-end;max-width:70%;text-align:right}
+.app .topbar .language-buttons{justify-self:end}
+@media(max-width:1000px){.app .topbar .language-picker{justify-items:end}.app .topbar .language-buttons{justify-self:end}}
