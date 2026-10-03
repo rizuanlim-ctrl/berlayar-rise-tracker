@@ -1,0 +1,48 @@
+<!doctype html><html lang="en"><head><script>
+(()=>{const realFetch=window.fetch.bind(window);let snapshot=null,posts=0;const target='https://berlayar-rise-tracker.rizuanlim.chatgpt.site/api/tracker';window.fetch=async(url,options={})=>{if(String(url)!==target)return realFetch(url,options);if(!snapshot){snapshot=await(await realFetch(target)).json();}if(options.method==='POST'||options.method==='PUT'){if(parent.document.getElementById('fail').checked){return Response.json({error:'Simulated connection failure'},{status:503});}const body=JSON.parse(options.body);if(body.revision!==snapshot.revision)return Response.json({error:'Stale test revision'},{status:409});snapshot={state:body.state,revision:snapshot.revision+1,updated:new Date().toISOString()};parent.document.getElementById('saves').textContent=String(++posts);return Response.json({revision:snapshot.revision,updated:snapshot.updated});}return Response.json(snapshot);};})();
+</script><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="description" content="Berlayar Rise unit prices, selection progress and ethnic quotas."><title>Berlayar Rise Tracker</title><link rel="icon" href="/berlayar-rise-icon.png">  <script type="module" crossorigin src="/assets/tracker-e8161b8bb6bb.js"></script>
+  <link rel="stylesheet" crossorigin href="/assets/index-BSqZ4HhU.css">
+<link rel="stylesheet" href="/assets/usability-d3058c0e1e8b.css"></head><body><a class="skip-link" href="#unit-explorer">Skip to unit search</a><details class="community-notice"><summary>Community tracker · update confirmed selections only</summary><p>Please record a selection only after the actual flat booking has been confirmed. Accurate community updates help everyone track availability reliably.</p><a href="https://berlayar-rise-tracker.rizuanlim.chatgpt.site/activity">Owner activity &amp; notifications</a></details>
+<div class="sea-music" role="region" aria-label="Background music">
+  <button id="sea-music-toggle" type="button" aria-controls="sea-music-audio" aria-pressed="false" aria-label="Play background music" title="Play background music">▶</button>
+  <span>Undertow · <a href="https://www.scottbuckley.com.au/library/undertow/" target="_blank" rel="noopener noreferrer">Scott Buckley</a> · <a href="https://creativecommons.org/licenses/by/4.0/" target="_blank" rel="noopener noreferrer">CC BY 4.0</a></span>
+  <span id="sea-music-status" role="status" aria-live="polite"></span>
+  <audio id="sea-music-audio" loop autoplay preload="auto" src="https://www.scottbuckley.com.au/library/wp-content/uploads/2019/12/sb_undertow.mp3"></audio>
+</div>
+<style>
+.sea-music{display:flex;align-items:center;flex-wrap:wrap;gap:2px 8px;margin:0 16px 6px;padding:0 8px;border:1px solid #cbdace;border-radius:4px;background:#edf3ee;color:#183c2c;font:7px/1.2 Arial,sans-serif}
+.sea-music button{width:18px;height:18px;min-width:18px;padding:0;display:inline-flex;align-items:center;justify-content:center;flex-shrink:0;border:1px solid #183c2c;border-radius:50%;background:#183c2c;color:white;font:inherit;cursor:pointer}
+.sea-music button:disabled{opacity:.65;cursor:wait}.sea-music a{color:inherit;text-decoration:underline}.sea-music button:focus-visible,.sea-music a:focus-visible{outline:3px solid #45845b;outline-offset:3px}
+@media(max-width:600px){.sea-music{margin:0 12px 6px;padding:0 6px;gap:2px 6px}.sea-music span{overflow-wrap:anywhere}}
+@media(pointer:coarse){.sea-music button{width:22px;height:22px;min-width:22px}}
+</style>
+<script>
+(()=>{
+ const audio=document.getElementById('sea-music-audio');
+ const button=document.getElementById('sea-music-toggle');
+ const status=document.getElementById('sea-music-status');
+ audio.volume=0.25;
+ function update(){button.textContent=audio.paused?'▶':'Ⅱ';button.setAttribute('aria-pressed',String(!audio.paused));button.setAttribute('aria-label',audio.paused?'Play background music':'Pause background music');button.title=audio.paused?'Play background music':'Pause background music';}
+ function clearAutoStart(){document.removeEventListener('click',startOnInteraction,true);document.removeEventListener('keydown',startOnInteraction,true);}
+ function startOnInteraction(event){
+  if(event.target instanceof Element&&event.target.closest('#sea-music-toggle'))return;
+  if(event.type==='keydown'&&!['Enter',' '].includes(event.key))return;
+  if(!audio.paused){clearAutoStart();return;}
+  if(audio.error)audio.load();
+  audio.play().then(()=>{status.textContent='';clearAutoStart();}).catch(()=>{status.textContent='Tap ▶ to play music.';});
+ }
+ document.addEventListener('click',startOnInteraction,true);
+ document.addEventListener('keydown',startOnInteraction,true);
+ audio.addEventListener('play',()=>{clearAutoStart();update();});audio.addEventListener('pause',update);
+ audio.play().then(()=>{status.textContent='';clearAutoStart();}).catch(()=>{status.textContent='Tap anywhere to start music.';});
+ audio.addEventListener('error',()=>{status.textContent='Music could not load. Tap Play music to retry.';button.disabled=false;update();});
+ button.addEventListener('click',async()=>{
+  clearAutoStart();status.textContent='';
+  if(!audio.paused){audio.pause();return;}
+  button.disabled=true;status.textContent='Loading music…';
+  try{if(audio.error)audio.load();await audio.play();status.textContent='';}
+  catch{status.textContent='Unable to play music. Please try again.';}
+  finally{button.disabled=false;update();}
+ });
+})();
+</script><a class="browse-shortcut" href="#unit-explorer">Browse units</a><div id="root"></div></body></html>
