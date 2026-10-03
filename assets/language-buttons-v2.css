@@ -20,3 +20,9 @@ html:lang(zh) body :is(p,label,legend,summary,td,th),html:lang(ta) body :is(p,la
 html:lang(ta) body :is(button,small,.unit-status-text,.unittype){line-height:1.65!important}
 @media(max-width:1000px){.app .topbar{grid-template-columns:minmax(0,1fr)}.app .topbar .brand{width:100%}}
 @media(max-width:600px){.app .topbar .language-buttons{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}.app .topbar .language-buttons .language-button{min-height:48px;height:48px}.app .topbar .language-picker>span{min-height:28px}}
+
+/* Apply matching readable typography and spacing to the Malay translation. */
+.language-button[lang="ms"]{font-family:Manrope,Arial,system-ui,sans-serif!important;line-height:1.6!important;letter-spacing:normal}
+html:lang(ms) body,html:lang(ms) body :is(button,input,textarea,select,p,span,label,legend,summary,small,strong,h1,h2,h3,h4,td,th,a){font-family:Manrope,Arial,system-ui,sans-serif!important;letter-spacing:normal;word-break:normal;overflow-wrap:break-word}
+html:lang(ms) body :is(p,label,legend,summary,td,th){line-height:1.7!important}
+html:lang(ms) body :is(button,small,.unit-status-text,.unittype){line-height:1.65!important}
