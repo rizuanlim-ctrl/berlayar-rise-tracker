@@ -12,7 +12,7 @@ font:14px/1.6 Arial,sans-serif">
   <button id="sea-music-toggle" type="button" aria-controls="sea-music-audio" aria-pressed="false" aria-label="Play background music" title="Play background music">▶</button>
   <span>Undertow · <a href="https://www.scottbuckley.com.au/library/undertow/" target="_blank" rel="noopener noreferrer">Scott Buckley</a> · <a href="https://creativecommons.org/licenses/by/4.0/" target="_blank" rel="noopener noreferrer">CC BY 4.0</a></span>
   <span id="sea-music-status" role="status" aria-live="polite"></span>
-  <audio id="sea-music-audio" loop preload="none" src="https://www.scottbuckley.com.au/library/wp-content/uploads/2019/12/sb_undertow.mp3"></audio>
+  <audio id="sea-music-audio" loop autoplay preload="auto" src="https://www.scottbuckley.com.au/library/wp-content/uploads/2019/12/sb_undertow.mp3"></audio>
 </div>
 <style>
 .sea-music{display:flex;align-items:center;flex-wrap:wrap;gap:2px 8px;margin:0 16px 6px;padding:0 8px;border:1px solid #cbdace;border-radius:4px;background:#edf3ee;color:#183c2c;font:7px/1.2 Arial,sans-serif}
@@ -28,10 +28,21 @@ font:14px/1.6 Arial,sans-serif">
  const status=document.getElementById('sea-music-status');
  audio.volume=0.25;
  function update(){button.textContent=audio.paused?'▶':'Ⅱ';button.setAttribute('aria-pressed',String(!audio.paused));button.setAttribute('aria-label',audio.paused?'Play background music':'Pause background music');button.title=audio.paused?'Play background music':'Pause background music';}
- audio.addEventListener('play',update);audio.addEventListener('pause',update);
+ function clearAutoStart(){document.removeEventListener('click',startOnInteraction,true);document.removeEventListener('keydown',startOnInteraction,true);}
+ function startOnInteraction(event){
+  if(event.target instanceof Element&&event.target.closest('#sea-music-toggle'))return;
+  if(event.type==='keydown'&&!['Enter',' '].includes(event.key))return;
+  if(!audio.paused){clearAutoStart();return;}
+  if(audio.error)audio.load();
+  audio.play().then(()=>{status.textContent='';clearAutoStart();}).catch(()=>{status.textContent='Tap ▶ to play music.';});
+ }
+ document.addEventListener('click',startOnInteraction,true);
+ document.addEventListener('keydown',startOnInteraction,true);
+ audio.addEventListener('play',()=>{clearAutoStart();update();});audio.addEventListener('pause',update);
+ audio.play().then(()=>{status.textContent='';clearAutoStart();}).catch(()=>{status.textContent='Tap anywhere to start music.';});
  audio.addEventListener('error',()=>{status.textContent='Music could not load. Tap Play music to retry.';button.disabled=false;update();});
  button.addEventListener('click',async()=>{
-  status.textContent='';
+  clearAutoStart();status.textContent='';
   if(!audio.paused){audio.pause();return;}
   button.disabled=true;status.textContent='Loading music…';
   try{if(audio.error)audio.load();await audio.play();status.textContent='';}
