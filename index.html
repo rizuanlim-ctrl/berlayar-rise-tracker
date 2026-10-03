@@ -1,6 +1,6 @@
-<!doctype html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="description" content="Berlayar Rise unit prices, selection progress and ethnic quotas."><title>Berlayar Rise Tracker</title><link rel="icon" href="/berlayar-rise-icon.png">  <script type="module" crossorigin src="/assets/tracker-13c9d30e3d1a.js"></script>
+<!doctype html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="description" content="Berlayar Rise unit prices, selection progress and ethnic quotas."><title>Berlayar Rise Tracker</title><link rel="icon" href="/berlayar-rise-icon.png">  <script type="module" crossorigin src="/assets/tracker-languages-v1.js"></script>
   <link rel="stylesheet" crossorigin href="/assets/index-BSqZ4HhU.css">
-<link rel="stylesheet" href="/assets/usability-d3058c0e1e8b.css"></head><body><a class="skip-link" href="#unit-explorer">Skip to unit search</a><details class="community-notice"><summary>Community tracker · update confirmed selections only</summary><p>Please record a selection only after the actual flat booking has been confirmed. Accurate community updates help everyone track availability reliably.</p><a href="https://berlayar-rise-tracker.rizuanlim.chatgpt.site/activity">Owner activity &amp; notifications</a></details>
+<link rel="stylesheet" href="/assets/usability-d3058c0e1e8b.css"><link rel="stylesheet" href="/assets/languages-v1.css"></head><body><a class="skip-link" href="#unit-explorer">Skip to unit search</a><details class="community-notice"><summary>Community tracker · update confirmed selections only</summary><p>Please record a selection only after the actual flat booking has been confirmed. Accurate community updates help everyone track availability reliably.</p><a href="https://berlayar-rise-tracker.rizuanlim.chatgpt.site/activity">Owner activity &amp; notifications</a></details>
 <div class="sea-music" role="region" aria-label="Background music">
   <button id="sea-music-toggle" type="button" aria-controls="sea-music-audio" aria-pressed="false" aria-label="Play background music" title="Play background music">▶</button>
   <span>Undertow · <a href="https://www.scottbuckley.com.au/library/undertow/" target="_blank" rel="noopener noreferrer">Scott Buckley</a> · <a href="https://creativecommons.org/licenses/by/4.0/" target="_blank" rel="noopener noreferrer">CC BY 4.0</a></span>
@@ -20,26 +20,27 @@
  const button=document.getElementById('sea-music-toggle');
  const status=document.getElementById('sea-music-status');
  audio.volume=0.25;
- function update(){button.textContent=audio.paused?'▶':'Ⅱ';button.setAttribute('aria-pressed',String(!audio.paused));button.setAttribute('aria-label',audio.paused?'Play background music':'Pause background music');button.title=audio.paused?'Play background music':'Pause background music';}
+ const tr=s=>window.berlayarTranslate?window.berlayarTranslate(s):s;
+ function update(){button.textContent=audio.paused?'▶':'Ⅱ';button.setAttribute('aria-pressed',String(!audio.paused));button.setAttribute('aria-label',tr(audio.paused?'Play background music':'Pause background music'));button.title=tr(audio.paused?'Play background music':'Pause background music');}
  function clearAutoStart(){document.removeEventListener('click',startOnInteraction,true);document.removeEventListener('keydown',startOnInteraction,true);}
  function startOnInteraction(event){
   if(event.target instanceof Element&&event.target.closest('#sea-music-toggle'))return;
   if(event.type==='keydown'&&!['Enter',' '].includes(event.key))return;
   if(!audio.paused){clearAutoStart();return;}
   if(audio.error)audio.load();
-  audio.play().then(()=>{status.textContent='';clearAutoStart();}).catch(()=>{status.textContent='Tap ▶ to play music.';});
+  audio.play().then(()=>{status.textContent='';clearAutoStart();}).catch(()=>{status.textContent=tr('Tap ▶ to play music.');});
  }
  document.addEventListener('click',startOnInteraction,true);
  document.addEventListener('keydown',startOnInteraction,true);
  audio.addEventListener('play',()=>{clearAutoStart();update();});audio.addEventListener('pause',update);
- audio.play().then(()=>{status.textContent='';clearAutoStart();}).catch(()=>{status.textContent='Tap anywhere to start music.';});
- audio.addEventListener('error',()=>{status.textContent='Music could not load. Tap Play music to retry.';button.disabled=false;update();});
+ audio.play().then(()=>{status.textContent='';clearAutoStart();}).catch(()=>{status.textContent=tr('Tap anywhere to start music.');});
+ audio.addEventListener('error',()=>{status.textContent=tr('Music could not load. Tap Play music to retry.');button.disabled=false;update();});
  button.addEventListener('click',async()=>{
   clearAutoStart();status.textContent='';
   if(!audio.paused){audio.pause();return;}
-  button.disabled=true;status.textContent='Loading music…';
+  button.disabled=true;status.textContent=tr('Loading music…');
   try{if(audio.error)audio.load();await audio.play();status.textContent='';}
-  catch{status.textContent='Unable to play music. Please try again.';}
+  catch{status.textContent=tr('Unable to play music. Please try again.');}
   finally{button.disabled=false;update();}
  });
 })();
