@@ -9,16 +9,17 @@ font:14px/1.6 Arial,sans-serif">
   updates help everyone track availability reliably.
 <br><a href="https://berlayar-rise-tracker.rizuanlim.chatgpt.site/activity" style="display:inline-block;min-height:44px;padding:10px 0;box-sizing:border-box;color:#183c2c">Owner activity &amp; notifications</a></aside>
 <div class="sea-music" role="region" aria-label="Background music">
-  <button id="sea-music-toggle" type="button" aria-controls="sea-music-audio" aria-pressed="false">▶ Play music</button>
+  <button id="sea-music-toggle" type="button" aria-controls="sea-music-audio" aria-pressed="false" aria-label="Play background music" title="Play background music">▶</button>
   <span>Undertow · <a href="https://www.scottbuckley.com.au/library/undertow/" target="_blank" rel="noopener noreferrer">Scott Buckley</a> · <a href="https://creativecommons.org/licenses/by/4.0/" target="_blank" rel="noopener noreferrer">CC BY 4.0</a></span>
   <span id="sea-music-status" role="status" aria-live="polite"></span>
   <audio id="sea-music-audio" loop preload="none" src="https://www.scottbuckley.com.au/library/wp-content/uploads/2019/12/sb_undertow.mp3"></audio>
 </div>
 <style>
 .sea-music{display:flex;align-items:center;flex-wrap:wrap;gap:10px 16px;margin:0 16px 16px;padding:10px 16px;border:1px solid #cbdace;border-radius:12px;background:#edf3ee;color:#183c2c;font:14px/1.5 Arial,sans-serif}
-.sea-music button{min-height:44px;padding:10px 16px;border:1px solid #183c2c;border-radius:8px;background:#183c2c;color:white;font:inherit;cursor:pointer}
+.sea-music button{width:32px;height:32px;min-width:32px;padding:0;display:inline-flex;align-items:center;justify-content:center;flex-shrink:0;border:1px solid #183c2c;border-radius:50%;background:#183c2c;color:white;font:inherit;cursor:pointer}
 .sea-music button:disabled{opacity:.65;cursor:wait}.sea-music a{color:inherit;text-decoration:underline}.sea-music button:focus-visible,.sea-music a:focus-visible{outline:3px solid #45845b;outline-offset:3px}
 @media(max-width:600px){.sea-music{margin:0 12px 12px;padding:10px 12px;gap:8px 12px}.sea-music span{overflow-wrap:anywhere}}
+@media(pointer:coarse){.sea-music button{width:44px;height:44px;min-width:44px}}
 </style>
 <script>
 (()=>{
@@ -26,7 +27,7 @@ font:14px/1.6 Arial,sans-serif">
  const button=document.getElementById('sea-music-toggle');
  const status=document.getElementById('sea-music-status');
  audio.volume=0.25;
- function update(){button.textContent=audio.paused?'▶ Play music':'Ⅱ Pause music';button.setAttribute('aria-pressed',String(!audio.paused));}
+ function update(){button.textContent=audio.paused?'▶':'Ⅱ';button.setAttribute('aria-pressed',String(!audio.paused));button.setAttribute('aria-label',audio.paused?'Play background music':'Pause background music');button.title=audio.paused?'Play background music':'Pause background music';}
  audio.addEventListener('play',update);audio.addEventListener('pause',update);
  audio.addEventListener('error',()=>{status.textContent='Music could not load. Tap Play music to retry.';button.disabled=false;update();});
  button.addEventListener('click',async()=>{
