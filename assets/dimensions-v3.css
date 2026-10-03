@@ -1,0 +1,53 @@
+
+/* Compact export control and resilient translated layouts. */
+.topactions>.export-excel{flex:0 0 auto!important;min-width:0;min-height:33px!important;max-width:170px;gap:5px;padding:6px 9px!important;font-size:12px;line-height:1.35;white-space:normal;height:auto}
+.topactions>.export-excel svg{width:13px;height:13px;flex-shrink:0}
+.topactions>.export-excel span{font-size:12px!important;line-height:1.35;min-width:0;overflow-wrap:anywhere}
+.topbar,.topactions,.brand,.language-picker,.pageheading,.sync,.workhead,.resultsbar,.resulttools,.legend,.blocktitle,.sectionintro{min-width:0}
+.topbar{gap:12px;align-items:center}.topactions{max-width:100%;flex-wrap:wrap;gap:8px}.language-buttons{min-width:0;max-width:100%}
+.community-notice summary{padding-right:14px!important;overflow-wrap:anywhere}
+.browse-shortcut{position:static;display:table;max-width:calc(100% - 32px);margin:0 16px 6px;padding:6px 12px;min-height:33px;border:1px solid #dec992;border-radius:6px;overflow-wrap:anywhere}
+.pageheading h1,.sectionintro h2,.quotacard h3,.notice p,.overview summary,.stats span,.stats small,.progressmetrics span,.muted,.note,footer{overflow-wrap:anywhere}
+.sync>div{min-width:0;max-width:100%;flex-wrap:wrap}.sync strong{overflow-wrap:anywhere}
+.roomrow,.roomrow>[data-slot=tabs]{min-width:0;max-width:100%}
+.roomtabs{max-width:100%;height:auto!important;overflow-x:auto!important;overflow-y:hidden!important}
+.roomtabs [data-slot=tabs-trigger]{height:auto!important;min-height:44px;white-space:normal!important;line-height:1.45}
+.workhead [data-slot=tabs-list]{height:auto;min-width:0;flex-wrap:wrap}
+.workhead [data-slot=tabs-trigger]{height:auto;min-width:0;white-space:normal;line-height:1.45}
+.filters,.extra-filter-fields{min-width:0}.filters>*{min-width:0}.filters .search{min-width:0}.search input{min-width:0;width:100%}
+.filters [data-slot=select-trigger]{height:auto;min-height:44px;max-width:100%;white-space:normal}
+[data-slot=select-trigger]>span{min-width:0;white-space:normal;overflow-wrap:anywhere;line-height:1.45}
+[data-slot=select-item]{white-space:normal;overflow-wrap:anywhere;min-height:36px}
+.advanced-filters summary{overflow-wrap:anywhere}.legend{flex-wrap:wrap;align-items:center}.legend small{min-width:0;overflow-wrap:anywhere}
+.resultsbar,.resulttools{min-width:0;flex-wrap:wrap}.resulttools>span{overflow-wrap:anywhere;min-width:0}
+.blocktitle>div{min-width:0}.blocktitle h2{overflow-wrap:anywhere}.blocktitle>span{flex:0 1 auto;min-width:0;max-width:45%;overflow-wrap:anywhere}.blocktitle:after{flex-shrink:0}
+.stats,.progressmetrics{grid-template-columns:repeat(4,minmax(0,1fr))}.stats>div,.progressmetrics>div{min-width:0}.stats strong,.progressmetrics strong{overflow-wrap:anywhere}
+.quotacard{min-width:0;max-width:100%;overflow-x:auto}.quotacard th,.quotacard td{white-space:normal;overflow-wrap:anywhere;line-height:1.45}
+.detailsheet [data-slot=sheet-header]{padding-right:64px!important}
+.detailsheet [data-slot=sheet-title],.managedialog [data-slot=dialog-title]{overflow-wrap:anywhere}
+.detailbody,.detailprice,.unit-actions{min-width:0;max-width:100%}.detailbody label,.unit-actions button{overflow-wrap:anywhere}.unit-actions button{white-space:normal}.detailbody input,.detailbody textarea{min-width:0;max-width:100%}
+.managedialog{max-width:calc(100vw - 24px)!important}.managedialog [data-slot=dialog-header]{padding-right:28px}.formrow{flex-wrap:wrap}.formrow label{min-width:0;overflow-wrap:anywhere}
+@media(max-width:1000px){.stats,.progressmetrics{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:720px){
+ .topbar{align-items:flex-start;gap:10px}.brand{flex-basis:100%;max-width:100%}.topactions{width:100%;margin-left:0!important;justify-content:flex-start!important}
+ .language-picker{width:100%;flex-basis:100%;margin-left:0!important;gap:6px}
+ .language-picker>span{font-size:14px!important}
+ .language-buttons{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));width:100%;gap:6px}
+ .language-buttons .language-button{flex:0 1 auto!important;min-width:0;padding:8px!important;min-height:44px;white-space:normal;overflow-wrap:anywhere;line-height:1.45}
+ .topactions>.export-excel{width:auto;max-width:100%;align-self:flex-start;margin-top:2px}
+ .browse-shortcut{margin-left:12px;max-width:calc(100% - 24px)}
+ .pageheading{grid-template-columns:minmax(0,1fr) 80px!important}.pageheading>div:first-child{min-width:0}.sync{grid-column:1/-1}
+ .header-project-image{max-width:80px!important}.pageheading h1{line-height:1.35}
+ .workhead [data-slot=tabs-list]{grid-template-columns:repeat(3,minmax(0,1fr));align-items:stretch;gap:3px}
+ .workhead [data-slot=tabs-trigger]{height:auto;min-height:44px;line-height:1.5;padding:8px 4px!important}
+ .extra-filter-fields{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}.extra-filter-fields [data-slot=select-trigger]{grid-column:1/-1;width:100%}
+ .resulttools{justify-content:flex-start;gap:8px}.resulttools>span{flex:1 1 110px}.viewtabs{flex:0 1 auto;max-width:100%;height:auto}
+ .legend small{width:100%;max-width:100%;line-height:1.5}
+ .blocktitle{align-items:center}.blocktitle h2{font-size:21px;line-height:1.3}.blocktitle>span{font-size:12px}
+ .quotaview,.progressview{padding:16px 12px}.quotacard{padding:10px}.quotacard table{table-layout:fixed;width:100%;min-width:0}.quotacard th,.quotacard td{font-size:12px;padding:8px 3px}
+ .progressmetrics{gap:8px}.progressmetrics>div{padding:12px}.progressmetrics span{line-height:1.5}
+ .detailsheet .detailbody{padding-left:16px;padding-right:16px}.choice-option>span{line-height:1.5}
+ .quotaform .formrow label{flex:1 1 100%;width:100%}.managedialog .formrow label{flex:1 1 140px}.managedialog [data-slot=dialog-title]{font-size:28px;line-height:1.3}
+ footer{display:block;overflow-wrap:anywhere}
+}
+@media(max-width:380px){.status-choices,html[lang="ta"] .status-choices{grid-template-columns:minmax(0,1fr)}.ethnicity-choices{grid-template-columns:repeat(2,minmax(0,1fr))}}
