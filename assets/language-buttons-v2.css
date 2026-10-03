@@ -2,3 +2,21 @@
 .language-picker{gap:8px;flex-wrap:wrap}.language-buttons{display:flex;flex-wrap:wrap;gap:4px}.language-buttons .language-button{display:flex;align-items:center;justify-content:center;min-height:44px;padding:8px 12px;border:1px solid #a2b6ac;border-radius:7px;background:#fff;color:#173d2b;font:600 14px/1.45 system-ui,sans-serif;white-space:nowrap;cursor:pointer}.language-buttons .language-button.selected{background:#173d2b;color:#fff;border-color:#173d2b;box-shadow:inset 0 0 0 1px #fff}.language-buttons .language-button:hover{border-color:#173d2b}.language-buttons .language-button:focus-visible{outline:3px solid #4d8466;outline-offset:2px}@media(max-width:600px){.language-picker{flex-basis:100%;width:100%;margin-left:0!important}.language-picker>span{font-size:14px!important}.language-buttons{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));width:100%;gap:6px}.language-buttons .language-button{min-height:44px;padding:8px}.topactions{width:100%;justify-content:flex-start!important}}
 
 .language-buttons .language-button.selected,.language-buttons .language-button.selected:hover,.language-buttons .language-button.selected:focus{color:#fff!important;background:#173d2b!important}
+
+/* Fixed language control placement, independent of the selected translation. */
+.app .topbar{display:grid;grid-template-columns:240px minmax(0,1fr);align-items:start;gap:16px}
+.app .topbar .brand{width:auto;min-width:0;max-width:100%}
+.app .topbar .topactions{width:100%;min-width:0;margin-left:0!important;display:flex;flex-wrap:wrap;justify-content:flex-start!important;align-items:center;gap:8px}
+.app .topbar .language-picker{display:grid;grid-template-columns:minmax(0,1fr);flex:0 0 100%;width:100%;min-width:0;margin:0!important;gap:6px;align-items:start}
+.app .topbar .language-picker>span{display:flex;align-items:center;min-height:26px;margin:0;line-height:1.6}
+.app .topbar .language-buttons{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));width:100%;min-width:0;gap:8px;align-items:stretch}
+.app .topbar .language-buttons .language-button{width:100%;min-width:0;min-height:48px;height:48px;margin:0;padding:8px!important;display:flex;align-items:center;justify-content:center;text-align:center;white-space:normal;overflow-wrap:normal;word-break:normal;line-height:1.6;font-size:14px!important;font-weight:600;letter-spacing:normal}
+/* Native script fallbacks preserve Chinese characters and Tamil shaping. */
+.language-button[lang="zh-Hans"]{font-family:"Noto Sans SC","PingFang SC","Microsoft YaHei","Heiti SC",system-ui,sans-serif!important}
+.language-button[lang="ta"]{font-family:"Noto Sans Tamil","Tamil Sangam MN","Nirmala UI",Latha,system-ui,sans-serif!important;line-height:1.75!important;font-size:15px!important}
+html:lang(zh) body,html:lang(zh) body :is(button,input,textarea,select,p,span,label,legend,summary,small,strong,h1,h2,h3,h4,td,th,a){font-family:"Noto Sans SC","PingFang SC","Microsoft YaHei","Heiti SC",system-ui,sans-serif!important;letter-spacing:normal}
+html:lang(ta) body,html:lang(ta) body :is(button,input,textarea,select,p,span,label,legend,summary,small,strong,h1,h2,h3,h4,td,th,a){font-family:"Noto Sans Tamil","Tamil Sangam MN","Nirmala UI",Latha,system-ui,sans-serif!important;letter-spacing:normal;word-break:normal;overflow-wrap:break-word}
+html:lang(zh) body :is(p,label,legend,summary,td,th),html:lang(ta) body :is(p,label,legend,summary,td,th){line-height:1.7!important}
+html:lang(ta) body :is(button,small,.unit-status-text,.unittype){line-height:1.65!important}
+@media(max-width:1000px){.app .topbar{grid-template-columns:minmax(0,1fr)}.app .topbar .brand{width:100%}}
+@media(max-width:600px){.app .topbar .language-buttons{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}.app .topbar .language-buttons .language-button{min-height:48px;height:48px}.app .topbar .language-picker>span{min-height:28px}}
