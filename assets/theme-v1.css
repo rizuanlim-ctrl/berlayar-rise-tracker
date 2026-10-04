@@ -1,0 +1,26 @@
+/* Berlayar Rise theme preference; status colours retain their meaning. */
+html[data-tracker-theme="dark"]{color-scheme:dark;--tracker-text:#e1eee6;--background:#101c16;--foreground:#e1eee6;--card:#192b21;--card-foreground:#e1eee6;--popover:#21392b;--popover-foreground:#e1eee6;--muted:#243b2d;--muted-foreground:#b4c9bc;--secondary:#243b2d;--secondary-foreground:#e1eee6;--accent:#304d3c;--accent-foreground:#e1eee6;--border:#3d5948;--input:#3d5948;--ring:#9bd2af}
+html[data-tracker-theme="dark"] body,html[data-tracker-theme="dark"] .app{background:#101c16!important;color:#e1eee6!important}
+html[data-tracker-theme="dark"] :is(.topbar,.workspace,.overview,.stats>div,.blockpanel,.quotacard,.tracker-help,.detailsheet,.managedialog,[data-slot="dialog-content"],[data-slot="select-content"],[data-slot="popover-content"]){background:#192b21!important;border-color:#3d5948!important;color:#e1eee6!important}
+html[data-tracker-theme="dark"] :is(.blocktitle,.legend,.availability-note,.gridlabel,.stacklabel,.floorlabel,.gapcell,.note,.notice,.progressmetrics>div,.unit-actions,.viewtabs,.roomtabs,[data-slot="tabs-list"]){background:#21392b!important;border-color:#3d5948!important;color:#d6e8dc!important}
+html[data-tracker-theme="dark"] :is(h1,h2,h3,h4,h5,h6,.brandcaption span,.eyebrow,.stats strong,.progressmetrics strong,.detailprice,.filter-field,.quick-filter legend,.unit-choices legend,.unit-extra summary,.blocktitle:after){color:#e1eee6!important}
+html[data-tracker-theme="dark"] :is(.muted,.subtitle,.sync span,.sync strong,.stats span,.stats small,.baseline,.legend small,.blocktitle>span,.resulttools>span,.workhead>span,.note,.shortlist-privacy,.shortlist-note,.choice-help,.detailprice span,footer,.quotacard p,.sectionintro p,.notice p,.notice strong){color:#b4c9bc!important}
+html[data-tracker-theme="dark"] :is(input,select,textarea,.search,.quick-filter button,.card-actions button,.choice-option>span,.unit-cancel,[data-slot="select-trigger"]){background:#15271c!important;color:#e1eee6!important;border-color:#55745e!important}
+html[data-tracker-theme="dark"] input::placeholder{color:#aac1b2}
+html[data-tracker-theme="dark"] :is(.topactions button,.clear-filters,.shortlist-filter,.textbutton,.detail-access-actions button,.unit-extra,.undo-unit,.blockemblem,.topactions .private){background:#243e2d!important;color:#e1eee6!important;border-color:#55745e!important}
+html[data-tracker-theme="dark"] :is(.roomtabs button,.workhead [data-slot="tabs-trigger"],.viewtabs [data-slot="tabs-trigger"]){color:#d6e8dc!important}
+html[data-tracker-theme="dark"] :is(button[aria-pressed="true"]:not(.unit),[data-slot="tabs-trigger"][data-state="active"],.primary,.choice-option.selected>span){background:#38634a!important;color:#fff!important;border-color:#95c8a7!important}
+html[data-tracker-theme="dark"] .roomtabs span{background:#304d3c!important;color:#d6e8dc!important}
+html[data-tracker-theme="dark"] .listtable td{color:#e1eee6}
+html[data-tracker-theme="dark"] .community-notice,html[data-tracker-theme="dark"] .browse-shortcut{background:#332e1d!important;color:#f0deb4!important;border-color:#766840!important}
+html[data-tracker-theme="dark"] .community-notice a{color:#b2dcbc}
+html[data-tracker-theme="dark"] .projectlogo{background:#edf4ef;border-radius:6px;padding:4px}
+html[data-tracker-theme="dark"] .stats .queuecard{background:#315c42!important}
+html[data-tracker-theme="dark"] :is(button,input,select,textarea,summary,a):focus-visible{outline-color:#a7ddb9!important}
+html[data-tracker-theme="dark"] .unit-card :is(h3,p,.card-price){color:inherit!important}
+.theme-control{display:inline-flex;align-items:center;gap:4px;flex:0 0 auto;max-width:100%;padding:4px;border:1px solid #a6b8ac;border-radius:8px;background:#edf4ef}
+.app .topactions .theme-control button{min-height:36px;min-width:60px;flex:0 0 auto;padding:6px 10px!important;border:0;border-radius:5px;color:#183c2c;background:transparent;white-space:nowrap;font:600 12px/1.4 Manrope,Arial,sans-serif}
+.app .topactions .theme-control button[aria-pressed="true"]{background:#183c2c!important;color:#fff!important}
+html[data-tracker-theme="dark"] .theme-control{background:#15271c;border-color:#55745e}
+html[data-tracker-theme="dark"] .app .topactions .theme-control button[aria-pressed="true"]{background:#38634a!important}
+@media(max-width:720px){.app .topactions .theme-control{margin-left:auto}.app .topactions .theme-control button{min-height:40px;min-width:64px}}
