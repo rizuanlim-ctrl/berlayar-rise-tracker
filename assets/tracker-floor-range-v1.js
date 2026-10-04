@@ -112,11 +112,11 @@ function TrackerScrollControls({inDetails=false,onClose,disabled=false}){
  }
  return (0,LocalizedJSX.jsxs)('nav',{className:'tracker-scroll-controls'+(inDetails?' details-scroll-controls':''),'aria-label':inDetails?'Unit details navigation':'Page navigation',children:[
  (0,LocalizedJSX.jsx)('style',{children:`
- .tracker-scroll-controls{position:fixed;right:max(14px,env(safe-area-inset-right));bottom:calc(14px + env(safe-area-inset-bottom));display:flex;flex-wrap:nowrap;align-items:center;gap:8px;z-index:100;max-width:calc(100vw - 28px);padding:8px;border:1px solid #b4c4ba;border-radius:14px;background:#f4f8f5!important;opacity:1!important;box-shadow:0 4px 18px #0003;isolation:isolate}
- .tracker-scroll-controls button{display:inline-flex!important;align-items:center;justify-content:center;gap:5px;min-width:54px;min-height:44px;padding:8px 10px!important;border:1px solid #183c2c!important;border-radius:8px!important;background:#183c2c!important;color:#fff!important;font-size:13px!important;line-height:1.4!important;font-weight:600;white-space:normal;opacity:1!important;cursor:pointer}
+ .tracker-scroll-controls{position:fixed;right:max(14px,env(safe-area-inset-right));bottom:calc(14px + env(safe-area-inset-bottom));display:flex;flex-wrap:nowrap;align-items:center;gap:8px;z-index:100;max-width:calc(100vw - 28px);padding:8px;border:1px solid transparent;border-radius:14px;background:transparent!important;opacity:1!important;box-shadow:none;isolation:isolate}
+ .tracker-scroll-controls button{display:inline-flex!important;align-items:center;justify-content:center;gap:5px;min-width:54px;min-height:44px;padding:8px 10px!important;border:1px solid rgba(255,255,255,.25)!important;border-radius:8px!important;background:rgba(24,60,44,.22)!important;color:#fff!important;text-shadow:0 1px 3px rgba(0,0,0,.9);font-size:9.75px!important;line-height:1.4!important;font-weight:600;white-space:normal;opacity:1!important;cursor:pointer}
  .tracker-scroll-controls button:focus-visible{outline:3px solid #397ee6;outline-offset:3px}
  .tracker-scroll-controls button:disabled{cursor:wait}
- .tracker-scroll-controls .scroll-icon{font-size:19px!important;line-height:1}
+ .tracker-scroll-controls .scroll-icon{font-size:14.25px!important;line-height:1}
  .tracker-scroll-controls .scroll-close{display:none!important}
  .detailsheet{padding-bottom:calc(110px + env(safe-area-inset-bottom))!important}
  .app>footer{padding-bottom:110px}
