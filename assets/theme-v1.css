@@ -24,3 +24,7 @@ html[data-tracker-theme="dark"] .unit-card :is(h3,p,.card-price){color:inherit!i
 html[data-tracker-theme="dark"] .theme-control{background:#15271c;border-color:#55745e}
 html[data-tracker-theme="dark"] .app .topactions .theme-control button[aria-pressed="true"]{background:#38634a!important}
 @media(max-width:720px){.app .topactions .theme-control{margin-left:auto}.app .topactions .theme-control button{min-height:40px;min-width:64px}}
+
+html[data-tracker-theme="dark"] .app :is(.overview>summary,.project-map-launcher,.project-map-launcher small){background:#21392b!important;color:#e1eee6!important;border-color:#55745e!important}
+html[data-tracker-theme="dark"] .app :is(.roomtabs button,.workhead [data-slot="tabs-trigger"],.viewtabs [data-slot="tabs-trigger"]){color:#d6e8dc!important}
+html[data-tracker-theme="dark"] .app :is(.roomtabs button,.workhead [data-slot="tabs-trigger"],.viewtabs [data-slot="tabs-trigger"])[data-state="active"]{color:#fff!important;background:#38634a!important}
