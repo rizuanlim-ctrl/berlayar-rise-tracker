@@ -1,4 +1,4 @@
-function trackerEditingLocked(now=Date.now()){return now>=Date.parse("2026-10-04T15:50:00+08:00")&&now<Date.parse("2026-11-01T00:00:00+08:00")}
+function trackerEditingLocked(){return false}
 
 function buildQuickUnitChange(state,id,field,value,stamp){
  if(!["status","ethnicity"].includes(field))throw Error("Invalid quick-edit field");
