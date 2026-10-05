@@ -250,5 +250,211 @@ html[lang="ta"] .roomtabs button:where(:not(.topbar, .topbar *, .pageheading, .p
 
 /* Preserve inherited header sizes after scaling the body base. */
 .topbar,.pageheading{font-size:16px;}</style>
-<a class="browse-shortcut" href="#unit-explorer">Browse units</a><div id="root"></div></body></html>
+<a class="browse-shortcut" href="#unit-explorer">Browse units</a><div id="root"></div><style id="tracker-section-fonts-v1">
+/* Reduce non-header fonts by 10%, retaining breakpoints and touch target sizes. */
+@layer components;@layer utilities{.text-\[0\.8rem\]:where(:not(.topbar, .topbar *, .pageheading, .pageheading *)):where(#unit-explorer, #unit-explorer *, .detailsheet, .detailsheet *){font-size:calc((.8rem) * 1.08);}}
+body:where(:not(.topbar, .topbar *, .pageheading, .pageheading *)):where(#unit-explorer, #unit-explorer *, .detailsheet, .detailsheet *){font-size:calc((16px) * 1.08);}
+button:not([data-slot]):where(:not(.topbar, .topbar *, .pageheading, .pageheading *)):where(#unit-explorer, #unit-explorer *, .detailsheet, .detailsheet *){font-size:calc((14px) * 1.08);}
+.brand strong:where(:not(.topbar, .topbar *, .pageheading, .pageheading *)):where(#unit-explorer, #unit-explorer *, .detailsheet, .detailsheet *){font-size:calc((15px) * 1.08);}
+.brand span:not(.brandmark):where(:not(.topbar, .topbar *, .pageheading, .pageheading *)):where(#unit-explorer, #unit-explorer *, .detailsheet, .detailsheet *){font-size:calc((13px) * 1.08);}
+.private:where(:not(.topbar, .topbar *, .pageheading, .pageheading *)):where(#unit-explorer, #unit-explorer *, .detailsheet, .detailsheet *){font-size:calc((13px) * 1.08);}
+.eyebrow:where(:not(.topbar, .topbar *, .pageheading, .pageheading *)):where(#unit-explorer, #unit-explorer *, .detailsheet, .detailsheet *){font-size:calc((12px) * 1.08);}
+h1:where(:not(.topbar, .topbar *, .pageheading, .pageheading *)):where(#unit-explorer, #unit-explorer *, .detailsheet, .detailsheet *){font-size:calc((clamp(24px,2.5vw,34px)) * 1.08);}
+.subtitle:where(:not(.topbar, .topbar *, .pageheading, .pageheading *)):where(#unit-explorer, #unit-explorer *, .detailsheet, .detailsheet *){font-size:calc((15px) * 1.08);}
+.sync span:where(:not(.topbar, .topbar *, .pageheading, .pageheading *)):where(#unit-explorer, #unit-explorer *, .detailsheet, .detailsheet *){font-size:calc((12px) * 1.08);}
+.sync strong:where(:not(.topbar, .topbar *, .pageheading, .pageheading *)):where(#unit-explorer, #unit-explorer *, .detailsheet, .detailsheet *){font-size:calc((13px) * 1.08);}
+.roomtabs button:where(:not(.topbar, .topbar *, .pageheading, .pageheading *)):where(#unit-explorer, #unit-explorer *, .detailsheet, .detailsheet *){font-size:calc((15px) * 1.08) !important;}
+.roomtabs span:where(:not(.topbar, .topbar *, .pageheading, .pageheading *)):where(#unit-explorer, #unit-explorer *, .detailsheet, .detailsheet *){font-size:calc((12px) * 1.08);}
+.baseline:where(:not(.topbar, .topbar *, .pageheading, .pageheading *)):where(#unit-explorer, #unit-explorer *, .detailsheet, .detailsheet *){font-size:calc((13px) * 1.08);}
+.stats span:where(:not(.topbar, .topbar *, .pageheading, .pageheading *)):where(#unit-explorer, #unit-explorer *, .detailsheet, .detailsheet *),.progressmetrics span:where(:not(.topbar, .topbar *, .pageheading, .pageheading *)):where(#unit-explorer, #unit-explorer *, .detailsheet, .detailsheet *){font-size:calc((14px) * 1.08);}
+.stats strong:where(:not(.topbar, .topbar *, .pageheading, .pageheading *)):where(#unit-explorer, #unit-explorer *, .detailsheet, .detailsheet *),.progressmetrics strong:where(:not(.topbar, .topbar *, .pageheading, .pageheading *)):where(#unit-explorer, #unit-explorer *, .detailsheet, .detailsheet *){font-size:calc((34px) * 1.08);}
+.stats small:where(:not(.topbar, .topbar *, .pageheading, .pageheading *)):where(#unit-explorer, #unit-explorer *, .detailsheet, .detailsheet *){font-size:calc((12px) * 1.08);}
+.noticeicon:where(:not(.topbar, .topbar *, .pageheading, .pageheading *)):where(#unit-explorer, #unit-explorer *, .detailsheet, .detailsheet *){font-size:calc((12px) * 1.08);}
+.notice p:where(:not(.topbar, .topbar *, .pageheading, .pageheading *)):where(#unit-explorer, #unit-explorer *, .detailsheet, .detailsheet *){font-size:calc((13px) * 1.08);}
+.workhead>span:where(:not(.topbar, .topbar *, .pageheading, .pageheading *)):where(#unit-explorer, #unit-explorer *, .detailsheet, .detailsheet *){font-size:calc((12px) * 1.08);}
+.workhead [data-slot=tabs-trigger]:where(:not(.topbar, .topbar *, .pageheading, .pageheading *)):where(#unit-explorer, #unit-explorer *, .detailsheet, .detailsheet *){font-size:calc((14px) * 1.08);}
+.filters [data-slot=select-trigger]:where(:not(.topbar, .topbar *, .pageheading, .pageheading *)):where(#unit-explorer, #unit-explorer *, .detailsheet, .detailsheet *){font-size:calc((14px) * 1.08);}
+.search input:where(:not(.topbar, .topbar *, .pageheading, .pageheading *)):where(#unit-explorer, #unit-explorer *, .detailsheet, .detailsheet *){font-size:calc((14px) * 1.08);}
+.numberfilter:where(:not(.topbar, .topbar *, .pageheading, .pageheading *)):where(#unit-explorer, #unit-explorer *, .detailsheet, .detailsheet *){font-size:calc((14px) * 1.08);}
+.shortlist:where(:not(.topbar, .topbar *, .pageheading, .pageheading *)):where(#unit-explorer, #unit-explorer *, .detailsheet, .detailsheet *){font-size:calc((14px) * 1.08);}
+.shortlist span:where(:not(.topbar, .topbar *, .pageheading, .pageheading *)):where(#unit-explorer, #unit-explorer *, .detailsheet, .detailsheet *){font-size:calc((12px) * 1.08);}
+.resulttools>span:where(:not(.topbar, .topbar *, .pageheading, .pageheading *)):where(#unit-explorer, #unit-explorer *, .detailsheet, .detailsheet *){font-size:calc((13px) * 1.08);}
+.legend:where(:not(.topbar, .topbar *, .pageheading, .pageheading *)):where(#unit-explorer, #unit-explorer *, .detailsheet, .detailsheet *){font-size:calc((12px) * 1.08);}
+.legend small:where(:not(.topbar, .topbar *, .pageheading, .pageheading *)):where(#unit-explorer, #unit-explorer *, .detailsheet, .detailsheet *){font-size:calc((12px) * 1.08);}
+.blocktitle h2:where(:not(.topbar, .topbar *, .pageheading, .pageheading *)):where(#unit-explorer, #unit-explorer *, .detailsheet, .detailsheet *){font-size:calc((16px) * 1.08);}
+.blocktitle>span:where(:not(.topbar, .topbar *, .pageheading, .pageheading *)):where(#unit-explorer, #unit-explorer *, .detailsheet, .detailsheet *){font-size:calc((12px) * 1.08);}
+.gridlabel:where(:not(.topbar, .topbar *, .pageheading, .pageheading *)):where(#unit-explorer, #unit-explorer *, .detailsheet, .detailsheet *),.stacklabel:where(:not(.topbar, .topbar *, .pageheading, .pageheading *)):where(#unit-explorer, #unit-explorer *, .detailsheet, .detailsheet *){font-size:calc((12px) * 1.08);}
+.floorlabel:where(:not(.topbar, .topbar *, .pageheading, .pageheading *)):where(#unit-explorer, #unit-explorer *, .detailsheet, .detailsheet *){font-size:calc((12px) * 1.08);}
+.unit>span:where(:not(.topbar, .topbar *, .pageheading, .pageheading *)):where(#unit-explorer, #unit-explorer *, .detailsheet, .detailsheet *){font-size:calc((12px) * 1.08);}
+.unit strong:where(:not(.topbar, .topbar *, .pageheading, .pageheading *)):where(#unit-explorer, #unit-explorer *, .detailsheet, .detailsheet *){font-size:calc((14px) * 1.08);}
+.gapcell:where(:not(.topbar, .topbar *, .pageheading, .pageheading *)):where(#unit-explorer, #unit-explorer *, .detailsheet, .detailsheet *){font-size:calc((13px) * 1.08);}
+.listtable td:where(:not(.topbar, .topbar *, .pageheading, .pageheading *)):where(#unit-explorer, #unit-explorer *, .detailsheet, .detailsheet *),.quotacard td:where(:not(.topbar, .topbar *, .pageheading, .pageheading *)):where(#unit-explorer, #unit-explorer *, .detailsheet, .detailsheet *){font-size:calc((14px) * 1.08);}
+.badge:where(:not(.topbar, .topbar *, .pageheading, .pageheading *)):where(#unit-explorer, #unit-explorer *, .detailsheet, .detailsheet *){font-size:calc((12px) * 1.08);}
+.empty h3:where(:not(.topbar, .topbar *, .pageheading, .pageheading *)):where(#unit-explorer, #unit-explorer *, .detailsheet, .detailsheet *){font-size:calc((16px) * 1.08);}
+.sectionintro h2:where(:not(.topbar, .topbar *, .pageheading, .pageheading *)):where(#unit-explorer, #unit-explorer *, .detailsheet, .detailsheet *){font-size:calc((21px) * 1.08);}
+.sectionintro p:where(:not(.topbar, .topbar *, .pageheading, .pageheading *)):where(#unit-explorer, #unit-explorer *, .detailsheet, .detailsheet *){font-size:calc((14px) * 1.08);}
+.quotacard h3:where(:not(.topbar, .topbar *, .pageheading, .pageheading *)):where(#unit-explorer, #unit-explorer *, .detailsheet, .detailsheet *){font-size:calc((16px) * 1.08);}
+.quotacard p:where(:not(.topbar, .topbar *, .pageheading, .pageheading *)):where(#unit-explorer, #unit-explorer *, .detailsheet, .detailsheet *){font-size:calc((12px) * 1.08);}
+.note:where(:not(.topbar, .topbar *, .pageheading, .pageheading *)):where(#unit-explorer, #unit-explorer *, .detailsheet, .detailsheet *){font-size:calc((13px) * 1.08);}
+.muted:where(:not(.topbar, .topbar *, .pageheading, .pageheading *)):where(#unit-explorer, #unit-explorer *, .detailsheet, .detailsheet *){font-size:calc((13px) * 1.08);}
+footer:where(:not(.topbar, .topbar *, .pageheading, .pageheading *)):where(#unit-explorer, #unit-explorer *, .detailsheet, .detailsheet *){font-size:calc((12px) * 1.08);}
+.detailsheet [data-slot=sheet-title]:where(:not(.topbar, .topbar *, .pageheading, .pageheading *)):where(#unit-explorer, #unit-explorer *, .detailsheet, .detailsheet *){font-size:calc((28px) * 1.08);}
+.detailprice:where(:not(.topbar, .topbar *, .pageheading, .pageheading *)):where(#unit-explorer, #unit-explorer *, .detailsheet, .detailsheet *){font-size:calc((32px) * 1.08);}
+.detailprice span:where(:not(.topbar, .topbar *, .pageheading, .pageheading *)):where(#unit-explorer, #unit-explorer *, .detailsheet, .detailsheet *){font-size:calc((12px) * 1.08);}
+.detailbody>label:where(:not(.topbar, .topbar *, .pageheading, .pageheading *)):where(#unit-explorer, #unit-explorer *, .detailsheet, .detailsheet *),.formrow label:where(:not(.topbar, .topbar *, .pageheading, .pageheading *)):where(#unit-explorer, #unit-explorer *, .detailsheet, .detailsheet *){font-size:calc((14px) * 1.08);}
+.detailbody [data-slot=select-trigger]:where(:not(.topbar, .topbar *, .pageheading, .pageheading *)):where(#unit-explorer, #unit-explorer *, .detailsheet, .detailsheet *){font-size:calc((14px) * 1.08);}
+.detailbody input:where(:not(.topbar, .topbar *, .pageheading, .pageheading *)):where(#unit-explorer, #unit-explorer *, .detailsheet, .detailsheet *),.detailbody textarea:where(:not(.topbar, .topbar *, .pageheading, .pageheading *)):where(#unit-explorer, #unit-explorer *, .detailsheet, .detailsheet *),.formrow input:where(:not(.topbar, .topbar *, .pageheading, .pageheading *)):where(#unit-explorer, #unit-explorer *, .detailsheet, .detailsheet *){font-size:calc((15px) * 1.08);}
+.managedialog h3:where(:not(.topbar, .topbar *, .pageheading, .pageheading *)):where(#unit-explorer, #unit-explorer *, .detailsheet, .detailsheet *){font-size:calc((16px) * 1.08);}
+.quotaform h4:where(:not(.topbar, .topbar *, .pageheading, .pageheading *)):where(#unit-explorer, #unit-explorer *, .detailsheet, .detailsheet *){font-size:calc((14px) * 1.08);}
+@media (width<=700px){.topactions button span:where(:not(.topbar, .topbar *, .pageheading, .pageheading *)):where(#unit-explorer, #unit-explorer *, .detailsheet, .detailsheet *){font-size:calc((12px) * 1.08);}
+h1:where(:not(.topbar, .topbar *, .pageheading, .pageheading *)):where(#unit-explorer, #unit-explorer *, .detailsheet, .detailsheet *){font-size:calc((26px) * 1.08);}
+.subtitle:where(:not(.topbar, .topbar *, .pageheading, .pageheading *)):where(#unit-explorer, #unit-explorer *, .detailsheet, .detailsheet *){font-size:calc((14px) * 1.08);}
+.sync strong:where(:not(.topbar, .topbar *, .pageheading, .pageheading *)):where(#unit-explorer, #unit-explorer *, .detailsheet, .detailsheet *){font-size:calc((12px) * 1.08);}
+.roomtabs button:where(:not(.topbar, .topbar *, .pageheading, .pageheading *)):where(#unit-explorer, #unit-explorer *, .detailsheet, .detailsheet *){font-size:calc((13px) * 1.08) !important;}
+.stats strong:where(:not(.topbar, .topbar *, .pageheading, .pageheading *)):where(#unit-explorer, #unit-explorer *, .detailsheet, .detailsheet *){font-size:calc((30px) * 1.08);}
+.stats span:where(:not(.topbar, .topbar *, .pageheading, .pageheading *)):where(#unit-explorer, #unit-explorer *, .detailsheet, .detailsheet *){font-size:calc((13px) * 1.08);}
+.stats small:where(:not(.topbar, .topbar *, .pageheading, .pageheading *)):where(#unit-explorer, #unit-explorer *, .detailsheet, .detailsheet *){font-size:calc((12px) * 1.08);}
+.notice p:where(:not(.topbar, .topbar *, .pageheading, .pageheading *)):where(#unit-explorer, #unit-explorer *, .detailsheet, .detailsheet *){font-size:calc((12px) * 1.08);}
+.workhead [data-slot=tabs-trigger]:where(:not(.topbar, .topbar *, .pageheading, .pageheading *)):where(#unit-explorer, #unit-explorer *, .detailsheet, .detailsheet *){font-size:calc((13px) * 1.08);}
+.filters [data-slot=select-trigger]:where(:not(.topbar, .topbar *, .pageheading, .pageheading *)):where(#unit-explorer, #unit-explorer *, .detailsheet, .detailsheet *){font-size:calc((13px) * 1.08);}
+.numberfilter:where(:not(.topbar, .topbar *, .pageheading, .pageheading *)):where(#unit-explorer, #unit-explorer *, .detailsheet, .detailsheet *),.numberfilter.budget:where(:not(.topbar, .topbar *, .pageheading, .pageheading *)):where(#unit-explorer, #unit-explorer *, .detailsheet, .detailsheet *){font-size:calc((14px) * 1.08);}
+.shortlist:where(:not(.topbar, .topbar *, .pageheading, .pageheading *)):where(#unit-explorer, #unit-explorer *, .detailsheet, .detailsheet *){font-size:calc((13px) * 1.08);}
+.resulttools>span:where(:not(.topbar, .topbar *, .pageheading, .pageheading *)):where(#unit-explorer, #unit-explorer *, .detailsheet, .detailsheet *){font-size:calc((12px) * 1.08);}
+.legend:where(:not(.topbar, .topbar *, .pageheading, .pageheading *)):where(#unit-explorer, #unit-explorer *, .detailsheet, .detailsheet *){font-size:calc((12px) * 1.08);}
+.quotacard th:where(:not(.topbar, .topbar *, .pageheading, .pageheading *)):where(#unit-explorer, #unit-explorer *, .detailsheet, .detailsheet *),.quotacard td:where(:not(.topbar, .topbar *, .pageheading, .pageheading *)):where(#unit-explorer, #unit-explorer *, .detailsheet, .detailsheet *){font-size:calc((13px) * 1.08);}
+.progressmetrics span:where(:not(.topbar, .topbar *, .pageheading, .pageheading *)):where(#unit-explorer, #unit-explorer *, .detailsheet, .detailsheet *){font-size:calc((13px) * 1.08);}
+.progressmetrics strong:where(:not(.topbar, .topbar *, .pageheading, .pageheading *)):where(#unit-explorer, #unit-explorer *, .detailsheet, .detailsheet *){font-size:calc((28px) * 1.08);}
+.formrow label:where(:not(.topbar, .topbar *, .pageheading, .pageheading *)):where(#unit-explorer, #unit-explorer *, .detailsheet, .detailsheet *){font-size:calc((13px) * 1.08);}
+.formrow input:where(:not(.topbar, .topbar *, .pageheading, .pageheading *)):where(#unit-explorer, #unit-explorer *, .detailsheet, .detailsheet *){font-size:calc((14px) * 1.08);}
+footer:where(:not(.topbar, .topbar *, .pageheading, .pageheading *)):where(#unit-explorer, #unit-explorer *, .detailsheet, .detailsheet *){font-size:calc((12px) * 1.08);}
+.roomtabs span:where(:not(.topbar, .topbar *, .pageheading, .pageheading *)):where(#unit-explorer, #unit-explorer *, .detailsheet, .detailsheet *){font-size:calc((12px) * 1.08);}}
+.brandcaption span:where(:not(.topbar, .topbar *, .pageheading, .pageheading *)):where(#unit-explorer, #unit-explorer *, .detailsheet, .detailsheet *){font-size:calc((14px) * 1.08);}
+.pageheading h1:where(:not(.topbar, .topbar *, .pageheading, .pageheading *)):where(#unit-explorer, #unit-explorer *, .detailsheet, .detailsheet *){font-size:calc((clamp(30px,3.2vw,42px)) * 1.08);}
+.detailbody label>strong:where(:not(.topbar, .topbar *, .pageheading, .pageheading *)):where(#unit-explorer, #unit-explorer *, .detailsheet, .detailsheet *){font-size:calc((16px) * 1.08);}
+@media (width<=720px){.brandcaption span:where(:not(.topbar, .topbar *, .pageheading, .pageheading *)):where(#unit-explorer, #unit-explorer *, .detailsheet, .detailsheet *){font-size:calc((12px) * 1.08);}
+.pageheading h1:where(:not(.topbar, .topbar *, .pageheading, .pageheading *)):where(#unit-explorer, #unit-explorer *, .detailsheet, .detailsheet *){font-size:calc((30px) * 1.08);}}
+.pageheading h1:where(:not(.topbar, .topbar *, .pageheading, .pageheading *)):where(#unit-explorer, #unit-explorer *, .detailsheet, .detailsheet *){font-size:calc((clamp(30px,3.1vw,42px)) * 1.08);}
+.brand .brandcaption span:where(:not(.topbar, .topbar *, .pageheading, .pageheading *)):where(#unit-explorer, #unit-explorer *, .detailsheet, .detailsheet *){font-size:calc((14px) * 1.08);}
+.eyebrow:where(:not(.topbar, .topbar *, .pageheading, .pageheading *)):where(#unit-explorer, #unit-explorer *, .detailsheet, .detailsheet *){font-size:calc((12px) * 1.08);}
+.subtitle:where(:not(.topbar, .topbar *, .pageheading, .pageheading *)):where(#unit-explorer, #unit-explorer *, .detailsheet, .detailsheet *){font-size:calc((15px) * 1.08);}
+.stats strong:where(:not(.topbar, .topbar *, .pageheading, .pageheading *)):where(#unit-explorer, #unit-explorer *, .detailsheet, .detailsheet *),.progressmetrics strong:where(:not(.topbar, .topbar *, .pageheading, .pageheading *)):where(#unit-explorer, #unit-explorer *, .detailsheet, .detailsheet *){font-size:calc((40px) * 1.08);}
+.blocktitle h2:where(:not(.topbar, .topbar *, .pageheading, .pageheading *)):where(#unit-explorer, #unit-explorer *, .detailsheet, .detailsheet *){font-size:calc((25px) * 1.08);}
+.quotaview h2:where(:not(.topbar, .topbar *, .pageheading, .pageheading *)):where(#unit-explorer, #unit-explorer *, .detailsheet, .detailsheet *),.progressview h2:where(:not(.topbar, .topbar *, .pageheading, .pageheading *)):where(#unit-explorer, #unit-explorer *, .detailsheet, .detailsheet *),.quotacard h3:where(:not(.topbar, .topbar *, .pageheading, .pageheading *)):where(#unit-explorer, #unit-explorer *, .detailsheet, .detailsheet *),.managedialog h3:where(:not(.topbar, .topbar *, .pageheading, .pageheading *)):where(#unit-explorer, #unit-explorer *, .detailsheet, .detailsheet *){font-size:calc((26px) * 1.08);}
+.detailsheet [data-slot=sheet-title]:where(:not(.topbar, .topbar *, .pageheading, .pageheading *)):where(#unit-explorer, #unit-explorer *, .detailsheet, .detailsheet *),.managedialog [data-slot=dialog-title]:where(:not(.topbar, .topbar *, .pageheading, .pageheading *)):where(#unit-explorer, #unit-explorer *, .detailsheet, .detailsheet *){font-size:calc((36px) * 1.08);}
+.detailprice:where(:not(.topbar, .topbar *, .pageheading, .pageheading *)):where(#unit-explorer, #unit-explorer *, .detailsheet, .detailsheet *){font-size:calc((36px) * 1.08);}
+@media (width<=720px){.pageheading h1:where(:not(.topbar, .topbar *, .pageheading, .pageheading *)):where(#unit-explorer, #unit-explorer *, .detailsheet, .detailsheet *){font-size:calc((30px) * 1.08);}
+.brand .brandcaption span:where(:not(.topbar, .topbar *, .pageheading, .pageheading *)):where(#unit-explorer, #unit-explorer *, .detailsheet, .detailsheet *){font-size:calc((12px) * 1.08);}
+.stats strong:where(:not(.topbar, .topbar *, .pageheading, .pageheading *)):where(#unit-explorer, #unit-explorer *, .detailsheet, .detailsheet *),.progressmetrics strong:where(:not(.topbar, .topbar *, .pageheading, .pageheading *)):where(#unit-explorer, #unit-explorer *, .detailsheet, .detailsheet *){font-size:calc((34px) * 1.08);}
+.blocktitle h2:where(:not(.topbar, .topbar *, .pageheading, .pageheading *)):where(#unit-explorer, #unit-explorer *, .detailsheet, .detailsheet *){font-size:calc((24px) * 1.08);}
+.topactions button span:where(:not(.topbar, .topbar *, .pageheading, .pageheading *)):where(#unit-explorer, #unit-explorer *, .detailsheet, .detailsheet *){font-size:calc((12px) * 1.08);}}
+.unit .unittype:where(:not(.topbar, .topbar *, .pageheading, .pageheading *)):where(#unit-explorer, #unit-explorer *, .detailsheet, .detailsheet *){font-size:calc((12px) * 1.08);}
+@media(max-width:720px){.pageheading h1:where(:not(.topbar, .topbar *, .pageheading, .pageheading *)):where(#unit-explorer, #unit-explorer *, .detailsheet, .detailsheet *){font-size:calc((clamp(25px,7vw,30px)) * 1.08);}
+.roomtabs button:where(:not(.topbar, .topbar *, .pageheading, .pageheading *)):where(#unit-explorer, #unit-explorer *, .detailsheet, .detailsheet *){font-size:calc((13px) * 1.08) !important;}
+.workhead [data-slot=tabs-trigger]:where(:not(.topbar, .topbar *, .pageheading, .pageheading *)):where(#unit-explorer, #unit-explorer *, .detailsheet, .detailsheet *){font-size:calc((12px) * 1.08);}
+.stats strong:where(:not(.topbar, .topbar *, .pageheading, .pageheading *)):where(#unit-explorer, #unit-explorer *, .detailsheet, .detailsheet *),.progressmetrics strong:where(:not(.topbar, .topbar *, .pageheading, .pageheading *)):where(#unit-explorer, #unit-explorer *, .detailsheet, .detailsheet *){font-size:calc((30px) * 1.08);}}
+.community-notice:where(:not(.topbar, .topbar *, .pageheading, .pageheading *)):where(#unit-explorer, #unit-explorer *, .detailsheet, .detailsheet *){font-size:calc((14px) * 1.08);}
+.browse-shortcut:where(:not(.topbar, .topbar *, .pageheading, .pageheading *)):where(#unit-explorer, #unit-explorer *, .detailsheet, .detailsheet *){font-size:calc((14px) * 1.08);}
+.pageheading h1:where(:not(.topbar, .topbar *, .pageheading, .pageheading *)):where(#unit-explorer, #unit-explorer *, .detailsheet, .detailsheet *){font-size:calc((clamp(24px,2.6vw,36px)) * 1.08);}
+.overview>summary:where(:not(.topbar, .topbar *, .pageheading, .pageheading *)):where(#unit-explorer, #unit-explorer *, .detailsheet, .detailsheet *){font-size:calc((14px) * 1.08);}
+.overview .stats strong:where(:not(.topbar, .topbar *, .pageheading, .pageheading *)):where(#unit-explorer, #unit-explorer *, .detailsheet, .detailsheet *){font-size:calc((28px) * 1.08);}
+.notice p:where(:not(.topbar, .topbar *, .pageheading, .pageheading *)):where(#unit-explorer, #unit-explorer *, .detailsheet, .detailsheet *){font-size:calc((14px) * 1.08);}
+.workhead>span:where(:not(.topbar, .topbar *, .pageheading, .pageheading *)):where(#unit-explorer, #unit-explorer *, .detailsheet, .detailsheet *){font-size:calc((13px) * 1.08);}
+.filters [data-slot=select-trigger]:where(:not(.topbar, .topbar *, .pageheading, .pageheading *)):where(#unit-explorer, #unit-explorer *, .detailsheet, .detailsheet *){font-size:calc((14px) * 1.08);}
+.filter-field:where(:not(.topbar, .topbar *, .pageheading, .pageheading *)):where(#unit-explorer, #unit-explorer *, .detailsheet, .detailsheet *){font-size:calc((13px) * 1.08);}
+.filter-field input:where(:not(.topbar, .topbar *, .pageheading, .pageheading *)):where(#unit-explorer, #unit-explorer *, .detailsheet, .detailsheet *){font-size:calc((16px) * 1.08) !important;}
+.search input:where(:not(.topbar, .topbar *, .pageheading, .pageheading *)):where(#unit-explorer, #unit-explorer *, .detailsheet, .detailsheet *){font-size:calc((16px) * 1.08);}
+.viewtabs [data-slot=tabs-trigger]:where(:not(.topbar, .topbar *, .pageheading, .pageheading *)):where(#unit-explorer, #unit-explorer *, .detailsheet, .detailsheet *){font-size:calc((14px) * 1.08);}
+.availability-note:where(:not(.topbar, .topbar *, .pageheading, .pageheading *)):where(#unit-explorer, #unit-explorer *, .detailsheet, .detailsheet *){font-size:calc((13px) * 1.08);}
+.legend:where(:not(.topbar, .topbar *, .pageheading, .pageheading *)):where(#unit-explorer, #unit-explorer *, .detailsheet, .detailsheet *){font-size:calc((13px) * 1.08);}
+.legend small:where(:not(.topbar, .topbar *, .pageheading, .pageheading *)):where(#unit-explorer, #unit-explorer *, .detailsheet, .detailsheet *){font-size:calc((13px) * 1.08);}
+.blocktitle:after:where(:not(.topbar, .topbar *, .pageheading, .pageheading *)):where(#unit-explorer, #unit-explorer *, .detailsheet, .detailsheet *){font-size:calc((24px) * 1.08);}
+.blocktitle>span:where(:not(.topbar, .topbar *, .pageheading, .pageheading *)):where(#unit-explorer, #unit-explorer *, .detailsheet, .detailsheet *){font-size:calc((13px) * 1.08);}
+.blocktitle h2:where(:not(.topbar, .topbar *, .pageheading, .pageheading *)):where(#unit-explorer, #unit-explorer *, .detailsheet, .detailsheet *){font-size:calc((24px) * 1.08);}
+.unit>span:where(:not(.topbar, .topbar *, .pageheading, .pageheading *)):where(#unit-explorer, #unit-explorer *, .detailsheet, .detailsheet *),.unit .unittype:where(:not(.topbar, .topbar *, .pageheading, .pageheading *)):where(#unit-explorer, #unit-explorer *, .detailsheet, .detailsheet *){font-size:calc((13px) * 1.08) !important;}
+.unit strong:where(:not(.topbar, .topbar *, .pageheading, .pageheading *)):where(#unit-explorer, #unit-explorer *, .detailsheet, .detailsheet *){font-size:calc((15px) * 1.08) !important;}
+.stacklabel:where(:not(.topbar, .topbar *, .pageheading, .pageheading *)):where(#unit-explorer, #unit-explorer *, .detailsheet, .detailsheet *),.floorlabel:where(:not(.topbar, .topbar *, .pageheading, .pageheading *)):where(#unit-explorer, #unit-explorer *, .detailsheet, .detailsheet *){font-size:calc((13px) * 1.08);}
+.detailbody .note:where(:not(.topbar, .topbar *, .pageheading, .pageheading *)):where(#unit-explorer, #unit-explorer *, .detailsheet, .detailsheet *),.detailbody .muted:where(:not(.topbar, .topbar *, .pageheading, .pageheading *)):where(#unit-explorer, #unit-explorer *, .detailsheet, .detailsheet *){font-size:calc((14px) * 1.08);}
+@media(max-width:700px){.community-notice summary:where(:not(.topbar, .topbar *, .pageheading, .pageheading *)):where(#unit-explorer, #unit-explorer *, .detailsheet, .detailsheet *){font-size:calc((13px) * 1.08);}
+.browse-shortcut:where(:not(.topbar, .topbar *, .pageheading, .pageheading *)):where(#unit-explorer, #unit-explorer *, .detailsheet, .detailsheet *){font-size:calc((13px) * 1.08);}
+.pageheading h1:where(:not(.topbar, .topbar *, .pageheading, .pageheading *)):where(#unit-explorer, #unit-explorer *, .detailsheet, .detailsheet *){font-size:calc((24px) * 1.08);}
+.pageheading .eyebrow:where(:not(.topbar, .topbar *, .pageheading, .pageheading *)):where(#unit-explorer, #unit-explorer *, .detailsheet, .detailsheet *){font-size:calc((11px) * 1.08);}
+.sync strong:where(:not(.topbar, .topbar *, .pageheading, .pageheading *)):where(#unit-explorer, #unit-explorer *, .detailsheet, .detailsheet *){font-size:calc((13px) * 1.08);}
+.sync span:where(:not(.topbar, .topbar *, .pageheading, .pageheading *)):where(#unit-explorer, #unit-explorer *, .detailsheet, .detailsheet *){font-size:calc((12px) * 1.08);}
+.mobile-room-picker:where(:not(.topbar, .topbar *, .pageheading, .pageheading *)):where(#unit-explorer, #unit-explorer *, .detailsheet, .detailsheet *){font-size:calc((14px) * 1.08);}
+.mobile-room-picker select:where(:not(.topbar, .topbar *, .pageheading, .pageheading *)):where(#unit-explorer, #unit-explorer *, .detailsheet, .detailsheet *){font-size:calc((16px) * 1.08);}
+.overview>summary:where(:not(.topbar, .topbar *, .pageheading, .pageheading *)):where(#unit-explorer, #unit-explorer *, .detailsheet, .detailsheet *){font-size:calc((13px) * 1.08);}
+.overview .stats span:where(:not(.topbar, .topbar *, .pageheading, .pageheading *)):where(#unit-explorer, #unit-explorer *, .detailsheet, .detailsheet *){font-size:calc((14px) * 1.08);}
+.notice p:where(:not(.topbar, .topbar *, .pageheading, .pageheading *)):where(#unit-explorer, #unit-explorer *, .detailsheet, .detailsheet *){font-size:calc((13px) * 1.08);}
+.workhead [data-slot=tabs-trigger]:where(:not(.topbar, .topbar *, .pageheading, .pageheading *)):where(#unit-explorer, #unit-explorer *, .detailsheet, .detailsheet *){font-size:calc((13px) * 1.08);}
+.filters [data-slot=select-trigger]:where(:not(.topbar, .topbar *, .pageheading, .pageheading *)):where(#unit-explorer, #unit-explorer *, .detailsheet, .detailsheet *){font-size:calc((14px) * 1.08);}
+.filter-field:where(:not(.topbar, .topbar *, .pageheading, .pageheading *)):where(#unit-explorer, #unit-explorer *, .detailsheet, .detailsheet *){font-size:calc((13px) * 1.08);}
+.resulttools>span:where(:not(.topbar, .topbar *, .pageheading, .pageheading *)):where(#unit-explorer, #unit-explorer *, .detailsheet, .detailsheet *){font-size:calc((13px) * 1.08);}
+.clear-filters:where(:not(.topbar, .topbar *, .pageheading, .pageheading *)):where(#unit-explorer, #unit-explorer *, .detailsheet, .detailsheet *){font-size:calc((13px) * 1.08);}
+.viewtabs [data-slot=tabs-trigger]:where(:not(.topbar, .topbar *, .pageheading, .pageheading *)):where(#unit-explorer, #unit-explorer *, .detailsheet, .detailsheet *){font-size:calc((13px) * 1.08);}
+.legend small:where(:not(.topbar, .topbar *, .pageheading, .pageheading *)):where(#unit-explorer, #unit-explorer *, .detailsheet, .detailsheet *){font-size:calc((12px) * 1.08);}
+.blocktitle h2:where(:not(.topbar, .topbar *, .pageheading, .pageheading *)):where(#unit-explorer, #unit-explorer *, .detailsheet, .detailsheet *){font-size:calc((22px) * 1.08);}
+.detailsheet [data-slot=sheet-title]:where(:not(.topbar, .topbar *, .pageheading, .pageheading *)):where(#unit-explorer, #unit-explorer *, .detailsheet, .detailsheet *){font-size:calc((30px) * 1.08);}}
+.advanced-filters summary:where(:not(.topbar, .topbar *, .pageheading, .pageheading *)):where(#unit-explorer, #unit-explorer *, .detailsheet, .detailsheet *){font-size:calc((14px) * 1.08);}
+@media(max-width:700px){.community-notice summary:where(:not(.topbar, .topbar *, .pageheading, .pageheading *)):where(#unit-explorer, #unit-explorer *, .detailsheet, .detailsheet *){font-size:calc((12px) * 1.08);}
+.availability-note:where(:not(.topbar, .topbar *, .pageheading, .pageheading *)):where(#unit-explorer, #unit-explorer *, .detailsheet, .detailsheet *){font-size:calc((13px) * 1.08);}}
+.unit-choices legend:where(:not(.topbar, .topbar *, .pageheading, .pageheading *)):where(#unit-explorer, #unit-explorer *, .detailsheet, .detailsheet *){font-size:calc((14px) * 1.08);}
+.choice-option>span:where(:not(.topbar, .topbar *, .pageheading, .pageheading *)):where(#unit-explorer, #unit-explorer *, .detailsheet, .detailsheet *){font-size:calc((14px) * 1.08);}
+.choice-tick:where(:not(.topbar, .topbar *, .pageheading, .pageheading *)):where(#unit-explorer, #unit-explorer *, .detailsheet, .detailsheet *){font-size:calc((16px) * 1.08);}
+.choice-help:where(:not(.topbar, .topbar *, .pageheading, .pageheading *)):where(#unit-explorer, #unit-explorer *, .detailsheet, .detailsheet *){font-size:calc((14px) * 1.08);}
+.unit-extra summary:where(:not(.topbar, .topbar *, .pageheading, .pageheading *)):where(#unit-explorer, #unit-explorer *, .detailsheet, .detailsheet *){font-size:calc((14px) * 1.08);}
+.unit-extra summary:where(:not(.topbar, .topbar *, .pageheading, .pageheading *)):where(#unit-explorer, #unit-explorer *, .detailsheet, .detailsheet *)::before{font-size:calc((20px) * 1.08);}
+.unit-actions button:where(:not(.topbar, .topbar *, .pageheading, .pageheading *)):where(#unit-explorer, #unit-explorer *, .detailsheet, .detailsheet *){font-size:calc((14px) * 1.08);}
+.language-picker:where(:not(.topbar, .topbar *, .pageheading, .pageheading *)):where(#unit-explorer, #unit-explorer *, .detailsheet, .detailsheet *){font-size:calc((13px) * 1.08);}
+html[lang="ta"] .choice-option:where(:not(.topbar, .topbar *, .pageheading, .pageheading *)):where(#unit-explorer, #unit-explorer *, .detailsheet, .detailsheet *){font-size:calc((13px) * 1.08);}
+@media(max-width:600px){.language-picker span:where(:not(.topbar, .topbar *, .pageheading, .pageheading *)):where(#unit-explorer, #unit-explorer *, .detailsheet, .detailsheet *){font-size:calc((12px) * 1.08);}
+html[lang="ta"] .unit-choices legend:where(:not(.topbar, .topbar *, .pageheading, .pageheading *)):where(#unit-explorer, #unit-explorer *, .detailsheet, .detailsheet *){font-size:calc((14px) * 1.08);}
+html[lang="ta"] .roomtabs button:where(:not(.topbar, .topbar *, .pageheading, .pageheading *)):where(#unit-explorer, #unit-explorer *, .detailsheet, .detailsheet *){font-size:calc((12px) * 1.08);}}
+.language-buttons .language-button:where(:not(.topbar, .topbar *, .pageheading, .pageheading *)):where(#unit-explorer, #unit-explorer *, .detailsheet, .detailsheet *){font-size:calc((14px) * 1.08);}
+@media(max-width:600px){.language-picker>span:where(:not(.topbar, .topbar *, .pageheading, .pageheading *)):where(#unit-explorer, #unit-explorer *, .detailsheet, .detailsheet *){font-size:calc((14px) * 1.08) !important;}}
+.topactions>.export-excel:where(:not(.topbar, .topbar *, .pageheading, .pageheading *)):where(#unit-explorer, #unit-explorer *, .detailsheet, .detailsheet *){font-size:calc((12px) * 1.08);}
+.topactions>.export-excel span:where(:not(.topbar, .topbar *, .pageheading, .pageheading *)):where(#unit-explorer, #unit-explorer *, .detailsheet, .detailsheet *){font-size:calc((12px) * 1.08) !important;}
+@media(max-width:720px){.language-picker>span:where(:not(.topbar, .topbar *, .pageheading, .pageheading *)):where(#unit-explorer, #unit-explorer *, .detailsheet, .detailsheet *){font-size:calc((14px) * 1.08) !important;}
+.blocktitle h2:where(:not(.topbar, .topbar *, .pageheading, .pageheading *)):where(#unit-explorer, #unit-explorer *, .detailsheet, .detailsheet *){font-size:calc((21px) * 1.08);}
+.blocktitle>span:where(:not(.topbar, .topbar *, .pageheading, .pageheading *)):where(#unit-explorer, #unit-explorer *, .detailsheet, .detailsheet *){font-size:calc((12px) * 1.08);}
+.quotacard th:where(:not(.topbar, .topbar *, .pageheading, .pageheading *)):where(#unit-explorer, #unit-explorer *, .detailsheet, .detailsheet *),.quotacard td:where(:not(.topbar, .topbar *, .pageheading, .pageheading *)):where(#unit-explorer, #unit-explorer *, .detailsheet, .detailsheet *){font-size:calc((12px) * 1.08);}
+.managedialog [data-slot=dialog-title]:where(:not(.topbar, .topbar *, .pageheading, .pageheading *)):where(#unit-explorer, #unit-explorer *, .detailsheet, .detailsheet *){font-size:calc((28px) * 1.08);}}
+@media(max-width:720px){.workhead [data-slot=tabs-trigger]:where(:not(.topbar, .topbar *, .pageheading, .pageheading *)):where(#unit-explorer, #unit-explorer *, .detailsheet, .detailsheet *){font-size:calc((13px) * 1.08) !important;}
+.mobile-room-picker select:where(:not(.topbar, .topbar *, .pageheading, .pageheading *)):where(#unit-explorer, #unit-explorer *, .detailsheet, .detailsheet *){font-size:calc((14px) * 1.08);}}
+.app .large-text-button:where(:not(.topbar, .topbar *, .pageheading, .pageheading *)):where(#unit-explorer, #unit-explorer *, .detailsheet, .detailsheet *){font-size:calc((14px) * 1.08);}
+.tracker-help:where(:not(.topbar, .topbar *, .pageheading, .pageheading *)):where(#unit-explorer, #unit-explorer *, .detailsheet, .detailsheet *){font-size:calc((14px) * 1.08);}
+.quick-filter legend:where(:not(.topbar, .topbar *, .pageheading, .pageheading *)):where(#unit-explorer, #unit-explorer *, .detailsheet, .detailsheet *){font-size:calc((14px) * 1.08);}
+.app .quick-filter button:where(:not(.topbar, .topbar *, .pageheading, .pageheading *)):where(#unit-explorer, #unit-explorer *, .detailsheet, .detailsheet *){font-size:calc((14px) * 1.08);}
+.app .shortlist-filter:where(:not(.topbar, .topbar *, .pageheading, .pageheading *)):where(#unit-explorer, #unit-explorer *, .detailsheet, .detailsheet *){font-size:calc((14px) * 1.08);}
+.app .viewtabs [role=tab]:where(:not(.topbar, .topbar *, .pageheading, .pageheading *)):where(#unit-explorer, #unit-explorer *, .detailsheet, .detailsheet *){font-size:calc((14px) * 1.08);}
+.app .unit .unittype:where(:not(.topbar, .topbar *, .pageheading, .pageheading *)):where(#unit-explorer, #unit-explorer *, .detailsheet, .detailsheet *){font-size:calc((12px) * 1.08);}
+.app .unit-status-text:where(:not(.topbar, .topbar *, .pageheading, .pageheading *)):where(#unit-explorer, #unit-explorer *, .detailsheet, .detailsheet *){font-size:calc((12px) * 1.08) !important;}
+.shortlist-note:where(:not(.topbar, .topbar *, .pageheading, .pageheading *)):where(#unit-explorer, #unit-explorer *, .detailsheet, .detailsheet *){font-size:calc((14px) * 1.08);}
+.card-heading h3:where(:not(.topbar, .topbar *, .pageheading, .pageheading *)):where(#unit-explorer, #unit-explorer *, .detailsheet, .detailsheet *){font-size:calc((16px) * 1.08);}
+.unit-card p:where(:not(.topbar, .topbar *, .pageheading, .pageheading *)):where(#unit-explorer, #unit-explorer *, .detailsheet, .detailsheet *){font-size:calc((14px) * 1.08);}
+.card-price:where(:not(.topbar, .topbar *, .pageheading, .pageheading *)):where(#unit-explorer, #unit-explorer *, .detailsheet, .detailsheet *){font-size:calc((20px) * 1.08);}
+.app .card-actions button:where(:not(.topbar, .topbar *, .pageheading, .pageheading *)):where(#unit-explorer, #unit-explorer *, .detailsheet, .detailsheet *){font-size:calc((14px) * 1.08);}
+.app .badge:where(:not(.topbar, .topbar *, .pageheading, .pageheading *)):where(#unit-explorer, #unit-explorer *, .detailsheet, .detailsheet *){font-size:calc((12px) * 1.08);}
+.app .detail-access-actions button:where(:not(.topbar, .topbar *, .pageheading, .pageheading *)):where(#unit-explorer, #unit-explorer *, .detailsheet, .detailsheet *){font-size:calc((14px) * 1.08);}
+.undo-unit:where(:not(.topbar, .topbar *, .pageheading, .pageheading *)):where(#unit-explorer, #unit-explorer *, .detailsheet, .detailsheet *){font-size:calc((14px) * 1.08);}
+.tracker-large-text .app :is(p,label,legend,button,summary,small,td,th,.badge,.muted,.resulttools>span,.workhead>span,.stacklabel,.floorlabel,.gridlabel,.sync,.brandcaption,.private):where(:not(.topbar, .topbar *, .pageheading, .pageheading *)):where(#unit-explorer, #unit-explorer *, .detailsheet, .detailsheet *){font-size:calc((18px) * 1.08) !important;}
+.tracker-large-text .app .unit span:where(:not(.topbar, .topbar *, .pageheading, .pageheading *)):where(#unit-explorer, #unit-explorer *, .detailsheet, .detailsheet *),.tracker-large-text .app .unit strong:where(:not(.topbar, .topbar *, .pageheading, .pageheading *)):where(#unit-explorer, #unit-explorer *, .detailsheet, .detailsheet *){font-size:calc((18px) * 1.08) !important;}
+.tracker-large-text .app .detailprice:where(:not(.topbar, .topbar *, .pageheading, .pageheading *)):where(#unit-explorer, #unit-explorer *, .detailsheet, .detailsheet *){font-size:calc((28px) * 1.08);}
+.detailsheet .detail-access-actions button:where(:not(.topbar, .topbar *, .pageheading, .pageheading *)):where(#unit-explorer, #unit-explorer *, .detailsheet, .detailsheet *){font-size:calc((14px) * 1.08);}
+.tracker-large-text .detailsheet :is(p,label,legend,button,summary,small,strong,.muted,.note,.choice-help,.detailprice span):where(:not(.topbar, .topbar *, .pageheading, .pageheading *)):where(#unit-explorer, #unit-explorer *, .detailsheet, .detailsheet *){font-size:calc((18px) * 1.08) !important;}
+.tracker-large-text .detailsheet .detailprice:where(:not(.topbar, .topbar *, .pageheading, .pageheading *)):where(#unit-explorer, #unit-explorer *, .detailsheet, .detailsheet *){font-size:calc((28px) * 1.08);}
+.tracker-large-text .app .card-heading h3:where(:not(.topbar, .topbar *, .pageheading, .pageheading *)):where(#unit-explorer, #unit-explorer *, .detailsheet, .detailsheet *){font-size:calc((18px) * 1.08) !important;}
+
+/* Preserve inherited header sizes after scaling the body base. */
+
+.app #unit-explorer{font-size:17.28px}
+.app #unit-explorer :is(label,legend,.filter-heading){font-size:17.28px}
+.app #unit-explorer .shortlist-privacy{font-size:15.12px}
+.app #unit-explorer .quick-unit-help{font-size:15.12px}
+.app #unit-explorer .workhead [data-slot=tabs-list]{height:auto;flex-wrap:wrap;gap:8px}
+.app #unit-explorer .workhead [data-slot=tabs-trigger]{height:auto;min-height:44px;white-space:normal}
+.tracker-large-text .app #unit-explorer :is(label,legend){font-size:19.44px!important}
+.app .tracker-help{font-size:17.5px!important}
+.app .tracker-help :is(summary,li,p){font-size:17.5px!important}
+.tracker-large-text .app .tracker-help :is(summary,p){font-size:20.25px!important}
+</style></body></html>
 
