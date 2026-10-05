@@ -64,3 +64,16 @@ html[data-tracker-theme="dark"] .app .floor-card-prompt{
 html[data-tracker-theme="dark"] .app .floor-card-selection{
  color:#e1eee6!important;border-color:#55745e!important;
 }
+
+/* Dark-only contrast for list actions and translucent page/detail navigation. */
+html[data-tracker-theme="dark"] .app .listtable button:not(.quick-choice){
+ background:#243e2d!important;color:#e1eee6!important;
+ -webkit-text-fill-color:#e1eee6!important;border-color:#789984!important;
+}
+html[data-tracker-theme="dark"] .tracker-scroll-controls button{
+ background:rgba(24,60,44,.88)!important;color:#c0ebce!important;
+ -webkit-text-fill-color:#c0ebce!important;border-color:#789984!important;
+}
+html[data-tracker-theme="dark"] .tracker-scroll-controls button .scroll-icon{
+ color:inherit!important;-webkit-text-fill-color:inherit!important;
+}
