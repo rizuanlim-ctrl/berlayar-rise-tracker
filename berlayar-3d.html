@@ -211,10 +211,7 @@ function syncSun(){const days=new Date(Date.UTC(state.sunYear,state.sunMonth,0))
 document.getElementById('sun-month').onchange=e=>{state.sunMonth=Number(e.target.value);syncSun();};
 document.getElementById('sun-day').onchange=e=>{state.sunDay=Number(e.target.value);syncSun();};
 document.getElementById('sun-time').oninput=e=>{stopSun();state.sunHour=Number(e.target.value);syncSun();};
-document.getElementById('sun-play').onclick=()=>{if(sunTimer){stopSun();return;}state.sunHour=6;syncSun();document.getElementById('sun-play').textContent='Pause';document.getElementById('sun-play').setAttribute('aria-pressed','true');sunTimer=setInterval(()=>{state.sunHour+=.25;if(state.sunHour>19.5){stopSun();return;}syncSun();},200);};
+document.getElementById('sun-play').onclick=()=>{if(sunTimer){stopSun();return;}state.sunHour=6;syncSun();document.getElementById('sun-play').textContent='Pause';document.getElementById('sun-play').setAttribute('aria-pressed','true');sunTimer=setInterval(()=>{state.sunHour+=.25;if(state.sunHour>19.5){stopSun();return;}syncSun();},400);};
 document.getElementById('sun-now').onclick=()=>{stopSun();const parts=new Intl.DateTimeFormat('en-GB',{timeZone:'Asia/Singapore',year:'numeric',month:'numeric',day:'numeric',hour:'numeric',minute:'numeric',hourCycle:'h23'}).formatToParts(new Date());const p=Object.fromEntries(parts.map(x=>[x.type,x.value]));Object.assign(state,{sunYear:Number(p.year),sunMonth:Number(p.month),sunDay:Number(p.day),sunHour:Math.floor((Number(p.hour)+Number(p.minute)/60)*4)/4});syncSun();};
-document.addEventListener('visibilitychange',()=>{if(document.hidden)stopSun();});document.fonts.ready.then(resize);syncSun();resize();
+document.addEventListener('visibilitychange',()=>{if(document.hidden)stopSun();});document.fonts.ready.then(resize);document.getElementById('sun-now').onclick();resize();
 </script></body></html>
-
-
-
