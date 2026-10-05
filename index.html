@@ -49,6 +49,11 @@
 .app .filter-column-right>.filter-field:not(.floor-range) input{height:44px;box-sizing:border-box;padding:8px}
 .app .floor-range-inputs input{height:44px}
 @media(max-width:480px){.app .filter-column-right{grid-template-columns:minmax(0,1.4fr) minmax(0,1fr)!important;column-gap:10px}.app .filter-column-right>.filter-field:not(.floor-range){font-size:12px}}
+</style><style id="large-text-room-tabs-v1">
+@media(min-width:701px){
+ .tracker-large-text .app .roomtabs{display:grid!important;grid-template-columns:repeat(5,minmax(0,1fr));gap:4px!important;height:auto!important;overflow:visible!important}
+ .tracker-large-text .app .roomtabs [role=tab]{min-width:0;width:100%;height:auto!important;min-height:64px;grid-column:auto!important;white-space:normal}
+}
 </style></head><body><a class="skip-link" href="#unit-explorer">Skip to unit search</a><details class="community-notice"><summary>Community tracker · update confirmed selections only</summary><p>Please record a selection only after the actual flat booking has been confirmed. Accurate community updates help everyone track availability reliably.</p><a href="https://berlayar-rise-tracker.rizuanlim.chatgpt.site/activity">Owner activity &amp; notifications</a></details>
 <style id="font-reduction-10">/* Reduce non-header fonts by 10%, retaining breakpoints and touch target sizes. */
 @layer components;@layer utilities{.text-\[0\.8rem\]:where(:not(.topbar, .topbar *, .pageheading, .pageheading *)){font-size:calc((.8rem) * 0.9);}}
