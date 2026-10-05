@@ -85,7 +85,11 @@ function drawSunCompass(){
  if(sun.altitude>0){
  const d=bearingVector(sun.azimuth);ctx.strokeStyle='#b77f39';ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(x,y);ctx.lineTo(x+23*d[0],y+23*d[1]);ctx.stroke();ctx.beginPath();ctx.arc(x+23*d[0],y+23*d[1],5,0,Math.PI*2);ctx.fillStyle='#d8a442';ctx.fill();
  // Large map-space sunlight indicator: rays travel from the sun towards the site.
- const radius=Math.min(width*.3,height*.32,210),sx=c[0]+d[0]*radius,sy=c[1]+d[1]*radius,tx=c[0]+d[0]*36,ty=c[1]+d[1]*36;
+ // Place the moving sun on the distant perimeter of the viewport.
+ const margin=55,origin=[Math.max(margin,Math.min(width-margin,c[0])),Math.max(margin,Math.min(height-margin,c[1]))];
+ const reachX=Math.abs(d[0])<.0001?Infinity:((d[0]>0?width-margin:margin)-origin[0])/d[0];
+ const reachY=Math.abs(d[1])<.0001?Infinity:((d[1]>0?height-margin:margin)-origin[1])/d[1];
+ const radius=Math.max(0,Math.min(reachX,reachY)),sx=origin[0]+d[0]*radius,sy=origin[1]+d[1]*radius,tx=c[0]+d[0]*36,ty=c[1]+d[1]*36;
  const glow=ctx.createRadialGradient(sx,sy,4,sx,sy,40);glow.addColorStop(0,'rgba(240,183,70,.65)');glow.addColorStop(1,'rgba(240,183,70,0)');ctx.fillStyle=glow;ctx.beginPath();ctx.arc(sx,sy,40,0,Math.PI*2);ctx.fill();
  ctx.strokeStyle='rgba(188,126,24,.85)';ctx.lineWidth=2;ctx.setLineDash([7,6]);ctx.beginPath();ctx.moveTo(sx,sy);ctx.lineTo(tx,ty);ctx.stroke();ctx.setLineDash([]);
  const theta=Math.atan2(ty-sy,tx-sx);ctx.fillStyle='#b77f39';ctx.beginPath();ctx.moveTo(tx,ty);ctx.lineTo(tx-12*Math.cos(theta-.45),ty-12*Math.sin(theta-.45));ctx.lineTo(tx-12*Math.cos(theta+.45),ty-12*Math.sin(theta+.45));ctx.closePath();ctx.fill();
@@ -98,7 +102,10 @@ function drawSunCompass(){
 }
 function render(){fitScene();ctx.setTransform(dpr,0,0,dpr,0,0);ctx.clearRect(0,0,width,height);
 const background=ctx.createLinearGradient(0,0,0,height);const solar=solarPosition(state.sunMonth,state.sunDay,state.sunHour,state.sunYear);background.addColorStop(0,solar.altitude>0?'#f0f5f2':'#d8e0dc');background.addColorStop(1,solar.altitude>0?'#e4ece7':'#bccbc2');ctx.fillStyle=background;ctx.fillRect(0,0,width,height);
-if(state.context){for(const road of roads){path(road.p.map(p=>project(...p)),false);ctx.lineJoin='round';ctx.lineCap='round';ctx.strokeStyle='#d5dfd8';ctx.lineWidth=Math.max(2,(road.w+3)*fit.k);ctx.stroke();ctx.strokeStyle='#f8faf8';ctx.lineWidth=Math.max(1,road.w*fit.k);ctx.stroke();}}
+if(state.context){ctx.save();
+// Keep the precinct's western context; omit the street-map extension east of Reflections.
+path([project(-500,-500),project(973,-500),project(973,2000),project(-500,2000)]);ctx.clip();
+for(const road of roads){path(road.p.map(p=>project(...p)),false);ctx.lineJoin='round';ctx.lineCap='round';ctx.strokeStyle='#d5dfd8';ctx.lineWidth=Math.max(2,(road.w+3)*fit.k);ctx.stroke();ctx.strokeStyle='#f8faf8';ctx.lineWidth=Math.max(1,road.w*fit.k);ctx.stroke();}ctx.restore();}
 const GROUND_DRAWING_HEIGHT=887;const p0=project(0,0),px=project(973,0),py=project(0,1000);
 if(imageLoaded){ctx.save();path([p0,px,project(973,GROUND_DRAWING_HEIGHT),project(0,GROUND_DRAWING_HEIGHT)]);ctx.shadowColor='rgba(36,68,51,.10)';ctx.shadowBlur=14;ctx.fillStyle='#f6f8f5';ctx.fill();ctx.restore();ctx.save();ctx.transform((px[0]-p0[0])/ground.width,(px[1]-p0[1])/ground.width,(py[0]-p0[0])/ground.height,(py[1]-p0[1])/ground.height,p0[0],p0[1]);ctx.globalAlpha=.92;ctx.drawImage(ground,0,0,ground.width,ground.height*GROUND_DRAWING_HEIGHT/1000,0,0,ground.width,ground.height*GROUND_DRAWING_HEIGHT/1000);ctx.restore();}
 faces=[];hits=[];
@@ -154,10 +161,10 @@ document.getElementById('focus').value=models.some(b=>b.id===state.selected&&b.k
 document.getElementById('landmark').value=['residences','reflections','mrt','bus-stops'].includes(state.selected)?state.selected:'';
 document.querySelectorAll('[data-block]').forEach(e=>e.setAttribute('aria-pressed',String(e.dataset.block===state.selected)));
 const panel=document.getElementById('selection'),heading=document.createElement('strong');panel.replaceChildren();
-const groups={'bus-stops':{n:'Future bus stops',note:'Four planned bus-stop locations are marked together: Berlayar Street, eastern Berlayar Drive and two opposite-side stops along southern Berlayar Drive. Locations are approximately traced from HDB’s site plan. Bus bays / shelters are planned; routes and opening dates are not confirmed here.'},residences:{n:'Berlayar Residences (U/C)',note:'All four residential blocks are highlighted together. Under construction (U/C). HDB plan footprints and 19–46-storey massing are simplified; alignment and heights are approximate.'},reflections:{n:'Reflections at Keppel Bay',note:'All displayed Reflections buildings are highlighted together. Only building centres within 35° either side of south from the centre of Berlayar Rise are retained. This plan-view cone is not a unit-specific sightline or visibility guarantee. Footprints and heights are simplified.'},mrt:{n:'Telok Blangah MRT Station',note:'Station entrance highlighted. The underground station is not modelled; the above-ground height is illustrative.'}};
+const groups={'bus-stops':{n:'Future bus stops',note:'Four planned bus-stop locations are marked together: Berlayar Street, eastern Berlayar Drive and two opposite-side stops along southern Berlayar Drive. Locations are approximately traced from HDB’s site plan. Bus bays / shelters are planned; routes and opening dates are not confirmed here.'},residences:{n:'Berlayar Residences (U/C)',note:'All four residential blocks are highlighted together. Under construction (U/C). HDB plan footprints and 19–46-storey massing are simplified; alignment and heights are approximate.'},reflections:{n:'Reflections at Keppel Bay',note:'All displayed Reflections buildings are highlighted together. Footprints and heights are simplified.'},mrt:{n:'Telok Blangah MRT Station',note:'Station entrance highlighted. The underground station is not modelled; the above-ground height is illustrative.'}};
 const group=groups[state.selected],b=models.find(b=>b.id===state.selected);
 panel.classList.toggle('surrounding-selection',Boolean(group)||Boolean(b&&b.kind==='existing'));heading.textContent=group?group.n:b?b.n:'Berlayar Rise · all six blocks';
-panel.append(heading,document.createTextNode(group?group.note:b?b.kind==='tower'?`${b.floors} storeys in HDB's published plan. Footprint traced from the site plan; height is illustrative (${STOREY_METRES} m per storey).`:`${b.floors} storeys shown for this simplified model. ${b.note}`:'Rotate to compare Berlayar Rise and nearby developments. Choose a landmark to highlight its whole group. Reflections is limited to the ±35° south-facing plan-view cone.'));render();}
+panel.append(heading,document.createTextNode(group?group.note:b?b.kind==='tower'?`${b.floors} storeys in HDB's published plan. Footprint traced from the site plan; height is illustrative (${STOREY_METRES} m per storey).`:`${b.floors} storeys shown for this simplified model. ${b.note}`:'Rotate to compare Berlayar Rise and nearby developments. Choose a landmark to highlight its whole group.'));render();}
 for(const b of models.filter(b=>b.kind==='tower')){const button=document.createElement('button');button.textContent=b.id;button.dataset.block=b.id;button.setAttribute('aria-pressed','false');button.onclick=()=>select(b.id);document.getElementById('blocks').append(button);}
 document.getElementById('focus').onchange=e=>select(e.target.value);
 for(const [id,name] of [['mrt','Telok Blangah MRT Station'],['residences','Berlayar Residences'],['reflections','Reflections at Keppel Bay'],['bus-stops','Future bus stops']]){const option=document.createElement('option');option.value=id;option.textContent=name;document.getElementById('landmark').append(option);}
@@ -208,5 +215,6 @@ document.getElementById('sun-play').onclick=()=>{if(sunTimer){stopSun();return;}
 document.getElementById('sun-now').onclick=()=>{stopSun();const parts=new Intl.DateTimeFormat('en-GB',{timeZone:'Asia/Singapore',year:'numeric',month:'numeric',day:'numeric',hour:'numeric',minute:'numeric',hourCycle:'h23'}).formatToParts(new Date());const p=Object.fromEntries(parts.map(x=>[x.type,x.value]));Object.assign(state,{sunYear:Number(p.year),sunMonth:Number(p.month),sunDay:Number(p.day),sunHour:Math.floor((Number(p.hour)+Number(p.minute)/60)*4)/4});syncSun();};
 document.addEventListener('visibilitychange',()=>{if(document.hidden)stopSun();});document.fonts.ready.then(resize);syncSun();resize();
 </script></body></html>
+
 
 
