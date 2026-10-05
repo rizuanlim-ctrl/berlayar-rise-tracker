@@ -460,5 +460,9 @@ html[lang="ta"] .roomtabs button:where(:not(.topbar, .topbar *, .pageheading, .p
 /* Reduce normal help text by 15%; preserve all existing Large Text sizes. */
 html:not(.tracker-large-text) .app .tracker-help,
 html:not(.tracker-large-text) .app .tracker-help :is(summary,li,p){font-size:14.875px!important}
-</style></body></html>
-
+</style>
+<style id="unit-close-contrast-v2">
+html[data-tracker-theme="dark"] .detailsheet>button:has(>svg.lucide-x){color:#173f2d!important;background:#edf4ef!important;opacity:1!important}
+html[data-tracker-theme="dark"] .detailsheet>button>svg.lucide-x{color:#173f2d!important;stroke:#173f2d!important;opacity:1!important;stroke-width:2.5}
+</style>
+</body></html>
