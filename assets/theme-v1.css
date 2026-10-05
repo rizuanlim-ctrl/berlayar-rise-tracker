@@ -28,3 +28,18 @@ html[data-tracker-theme="dark"] .app .topactions .theme-control button[aria-pres
 html[data-tracker-theme="dark"] .app :is(.overview>summary,.project-map-launcher,.project-map-launcher small){background:#21392b!important;color:#e1eee6!important;border-color:#55745e!important}
 html[data-tracker-theme="dark"] .app :is(.roomtabs button,.workhead [data-slot="tabs-trigger"],.viewtabs [data-slot="tabs-trigger"]){color:#d6e8dc!important}
 html[data-tracker-theme="dark"] .app :is(.roomtabs button,.workhead [data-slot="tabs-trigger"],.viewtabs [data-slot="tabs-trigger"])[data-state="active"]{color:#fff!important;background:#38634a!important}
+
+/* Keep inline booking controls legible on coloured unit cards, even while locked. */
+html[data-tracker-theme="dark"] .app .unit-quick-controls .quick-choice{
+ background:#15271c!important;color:#e1eee6!important;border-color:#55745e!important;
+ -webkit-text-fill-color:#e1eee6!important;
+}
+html[data-tracker-theme="dark"] .app .unit-quick-controls .quick-choice[aria-pressed="true"]{
+ background:#38634a!important;color:#fff!important;border-color:#95c8a7!important;
+ -webkit-text-fill-color:#fff!important;
+}
+html[data-tracker-theme="dark"] .app .unit-quick-controls .quick-choice:disabled,
+html[data-tracker-theme="dark"] .app .quick-choice-field:disabled .quick-choice{
+ opacity:1!important;cursor:not-allowed;
+}
+html[data-tracker-theme="dark"] .app .unit-card .quick-choice-field legend{color:#183c2c!important}
