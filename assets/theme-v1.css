@@ -44,3 +44,23 @@ html[data-tracker-theme="dark"] .app .quick-choice-field:disabled .quick-choice{
  opacity:1!important;cursor:not-allowed;
 }
 html[data-tracker-theme="dark"] .app .unit-card .quick-choice-field legend{color:#183c2c!important}
+
+/* Dark-mode level picker: readable inactive levels, distinct active level.
+   Paint-only overrides preserve shared responsive geometry and light mode. */
+html[data-tracker-theme="dark"] .app .floor-card-level-grid button{
+ background:#243e2d!important;color:#e1eee6!important;
+ -webkit-text-fill-color:#e1eee6!important;border-color:#789984!important;
+}
+html[data-tracker-theme="dark"] .app .floor-card-level-grid button[aria-pressed="true"]{
+ background:#38634a!important;color:#fff!important;
+ -webkit-text-fill-color:#fff!important;border-color:#95c8a7!important;
+}
+html[data-tracker-theme="dark"] .app :is(.floor-card-level-help,.floor-card-prompt){
+ color:#b4c9bc!important;
+}
+html[data-tracker-theme="dark"] .app .floor-card-prompt{
+ background:#21392b!important;border-color:#789984!important;
+}
+html[data-tracker-theme="dark"] .app .floor-card-selection{
+ color:#e1eee6!important;border-color:#55745e!important;
+}
