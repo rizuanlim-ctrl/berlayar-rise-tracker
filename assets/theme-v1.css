@@ -14,7 +14,8 @@ html[data-tracker-theme="dark"] .roomtabs span{background:#304d3c!important;colo
 html[data-tracker-theme="dark"] .listtable td{color:#e1eee6}
 html[data-tracker-theme="dark"] .community-notice,html[data-tracker-theme="dark"] .browse-shortcut{background:#332e1d!important;color:#f0deb4!important;border-color:#766840!important}
 html[data-tracker-theme="dark"] .community-notice a{color:#b2dcbc}
-html[data-tracker-theme="dark"] .projectlogo{background:#edf4ef;border-radius:6px;padding:4px}
+/* Logo geometry is shared by both themes; contrast uses paint only. */
+.projectlogo{background:#edf4ef;border-radius:6px}
 html[data-tracker-theme="dark"] .stats .queuecard{background:#315c42!important}
 html[data-tracker-theme="dark"] :is(button,input,select,textarea,summary,a):focus-visible{outline-color:#a7ddb9!important}
 html[data-tracker-theme="dark"] .unit-card :is(h3,p,.card-price){color:inherit!important}
