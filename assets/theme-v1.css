@@ -77,3 +77,8 @@ html[data-tracker-theme="dark"] .tracker-scroll-controls button{
 html[data-tracker-theme="dark"] .tracker-scroll-controls button .scroll-icon{
  color:inherit!important;-webkit-text-fill-color:inherit!important;
 }
+
+html[data-tracker-theme="dark"] .detailsheet [data-slot="sheet-close"]{
+ background:#243e2d!important;color:#e1eee6!important;
+ -webkit-text-fill-color:#e1eee6!important;
+}
