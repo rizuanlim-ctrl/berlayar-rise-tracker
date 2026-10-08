@@ -196,7 +196,7 @@ function ReliabilityTools({units,shortlist,onRestore}){
  const chosen=units.filter(u=>shortlist.includes(u.id)),status=navigator.onLine===false?'Offline':reliabilityConnection.status;
  const history=sharedHistory;
  const restore=async e=>{const file=e.target.files?.[0];if(!file)return;try{if(file.size>200000)throw Error('Invalid backup file.');const data=JSON.parse(await file.text());if(data.format!=='berlayar-shortlist-v1'||!Array.isArray(data.units)||!data.units.every(id=>typeof id==='string'&&units.some(u=>u.id===id)))throw Error('Invalid backup file.');const merged=[...new Set([...shortlist,...data.units])];savePersistentShortlist(merged);onRestore(merged);setMessage('Shortlist restored.')}catch(error){setMessage(error.message)}finally{e.target.value=''}};
- const h=(type,props,...children)=>LocalizedJSX.jsxs(type,{...props,children});
+ const h=(type,props,...children)=>LocalizedJSX.jsxs(type,children.length?{...props,children}:props);
  return h('section',{className:'reliability-tools','aria-label':trackerText('Reliability and shortlist tools')},
  h('div',{className:'reliability-heading'},h('strong',{},'Connection: ',trackerText(status)),h('span',{},reliabilityConnection.checked?trackerText('Last checked')+': '+new Date(reliabilityConnection.checked).toLocaleString(trackerLanguage==='en'?'en-SG':trackerLanguage,{timeZone:'Asia/Singapore'}):trackerText('Waiting for saved records')),h('button',{type:'button',onClick:()=>setOpen(v=>!v),'aria-expanded':open},open?'Hide tools':'Shortlist and reliability tools')),
  status==='Update failed'||status==='Offline'?h('p',{role:'status'},'Displayed community records may be out of date. Your shortlist can still be backed up.'):null,
