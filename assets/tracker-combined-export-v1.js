@@ -142,6 +142,34 @@ function persistShortlistChange(id,fallback){
  if(saved&&navigator.storage?.persist)navigator.storage.persist().catch(()=>{});
  return {items:next,saved};
 }
+// A saved recovery link works without cookies, browser storage, or an IP identity.
+function readShortlistLink(){
+ try{const params=new URLSearchParams(location.hash.slice(1));const raw=params.get("shortlist");if(raw===null)return null;const items=normalizeShortlist(raw);return items&&items.length<=1976&&items.every(id=>id.length<=100)?items:null}catch{return null}
+}
+function updateShortlistLink(items){
+ try{const params=new URLSearchParams(location.hash.slice(1));params.set("shortlist",JSON.stringify(items));history.replaceState(history.state,"",location.pathname+location.search+"#"+params.toString())}catch{}
+}
+const originalWriteShortlistCopies=writeShortlistCopies;
+writeShortlistCopies=function(record){const saved=originalWriteShortlistCopies(record);updateShortlistLink(record.items);return saved};
+const linkedShortlist=readShortlistLink();
+if(linkedShortlist!==null)savePersistentShortlist(linkedShortlist);
+else {const items=readPersistentShortlist();if(items.length)updateShortlistLink(items)}
+function mountShortlistRecovery(){
+ const host=document.querySelector(".shortlist-privacy");if(!host||document.getElementById("shortlist-recovery"))return;
+ const panel=document.createElement("div");panel.id="shortlist-recovery";panel.style.cssText="display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-top:8px";
+ const button=document.createElement("button");button.type="button";button.textContent="Save recovery link";
+ const help=document.createElement("span");help.textContent="Save this link to restore your shortlist after a private session closes. Keep it private; anyone with the link can see the included units.";help.style.cssText="font-size:14px;line-height:1.5";
+ const output=document.createElement("input");output.type="text";output.readOnly=true;output.hidden=true;output.setAttribute("aria-label","Shortlist recovery link");output.style.cssText="width:100%;min-height:44px;font-size:16px";
+ const status=document.createElement("span");status.setAttribute("role","status");
+ button.onclick=async()=>{updateShortlistLink(readPersistentShortlist());output.value=location.href;output.hidden=false;try{await navigator.clipboard.writeText(output.value);status.textContent="Recovery link copied. Save it in your bookmarks or notes."}catch{output.focus();output.select();status.textContent="Copy and save the recovery link shown here."}};
+ panel.append(button,help,output,status);host.insertAdjacentElement("afterend",panel);
+}
+new MutationObserver(mountShortlistRecovery).observe(document.documentElement,{childList:true,subtree:true});
+mountShortlistRecovery();
+window.addEventListener("pageshow",restoreShortlistDatabase);
+window.addEventListener("focus",restoreShortlistDatabase);
+document.addEventListener("visibilitychange",()=>{if(document.visibilityState==="visible")restoreShortlistDatabase()});
+
 function ProjectMapLauncher(){
  const ref=(0,C.useRef)(null),[open,setOpen]=(0,C.useState)(false);
  const close=()=>{ref.current?.close();setOpen(false)};
