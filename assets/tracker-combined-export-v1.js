@@ -417,7 +417,8 @@ function TrackerScrollControls({inDetails=false,onClose,disabled=false}){
  .tracker-scroll-controls button:focus-visible{outline:3px solid #397ee6;outline-offset:3px}
  .tracker-scroll-controls button:disabled{cursor:wait}
  .tracker-scroll-controls .scroll-icon{font-size:14.25px!important;line-height:1}
- .tracker-scroll-controls .scroll-close{display:none!important}
+ .details-scroll-controls .scroll-close{display:inline-flex!important;min-width:82px;background:#edf4ef!important;color:#183c2c!important;border-color:#7b9b86!important}
+ .details-scroll-controls{position:fixed!important;z-index:1000!important;background:rgba(237,244,239,.94)!important;box-shadow:0 3px 16px #0003;max-width:calc(100% - 20px)}
  .detailsheet{padding-bottom:calc(110px + env(safe-area-inset-bottom))!important}
  .app>footer{padding-bottom:110px}
  @media(max-width:720px){.tracker-scroll-controls{right:max(10px,env(safe-area-inset-right));bottom:calc(10px + env(safe-area-inset-bottom));gap:6px;padding:7px;max-width:calc(100vw - 20px)}.details-scroll-controls .scroll-close{display:inline-flex!important;min-width:82px}.tracker-scroll-controls button{min-width:52px}.detailsheet{padding-bottom:calc(115px + env(safe-area-inset-bottom))!important}}
