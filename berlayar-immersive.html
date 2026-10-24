@@ -1,6 +1,6 @@
 <!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Berlayar Rise | Immersive Walkthrough (Preview)</title><style>
-*{box-sizing:border-box}body{margin:0;background:#101e1a;color:#fff;font:14px system-ui}header{position:absolute;z-index:3;top:0;left:0;right:0;padding:14px;background:linear-gradient(#091912e8,transparent);display:flex;justify-content:space-between;gap:12px;align-items:center}a{color:#b8f5cd}h1{font-size:17px;margin:0}small{display:block;color:#d4e3d9;margin-top:4px}canvas{display:block}#hud{position:absolute;bottom:18px;left:18px;z-index:4;background:#10261cdd;border:1px solid #66806f;border-radius:14px;padding:14px;max-width:340px}button,select{background:#e5f3e8;color:#153826;border:0;border-radius:9px;padding:11px;margin:3px;min-height:42px;font:inherit}#pad{position:absolute;right:12px;bottom:14px;z-index:4;display:grid;grid-template-columns:repeat(3,48px);gap:4px}#pad button{padding:0;touch-action:none}#pad .blank{visibility:hidden}#status{font-size:12px;color:#d4e3d9;line-height:1.5}#fallback{display:none;position:absolute;inset:25%;background:#fff;color:#222;padding:20px;z-index:10}@media(max-width:650px){#hud{bottom:12px;left:8px;max-width:calc(100% - 190px);padding:8px;font-size:12px}header{padding:10px}h1{font-size:14px}button,select{padding:8px;min-height:36px}#pad{grid-template-columns:repeat(3,44px)}} </style></head><body>
-<header><div><h1>Berlayar Rise · Immersive Walkthrough</h1><small>Concept preview · illustrative buildings, not surveyed unit views</small></div><a href="/berlayar-3d.html">Original 3D map ↗</a></header><div id="hud"><label for="block">Explore block </label><select id="block"><option>200A</option><option>200B</option><option>201A</option><option>201B</option><option>204A</option><option>204B</option></select><button id="reset">Reset</button><p id="status">Drag to look around. Use arrow keys / WASD or on-screen arrows to walk. Select a block to approach it.</p><small>Building positions, floor heights and façades in this preview are illustrative. Existing tracker shortlists are untouched.</small></div><div id="pad"><span class="blank"></span><button data-key="w" aria-label="Forward">▲</button><span class="blank"></span><button data-key="a" aria-label="Left">◀</button><button data-key="s" aria-label="Back">▼</button><button data-key="d" aria-label="Right">▶</button></div><div id="fallback">3D library could not load. <a href="/berlayar-3d.html">Return to existing map</a>.</div>
+*{box-sizing:border-box}body{margin:0;background:#101e1a;color:#fff;font:14px system-ui}header{position:absolute;z-index:3;top:0;left:0;right:0;padding:14px;background:linear-gradient(#091912e8,transparent);display:flex;justify-content:space-between;gap:12px;align-items:center}a{color:#b8f5cd}h1{font-size:17px;margin:0}small{display:block;color:#d4e3d9;margin-top:4px}canvas{display:block}#hud{position:absolute;bottom:18px;left:18px;z-index:4;background:#10261cdd;border:1px solid #66806f;border-radius:14px;padding:14px;max-width:340px}button,select,input{background:#e5f3e8;color:#153826;border:0;border-radius:9px;padding:11px;margin:3px;min-height:42px;font:inherit}#pad{position:absolute;right:12px;bottom:14px;z-index:4;display:grid;grid-template-columns:repeat(3,48px);gap:4px}#pad button{padding:0;touch-action:none}#pad .blank{visibility:hidden}#status{font-size:12px;color:#d4e3d9;line-height:1.5}#fallback{display:none;position:absolute;inset:25%;background:#fff;color:#222;padding:20px;z-index:10}@media(max-width:650px){#hud{bottom:12px;left:8px;max-width:calc(100% - 190px);padding:8px;font-size:12px}header{padding:10px}h1{font-size:14px}button,select{padding:8px;min-height:36px}#pad{grid-template-columns:repeat(3,44px)}} </style></head><body>
+<header><div><h1>Berlayar Rise · Immersive Walkthrough</h1><small>Concept preview · selectable units with illustrative interiors, not surveyed floor plans</small></div><a href="/berlayar-3d.html">Original 3D map ↗</a></header><div id="hud"><label for="block">Explore block </label><select id="block"><option>200A</option><option>200B</option><option>201A</option><option>201B</option><option>204A</option><option>204B</option></select><label for="floor">Floor</label><select id="floor"></select><label for="stack">Stack</label><input id="stack" inputmode="numeric" pattern="[0-9]*" maxlength="3" placeholder="e.g. 139" style="width:83px;padding:10px;border-radius:8px"><button id="enter">Enter unit</button><button id="outside">Building view</button><button id="reset">Reset</button><p id="status">Drag to look around. Use arrow keys / WASD or on-screen arrows to walk. Select a block to approach it.</p><small>Building positions, floor heights and façades in this preview are illustrative. Existing tracker shortlists are untouched.</small></div><div id="pad"><span class="blank"></span><button data-key="w" aria-label="Forward">▲</button><span class="blank"></span><button data-key="a" aria-label="Left">◀</button><button data-key="s" aria-label="Back">▼</button><button data-key="d" aria-label="Right">▶</button></div><div id="fallback">3D library could not load. <a href="/berlayar-3d.html">Return to existing map</a>.</div>
 <script type="module">
 try {
  const THREE=await import('https://cdn.jsdelivr.net/npm/three@0.164.1/build/three.module.js');
@@ -18,7 +18,51 @@ try {
  addEventListener('keydown',e=>{if(['w','a','s','d','ArrowUp','ArrowDown','ArrowLeft','ArrowRight'].includes(e.key)){keys.add(e.key.toLowerCase());e.preventDefault()}});addEventListener('keyup',e=>keys.delete(e.key.toLowerCase()));
  document.querySelectorAll('[data-key]').forEach(b=>{const k=b.dataset.key;b.addEventListener('pointerdown',e=>{b.setPointerCapture(e.pointerId);keys.add(k)});for(const event of ['pointerup','pointercancel','lostpointercapture'])b.addEventListener(event,()=>keys.delete(k))});
  let down=null;renderer.domElement.addEventListener('pointerdown',e=>{down={x:e.clientX,y:e.clientY};renderer.domElement.setPointerCapture(e.pointerId)});renderer.domElement.addEventListener('pointermove',e=>{if(!down)return;yaw-=(e.clientX-down.x)*.005;pitch=clamp(pitch-(e.clientY-down.y)*.004,-1.25,1.25);down={x:e.clientX,y:e.clientY}});renderer.domElement.addEventListener('pointerup',()=>down=null);
- const clock=new THREE.Clock();function animate(){requestAnimationFrame(animate);const dt=Math.min(clock.getDelta(),.05);const forward=Number(keys.has('w')||keys.has('arrowup'))-Number(keys.has('s')||keys.has('arrowdown'));const side=Number(keys.has('d')||keys.has('arrowright'))-Number(keys.has('a')||keys.has('arrowleft'));const speed=13*dt;camera.position.x+=(-Math.sin(yaw)*forward+Math.cos(yaw)*side)*speed;camera.position.z+=(-Math.cos(yaw)*forward-Math.sin(yaw)*side)*speed;camera.position.x=clamp(camera.position.x,-120,120);camera.position.z=clamp(camera.position.z,-160,100);camera.rotation.order='YXZ';camera.rotation.y=yaw;camera.rotation.x=pitch;renderer.render(scene,camera)}animate();
+ 
+// Illustrative interior walkthrough; intentionally isolated from shortlist persistence.
+const floorSelect=document.getElementById('floor');
+for(let n=2;n<=45;n++){const o=document.createElement('option');o.value=n;o.textContent='Level '+n;floorSelect.append(o)}
+floorSelect.value='12';
+const unitObjects=[];let indoors=false;
+function addUnit(mesh){scene.add(mesh);unitObjects.push(mesh);return mesh}
+function box(w,h,d,x,y,z,color){const m=new THREE.Mesh(new THREE.BoxGeometry(w,h,d),new THREE.MeshStandardMaterial({color,roughness:.83,side:THREE.DoubleSide}));m.position.set(x,y,z);return addUnit(m)}
+function roomLabel(label,x,z){const c=document.createElement('canvas');c.width=512;c.height=128;const ctx=c.getContext('2d');ctx.fillStyle='#fff';ctx.fillRect(0,0,512,128);ctx.fillStyle='#173c2c';ctx.font='bold 48px sans-serif';ctx.textAlign='center';ctx.fillText(label,256,79);const t=new THREE.CanvasTexture(c);const m=new THREE.Mesh(new THREE.PlaneGeometry(3.6,.9),new THREE.MeshBasicMaterial({map:t,side:THREE.DoubleSide}));m.position.set(x,2.35,z);addUnit(m)}
+function enterUnit(){
+ const stack=document.getElementById('stack').value.trim();
+ if(!/^\\d{2,3}$/.test(stack)){document.getElementById('status').textContent='Enter a valid 2–3 digit stack number before entering a unit.';return}
+ indoors=true;
+ // Hide exterior without mutating or deleting it.
+ for(const o of scene.children){if(o.isMesh&&!unitObjects.includes(o))o.visible=false}
+ const floor=box(14,.18,18,0,-.12,0,0xd5bd99);
+ // Open-plan conceptual Type 2 apartment, navigable from entry to bedroom.
+ // Segmented walls leave real door gaps rather than sealing rooms.
+ box(14,3,.2,0,1.5,-9,0xf4f0e8);box(.2,3,18,-7,1.5,0,0xf4f0e8);
+ box(.2,3,18,7,1.5,0,0xf4f0e8);
+ box(5,3,.2,-4.5,1.5,9,0xf4f0e8);box(5,3,.2,4.5,1.5,9,0xf4f0e8);
+ // Bedroom partition, doorway at x=1..3
+ box(8,3,.18,-3,1.5,-1.5,0xf4f0e8);box(4,3,.18,5,1.5,-1.5,0xf4f0e8);
+ // Bathroom at rear right, accessible from living area.
+ box(.18,3,5,3,1.5,6.5,0xe4e9e8);box(4,3,.18,5,1.5,4,0xe4e9e8);
+ box(2.9,.55,4,-3,0.27,-5,0x789b86); // bed
+ box(2.9,.3,1.4,-3,.4,-7.6,0xd6c2a5); // headboard
+ box(3,.65,1.4,-3,.32,3.4,0x597e73); // sofa
+ box(2,.5,1,0,.25,4,0x9c765a); // coffee table
+ box(4,.9,.8,-4.8,.45,7.8,0xc9d2cd); // kitchen counter
+ box(1.3,.8,1.3,5,.4,7.5,0xffffff); // bathroom fixture
+ roomLabel('BEDROOM',-3,-1.35);roomLabel('LIVING',-2,1);roomLabel('KITCHEN',-4,8.85);
+ camera.position.set(0,1.65,7.8);yaw=Math.PI;pitch=0;
+ document.getElementById('status').textContent='Illustrative unit walkthrough · Block '+document.getElementById('block').value+' · Level '+floorSelect.value+' · Stack '+stack+'. Layout, dimensions and furnishings are conceptual, NOT verified HDB floor plans. Drag to look; arrows / WASD to move.';
+}
+function exitUnit(){
+ indoors=false;for(const o of unitObjects)scene.remove(o);unitObjects.length=0;
+ for(const o of scene.children)if(o.isMesh)o.visible=true;
+ approach(names.indexOf(document.getElementById('block').value));
+ document.getElementById('status').textContent='Building view · select a block, floor and stack, then Enter unit for an illustrative interior.';
+}
+document.getElementById('enter').onclick=enterUnit;
+document.getElementById('outside').onclick=exitUnit;
+document.getElementById('block').addEventListener('change',()=>{if(indoors)exitUnit()});
+const clock=new THREE.Clock();function animate(){requestAnimationFrame(animate);const dt=Math.min(clock.getDelta(),.05);const forward=Number(keys.has('w')||keys.has('arrowup'))-Number(keys.has('s')||keys.has('arrowdown'));const side=Number(keys.has('d')||keys.has('arrowright'))-Number(keys.has('a')||keys.has('arrowleft'));const speed=13*dt;camera.position.x+=(-Math.sin(yaw)*forward+Math.cos(yaw)*side)*speed;camera.position.z+=(-Math.cos(yaw)*forward-Math.sin(yaw)*side)*speed;camera.position.x=clamp(camera.position.x,-120,120);camera.position.z=clamp(camera.position.z,indoors?-8.4:-160,indoors?8.4:100);if(indoors)camera.position.x=clamp(camera.position.x,-6.5,6.5);camera.rotation.order='YXZ';camera.rotation.y=yaw;camera.rotation.x=pitch;renderer.render(scene,camera)}animate();
  addEventListener('resize',()=>{camera.aspect=innerWidth/innerHeight;camera.updateProjectionMatrix();renderer.setSize(innerWidth,innerHeight)});
 }catch(e){document.getElementById('fallback').style.display='block';console.error(e)}
 </script></body></html>
