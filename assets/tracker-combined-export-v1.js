@@ -182,6 +182,7 @@ document.addEventListener("visibilitychange",()=>{if(document.visibilityState===
 
 const OFFICIAL_3R_QUOTAS={"3R|200A|Malay":19,"3R|200A|Chinese":72,"3R|200A|Indian / Other":10,"3R|201B|Malay":19,"3R|201B|Chinese":72,"3R|201B|Indian / Other":10};
 const LATEST_3R_REMAINING={"3R|200A|Malay":19,"3R|200A|Chinese":72,"3R|200A|Indian / Other":10,"3R|201B|Malay":19,"3R|201B|Chinese":67,"3R|201B|Indian / Other":8};
+const OFFICIAL_4R_OPENING={"4R|200A|Malay":38,"4R|200A|Chinese":145,"4R|200A|Indian / Other":21,"4R|200B|Malay":40,"4R|200B|Chinese":152,"4R|200B|Indian / Other":22,"4R|201A|Malay":41,"4R|201A|Chinese":155,"4R|201A|Indian / Other":23,"4R|201B|Malay":38,"4R|201B|Chinese":145,"4R|201B|Indian / Other":21,"4R|204A|Malay":34,"4R|204A|Chinese":128,"4R|204A|Indian / Other":19,"4R|204B|Malay":29,"4R|204B|Chinese":108,"4R|204B|Indian / Other":16};
 const SUPPLIED_4R_QUOTAS={"4R|200A|Malay":38,"4R|200A|Chinese":144,"4R|200A|Indian / Other":21,"4R|200B|Malay":40,"4R|200B|Chinese":152,"4R|200B|Indian / Other":22,"4R|201A|Malay":41,"4R|201A|Chinese":155,"4R|201A|Indian / Other":22,"4R|201B|Malay":38,"4R|201B|Chinese":143,"4R|201B|Indian / Other":21,"4R|204A|Malay":34,"4R|204A|Chinese":128,"4R|204A|Indian / Other":18,"4R|204B|Malay":29,"4R|204B|Chinese":105,"4R|204B|Indian / Other":16};
 const ESTIMATE_2R_QUOTAS={"200A":{"Malay":19,"Chinese":72,"Indian / Other":11},"200B":{"Malay":40,"Chinese":151,"Indian / Other":22},"201A":{"Malay":40,"Chinese":155,"Indian / Other":22},"201B":{"Malay":19,"Chinese":72,"Indian / Other":11},"204A":{"Malay":33,"Chinese":128,"Indian / Other":18},"204B":{"Malay":28,"Chinese":108,"Indian / Other":15}};
 function estimatedOpeningQuota(room,block,ethnicity){if(room!=="3R")return null;const base=Id.filter(u=>u.room==="2R"&&u.block===block).length,total=Id.filter(u=>u.room===room&&u.block===block).length;const quota=ESTIMATE_2R_QUOTAS[block]?.[ethnicity];return base&&total&&Number.isFinite(quota)?Math.round(quota*total/base):null;}
@@ -302,6 +303,24 @@ for(const block of ["200A","201B"]){
   if(!ethnicity)break;
   unit.ethnicity=ethnicity;
   unit.ethnicityEstimated=true;
+  unit.notes=[unit.notes,"Estimated ethnicity from block quota differences; NOT a verified buyer ethnicity."].filter(Boolean).join(" | ");
+  needs[ethnicity]--;
+ }
+}
+for(const block of ["200A","200B","201A","201B","204A","204B"]){
+ const ethnicities=["Malay","Chinese","Indian / Other"];
+ const taken=units.filter(u=>u.room==="4R"&&u.block===block&&u.status==="Taken");
+ const unknown=taken.filter(u=>!u.ethnicity),needs={};let valid=true;
+ for(const ethnicity of ethnicities){
+  const key=`4R|${block}|${ethnicity}`;
+  const confirmed=taken.filter(u=>u.ethnicity===ethnicity).length;
+  needs[ethnicity]=OFFICIAL_4R_OPENING[key]-SUPPLIED_4R_QUOTAS[key]-confirmed;
+  if(!Number.isInteger(needs[ethnicity])||needs[ethnicity]<0)valid=false;
+ }
+ if(!valid||ethnicities.reduce((n,k)=>n+needs[k],0)!==unknown.length)continue;
+ for(const unit of [...unknown].sort((a,b)=>a.id.localeCompare(b.id,undefined,{numeric:true}))){
+  const ethnicity=ethnicities.find(k=>needs[k]>0);if(!ethnicity)break;
+  unit.ethnicity=ethnicity;unit.ethnicityEstimated=true;
   unit.notes=[unit.notes,"Estimated ethnicity from block quota differences; NOT a verified buyer ethnicity."].filter(Boolean).join(" | ");
   needs[ethnicity]--;
  }
