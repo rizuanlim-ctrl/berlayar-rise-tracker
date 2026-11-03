@@ -1,47 +1,60 @@
-import {i as units,n as effective,r as quota,t as races} from './tracker-combined-export-v1.js?v=usability-20261009';
+import {n as effective,r as quota,t as races} from './tracker-combined-export-v1.js?v=usability-20261009';
 const API='https://berlayar-rise-tracker.rizuanlim.chatgpt.site/api/tracker';
-const OFFICIAL_OPENING_4R={"200A":[145,38,21],"200B":[152,40,22],"201A":[155,41,23],"201B":[145,38,21],"204A":[128,34,19],"204B":[108,29,16]};
-const LATEST_REMAINING_4R={"200A":[144,38,21],"200B":[151,40,22],"201A":[154,41,21],"201B":[136,37,20],"204A":[120,34,18],"204B":[105,29,15]};
-const RACE_INDEX={"Chinese":0,"Malay":1,"Indian / Other":2};
-function independentQuota(state,all,room,block,race){if(room==="2R")return quota(state,all,room,block,race);if(room!=="4R")return quota(state,all,room,block,race);const i=RACE_INDEX[race],opening=OFFICIAL_OPENING_4R[block]?.[i],fallback=LATEST_REMAINING_4R[block]?.[i],provided=state.quotas?.[room+"|"+block+"|"+race];const remaining=provided??fallback??null;return {opening,remaining,taken:remaining===null?null:opening-remaining};}
-const rooms=['2R','3R','4R'];let snapshot=null,revision=null,opened=false;let activeRoom='2R';
+const rooms=['2R','3R','4R'];let snapshot=null,revision=null,opened=false,activeRoom='2R';const activeBlocks={};let selectedUnit=null;
 const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const label=r=>r.replace('R','-Room');
 const style=document.createElement('style');style.textContent=`
-#berlayar-summary-open{margin-left:8px;padding:10px 16px;border:1px solid #668c76;border-radius:9px;background:#e5f3e9;color:#153c2a;font-weight:750;cursor:pointer;min-height:44px}
-#berlayar-summary-modal{position:fixed;inset:0;z-index:99999;background:#f5f8f5;color:#20392b;overflow:hidden;padding:0;display:flex;flex-direction:column}
+#berlayar-summary-modal{position:fixed;inset:0;z-index:99999;background:#f5f8f5;color:#20392b;overflow:hidden;display:flex;flex-direction:column;padding:0}
 #berlayar-summary-modal[hidden]{display:none}
-#berlayar-summary-modal .bs-head{position:sticky;top:0;background:#f5f8f5;z-index:3;flex:0 0 auto;display:flex;justify-content:space-between;align-items:center;gap:12px;padding:16px 22px;border-bottom:1px solid #b8c8bb}
-#berlayar-summary-modal .bs-head h2{margin:0;font-size:24px}
-#berlayar-summary-modal .bs-head button{font-size:17px;padding:9px 16px;cursor:pointer}
-#berlayar-summary-modal .bs-body{padding:16px;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px;align-items:stretch;flex:1;min-height:0;overflow:hidden}
-#berlayar-summary-modal .bs-room{min-width:0;background:white;border:1px solid #c7d6cb;border-radius:12px;padding:12px;min-height:0;max-height:100%;overflow-y:auto;overscroll-behavior:contain;touch-action:pan-y;scrollbar-gutter:stable; -webkit-overflow-scrolling:touch}
-#berlayar-summary-modal h3{margin:0 0 10px;font-size:22px;font-weight:900!important;letter-spacing:.01em}
-#berlayar-summary-modal .bs-stats{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:10px}
-#berlayar-summary-modal .bs-stats span{background:#e8f1e9;border-radius:6px;padding:7px;font-weight:650}
-#berlayar-summary-modal .bs-block{margin-top:14px;border-top:1px solid #ccd8ce;padding-top:10px}
-#berlayar-summary-modal .bs-block h4{margin:0 0 8px}
-#berlayar-summary-modal .bs-scroll{overflow:visible;max-height:none}
-#berlayar-summary-modal table{border-collapse:collapse;font-size:12px;white-space:nowrap}
-#berlayar-summary-modal th,#berlayar-summary-modal td{border:1px solid #cad7cd;padding:5px 7px;text-align:center}
-#berlayar-summary-modal th{background:#e5eee7;position:sticky;top:0;z-index:1}
-#berlayar-summary-modal td.taken{background:#f0a4c4;color:#651b3c}
+#berlayar-summary-modal .bs-head{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:12px 18px;border-bottom:1px solid #b8c8bb;flex:none}
+#berlayar-summary-modal .bs-head h2{margin:0;font-size:21px}
+#berlayar-summary-modal .bs-head button{font:inherit;min-height:40px;padding:7px 14px;cursor:pointer}
+#berlayar-summary-modal .bs-room-tabs,#berlayar-summary-modal .bs-block-tabs{display:flex;gap:6px;flex:none}
+#berlayar-summary-modal .bs-room-tabs{padding:9px 14px}
+#berlayar-summary-modal .bs-room-tabs button,#berlayar-summary-modal .bs-block-tabs button{min-height:40px;padding:6px 12px;border:1px solid #668c76;border-radius:7px;background:transparent;color:inherit;font:inherit;font-weight:750;cursor:pointer}
+#berlayar-summary-modal .bs-room-tabs button{flex:1}
+#berlayar-summary-modal button[aria-pressed=true]{background:#d5e8dc;color:#173b29;box-shadow:inset 0 0 0 1px #416e53}
+#berlayar-summary-modal .bs-body{padding:0 14px 10px;flex:1;min-height:0;display:flex;flex-direction:column;gap:7px;overflow:hidden}
+#berlayar-summary-modal .bs-stats{display:flex;flex-wrap:wrap;gap:6px;font-size:14px;flex:none}
+#berlayar-summary-modal .bs-stats span{background:#e8f1e9;border-radius:5px;padding:5px 8px;font-weight:700}
+#berlayar-summary-modal .bs-block-tabs{flex-wrap:wrap}
+#berlayar-summary-modal .bs-block-tabs button{flex:1;white-space:nowrap}
+#berlayar-summary-modal .bs-quota{font-size:13px;line-height:1.3;flex:none}
+#berlayar-summary-modal .bs-grid{flex:1;min-height:0;overflow:auto;border:1px solid #9fb5a6;border-radius:6px}
+#berlayar-summary-modal table{width:100%;height:100%;min-height:calc(var(--rows) * 12px);border-collapse:collapse;table-layout:fixed;font-size:var(--fit-font,11px);line-height:1}
+#berlayar-summary-modal th,#berlayar-summary-modal td{border:1px solid #bacbbf;text-align:center;padding:0 2px;height:var(--fit-row,14px);white-space:nowrap}
+#berlayar-summary-modal th{background:#e5eee7;font-weight:800}
+#berlayar-summary-modal th:first-child{width:38px}
+#berlayar-summary-modal thead th{position:sticky;top:0;z-index:1}
 #berlayar-summary-modal td.available{background:#9cddba;color:#0b4930}
+#berlayar-summary-modal td.taken{background:#f0a4c4;color:#651b3c}
 #berlayar-summary-modal td.unverified{background:#cbd2dc;color:#202b3b}
-#berlayar-summary-modal .bs-quota{font-size:13px;margin:7px 0}
-#berlayar-summary-modal .bs-note{padding:0 18px 18px;font-size:13px}
-#berlayar-summary-modal .bs-room-tabs{display:none;gap:8px;padding:10px 16px;flex:0 0 auto}
-#berlayar-summary-modal .bs-room-tabs button{flex:1;min-height:44px;border:1px solid #668c76;border-radius:8px;background:transparent;color:inherit;font:inherit;font-weight:750}
-#berlayar-summary-modal .bs-room-tabs button[aria-pressed=true]{background:#d5e8dc;color:#173b29}
-#berlayar-summary-modal .bs-block{overflow-x:auto}
-@media(max-width:1050px){#berlayar-summary-modal .bs-room-tabs{display:flex}#berlayar-summary-modal .bs-body{grid-template-columns:minmax(0,1fr);overflow:hidden}#berlayar-summary-modal .bs-room[data-active=false]{display:none}#berlayar-summary-modal .bs-room{height:auto;min-height:0;max-height:100%;overflow-y:auto;overscroll-behavior:contain}}
-
+#berlayar-summary-modal td button{font:inherit;font-weight:700;color:inherit;background:transparent;border:0;width:100%;height:100%;min-height:0;padding:0;cursor:pointer}
+#berlayar-summary-modal td button:focus-visible{outline:2px solid #163f2b;outline-offset:-2px}
+#berlayar-summary-modal .bs-unit-info{flex:none;min-height:20px;font-size:13px;line-height:1.4}
+#berlayar-summary-modal .bs-legend{flex:none;font-size:12px;display:flex;gap:14px;align-items:center}
+#berlayar-summary-modal .bs-legend span:before{content:'';display:inline-block;width:10px;height:10px;margin-right:5px;border:1px solid #769581}
+#berlayar-summary-modal .bs-legend .available:before{background:#9cddba}
+#berlayar-summary-modal .bs-legend .taken:before{background:#f0a4c4}
+html[data-tracker-theme=dark] #berlayar-summary-modal .bs-room-tabs,html[data-tracker-theme=dark] #berlayar-summary-modal .bs-body{background:#14271e;color:#e2eee6}
+html[data-tracker-theme=dark] #berlayar-summary-modal button[aria-pressed=true]{background:#38634a;color:#fff}
+@media(max-width:600px){#berlayar-summary-modal .bs-head{padding:8px 10px}#berlayar-summary-modal .bs-head h2{font-size:18px}#berlayar-summary-modal .bs-room-tabs{padding:6px 8px}#berlayar-summary-modal .bs-body{padding:0 8px 6px;gap:5px}#berlayar-summary-modal .bs-block-tabs{gap:4px}#berlayar-summary-modal .bs-block-tabs button{flex:1 1 28%;min-height:34px;padding:4px 6px;font-size:12px}#berlayar-summary-modal .bs-quota,#berlayar-summary-modal .bs-stats{font-size:12px}#berlayar-summary-modal .bs-unit-info{font-size:12px}}
 `;document.head.append(style);
-const modal=document.createElement('section');modal.id='berlayar-summary-modal';modal.hidden=true;modal.setAttribute('role','dialog');modal.setAttribute('aria-modal','true');modal.setAttribute('aria-label','Berlayar Rise selection summary');modal.innerHTML='<div class="bs-head"><h2>Berlayar Rise · Summary</h2><button type="button" id="berlayar-summary-close">Close ✕</button></div><nav class="bs-room-tabs" aria-label="Summary room type"><button type="button" data-room="2R" aria-pressed="true">2-Room</button><button type="button" data-room="3R" aria-pressed="false">3-Room</button><button type="button" data-room="4R" aria-pressed="false">4-Room</button></nav><div class="bs-body">Loading live records…</div>';document.body.append(modal);
-modal.querySelector('.bs-room-tabs').addEventListener('click',event=>{const room=event.target.dataset.room;if(!rooms.includes(room))return;activeRoom=room;modal.querySelectorAll('.bs-room').forEach(el=>el.dataset.active=String(el.dataset.room===room));modal.querySelectorAll('.bs-room-tabs button').forEach(el=>el.setAttribute('aria-pressed',String(el.dataset.room===room)));});
-modal.querySelector('#berlayar-summary-close').onclick=()=>{opened=false;modal.hidden=true;document.body.style.overflow=''};
+const modal=document.createElement('section');modal.id='berlayar-summary-modal';modal.hidden=true;modal.setAttribute('role','dialog');modal.setAttribute('aria-modal','true');modal.setAttribute('aria-label','Berlayar Rise selection summary');
+modal.innerHTML='<div class="bs-head"><h2>Berlayar Rise · Summary</h2><button type="button" id="berlayar-summary-close">Close ✕</button></div><nav class="bs-room-tabs" aria-label="Summary room type">'+rooms.map(r=>'<button type="button" data-room="'+r+'" aria-pressed="'+(r===activeRoom)+'">'+label(r)+'</button>').join('')+'</nav><div class="bs-body">Loading live records…</div>';document.body.append(modal);
+modal.querySelector('.bs-room-tabs').onclick=event=>{const room=event.target.dataset.room;if(!rooms.includes(room))return;activeRoom=room;selectedUnit=null;render();};
+modal.querySelector('.bs-body').onclick=event=>{const button=event.target.closest('button');if(!button)return;if(button.dataset.block){activeBlocks[activeRoom]=button.dataset.block;selectedUnit=null;render();}if(button.dataset.unit){selectedUnit=button.dataset.unit;showUnitInfo();}};
+modal.querySelector('#berlayar-summary-close').onclick=()=>{opened=false;modal.hidden=true;document.body.style.overflow='';document.getElementById('berlayar-summary-open')?.focus();};
 document.addEventListener('keydown',e=>{if(e.key==='Escape'&&opened)modal.querySelector('#berlayar-summary-close').click()});
+function fitGrid(){const grid=modal.querySelector('.bs-grid');if(!opened||!grid)return;const count=Number(grid.dataset.rows);const row=Math.max(12,Math.floor((grid.clientHeight-2)/count));grid.style.setProperty('--fit-row',row+'px');grid.style.setProperty('--fit-font',Math.max(9,Math.min(14,row-3))+'px');}
+new ResizeObserver(fitGrid).observe(modal);
+function showUnitInfo(){const target=modal.querySelector('.bs-unit-info');if(!target)return;const u=selectedUnit&&effective(snapshot.state).find(u=>u.id===selectedUnit);target.textContent=u?'Block '+u.block+' · #'+u.unit+' · '+u.status+' · $'+Number(u.price).toLocaleString('en-SG'):'Tap a unit for its price and status.';}
 function mountButton(){const current=document.getElementById('berlayar-summary-open');const counter=document.getElementById('counter-tab-trigger');if(current){if(counter){let group=counter.closest('.tracker-overview-actions');if(!group){group=document.createElement('div');group.className='tracker-overview-actions';counter.before(group);group.append(counter);}if(current.parentElement!==group||current.previousElementSibling!==counter)group.append(current);}return;}const target=document.querySelector('.app .roomtabs')||document.querySelector('.app .roomrow')||document.querySelector('.app');if(!target)return;const btn=document.createElement('button');btn.id='berlayar-summary-open';btn.type='button';btn.textContent='Summary';btn.onclick=()=>{opened=true;modal.hidden=false;document.body.style.overflow='hidden';render();refresh(true)};if(counter&&counter.parentElement){counter.insertAdjacentElement('afterend',btn)}else{const row=document.querySelector('.app .roomrow');if(row)row.appendChild(btn);else document.body.append(btn)}}
-function render(){if(!opened)return;const body=modal.querySelector('.bs-body');const previous=[...body.querySelectorAll('.bs-room')].map(el=>el.scrollTop);const bodyTop=body.scrollTop;if(!snapshot){body.textContent='Loading live records…';return}const all=effective(snapshot.state);body.innerHTML=rooms.map(room=>{const group=all.filter(u=>u.room===room);const taken=group.filter(u=>u.status==='Taken').length;let html='<section class="bs-room" data-room="'+room+'" data-active="'+(room===activeRoom)+'"><h3>'+label(room)+'</h3><div class="bs-stats"><span>Selected: '+taken+'</span><span>Remaining: '+(group.length-taken)+'</span><span>Total: '+group.length+'</span></div>';for(const block of [...new Set(group.map(u=>u.block))].sort()){const rows=group.filter(u=>u.block===block),stacks=[...new Set(rows.map(u=>String(u.stack)))].sort((a,b)=>Number(a)-Number(b)),floors=[...new Set(rows.map(u=>u.floor))].sort((a,b)=>b-a);const quotas=races.map(r=>{const q=independentQuota(snapshot.state,all,room,block,r);return esc(r)+': '+(q.remaining===null?(q.opening===null?'Not provided':'Pending ethnicity'):q.remaining)}).join(' · ');html+='<div class="bs-block"><h4>Block '+esc(block)+' · '+rows.filter(u=>u.status==='Taken').length+' selected</h4><div class="bs-quota"><strong>Ethnic quota remaining:</strong> '+quotas+'</div><div class="bs-scroll"><table><thead><tr><th>Floor</th>'+stacks.map(s=>'<th>'+esc(s)+'</th>').join('')+'</tr></thead><tbody>'+floors.map(f=>'<tr><th>'+esc(f)+'</th>'+stacks.map(s=>{const u=rows.find(u=>u.floor===f&&String(u.stack)===s);if(!u)return '<td>—</td>';const status=u.status==='Taken'?'taken':u.status==='Available'?'available':'unverified';return '<td class="'+status+'" title="'+esc(u.unit)+' · '+esc(u.status)+'"><strong>'+esc(u.unit)+'</strong><div>'+(Number.isFinite(Number(u.price))?'$'+Number(u.price).toLocaleString('en-SG'):'Price N/A')+'</div><div>'+esc(u.status)+'</div></td>'}).join('')+'</tr>').join('')+'</tbody></table></div></div>'}return html+'</section>'}).join('');body.querySelectorAll('.bs-room').forEach((el,i)=>{el.scrollTop=previous[i]||0});body.scrollTop=bodyTop;}
+
+function render(){if(!opened)return;const body=modal.querySelector('.bs-body');if(!snapshot){body.textContent='Loading live records…';return;}
+const all=effective(snapshot.state),group=all.filter(u=>u.room===activeRoom),blocks=[...new Set(group.map(u=>u.block))].sort();if(!blocks.includes(activeBlocks[activeRoom]))activeBlocks[activeRoom]=blocks[0];const block=activeBlocks[activeRoom],rows=group.filter(u=>u.block===block),stacks=[...new Set(rows.map(u=>String(u.stack)))].sort((a,b)=>Number(a)-Number(b)),floors=[...new Set(rows.map(u=>u.floor))].sort((a,b)=>b-a),taken=group.filter(u=>u.status==='Taken').length;
+modal.querySelectorAll('.bs-room-tabs button').forEach(el=>el.setAttribute('aria-pressed',String(el.dataset.room===activeRoom)));
+const quotas=races.map(r=>{const q=quota(snapshot.state,all,activeRoom,block,r);return esc(r)+': '+(q.remaining??'Not provided');}).join(' · ');
+body.innerHTML='<div class="bs-stats"><span>'+label(activeRoom)+' · Selected: '+taken+'</span><span>Remaining: '+(group.length-taken)+'</span><span>Total: '+group.length+'</span></div><nav class="bs-block-tabs" aria-label="Summary block">'+blocks.map(b=>'<button type="button" data-block="'+b+'" aria-pressed="'+(b===block)+'">Block '+b+' · '+group.filter(u=>u.block===b&&u.status==='Taken').length+' selected</button>').join('')+'</nav><div class="bs-quota"><strong>Block '+block+' · Ethnic quota remaining:</strong> '+quotas+'</div><div class="bs-grid" data-rows="'+(floors.length+1)+'" style="--rows:'+(floors.length+1)+'"><table aria-label="'+label(activeRoom)+' Block '+block+' unit availability"><thead><tr><th>Floor</th>'+stacks.map(s=>'<th>'+s+'</th>').join('')+'</tr></thead><tbody>'+floors.map(f=>'<tr><th scope="row">'+f+'</th>'+stacks.map(s=>{const u=rows.find(u=>u.floor===f&&String(u.stack)===s);if(!u)return '<td>—</td>';const cls=u.status==='Taken'?'taken':u.status==='Available'?'available':'unverified',info='#'+u.unit+' · '+u.status+' · $'+Number(u.price).toLocaleString('en-SG');return '<td class="'+cls+'"><button type="button" data-unit="'+esc(u.id)+'" title="'+esc(info)+'" aria-label="'+esc(info)+'">'+esc(u.unit)+'</button></td>';}).join('')+'</tr>').join('')+'</tbody></table></div><div class="bs-unit-info" aria-live="polite"></div><div class="bs-legend"><span class="available">Available</span><span class="taken">Taken</span></div>';showUnitInfo();requestAnimationFrame(fitGrid);}
 async function refresh(force=false){try{const response=await fetch(API,{cache:'no-store'});if(!response.ok)throw Error('Live service unavailable');const data=await response.json();if(!data.state?.overrides||!data.state?.quotas)throw Error('Invalid records');if(force||data.revision!==revision){snapshot=data;revision=data.revision;render()}document.dispatchEvent(new CustomEvent('berlayar-tracker-summary-refreshed',{detail:{revision}}))}catch(e){if(opened)console.warn('Summary refresh failed:',e)}}
 new MutationObserver(mountButton).observe(document.getElementById('root')||document.body,{childList:true,subtree:true});mountButton();refresh();setInterval(()=>refresh(),15000);document.addEventListener('visibilitychange',()=>{if(!document.hidden)refresh(true)});
