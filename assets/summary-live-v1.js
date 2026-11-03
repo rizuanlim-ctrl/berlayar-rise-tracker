@@ -15,7 +15,7 @@ const style=document.createElement('style');style.textContent=`
 #berlayar-summary-modal .bs-room-tabs button{flex:1}
 #berlayar-summary-modal button[aria-pressed=true]{background:#d5e8dc;color:#173b29;box-shadow:inset 0 0 0 1px #416e53}
 #berlayar-summary-modal .bs-body{padding:0 14px 10px;flex:1;min-height:0;display:flex;flex-direction:column;gap:7px;overflow:hidden}
-#berlayar-summary-modal .bs-stats{display:flex;flex-wrap:wrap;gap:6px;font-size:14px;flex:none}
+#berlayar-summary-modal .bs-stats{display:flex;flex-wrap:wrap;gap:6px;font-size:16px;flex:none}
 #berlayar-summary-modal .bs-stats span{background:#e8f1e9;border-radius:5px;padding:5px 8px;font-weight:700}
 #berlayar-summary-modal .bs-block-tabs{flex-wrap:wrap}
 #berlayar-summary-modal .bs-block-tabs button{flex:1;white-space:nowrap}
