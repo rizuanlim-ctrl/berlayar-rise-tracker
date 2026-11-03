@@ -3,7 +3,7 @@ const API='https://berlayar-rise-tracker.rizuanlim.chatgpt.site/api/tracker';
 const OFFICIAL_OPENING_4R={"200A":[145,38,21],"200B":[152,40,22],"201A":[155,41,23],"201B":[145,38,21],"204A":[128,34,19],"204B":[108,29,16]};
 const LATEST_REMAINING_4R={"200A":[144,38,21],"200B":[151,40,22],"201A":[154,41,21],"201B":[136,37,20],"204A":[120,34,18],"204B":[105,29,15]};
 const RACE_INDEX={"Chinese":0,"Malay":1,"Indian / Other":2};
-function independentQuota(state,all,room,block,race){if(room!=="4R")return quota(state,all,room,block,race);const i=RACE_INDEX[race],opening=OFFICIAL_OPENING_4R[block]?.[i],fallback=LATEST_REMAINING_4R[block]?.[i],provided=state.quotas?.[room+"|"+block+"|"+race];const remaining=provided??fallback??null;return {opening,remaining,taken:remaining===null?null:opening-remaining};}
+function independentQuota(state,all,room,block,race){if(room==="2R"){const opening=state.quotas?.[room+"|"+block+"|"+race]??null;return {opening,remaining:null,taken:null};}if(room!=="4R")return quota(state,all,room,block,race);const i=RACE_INDEX[race],opening=OFFICIAL_OPENING_4R[block]?.[i],fallback=LATEST_REMAINING_4R[block]?.[i],provided=state.quotas?.[room+"|"+block+"|"+race];const remaining=provided??fallback??null;return {opening,remaining,taken:remaining===null?null:opening-remaining};}
 const rooms=['2R','3R','4R'];let snapshot=null,revision=null,opened=false;
 const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const label=r=>r.replace('R','-Room');
