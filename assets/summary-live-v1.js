@@ -43,11 +43,11 @@ html[data-tracker-theme=dark] #berlayar-summary-modal button[aria-pressed=true]{
 #berlayar-summary-modal .bs-all-blocks{display:grid;grid-template-columns:repeat(var(--blocks),minmax(0,1fr));gap:8px;flex:1;min-height:0;overflow:hidden}
 #berlayar-summary-modal .bs-block-panel{display:flex;flex-direction:column;min-width:0;min-height:0;gap:4px}
 #berlayar-summary-modal .bs-block-panel h3{font-size:16px;font-weight:900;margin:0;text-align:center}
-#berlayar-summary-modal .bs-block-count{font-size:12px;text-align:center}
-#berlayar-summary-modal .bs-block-quota{font-size:11px;min-height:28px;line-height:1.25;text-align:center}
+#berlayar-summary-modal .bs-block-count{font-size:16px;text-align:center}
+#berlayar-summary-modal .bs-block-quota{font-size:16px;min-height:40px;line-height:1.25;text-align:center}
 #berlayar-summary-modal .bs-gap{background:#e6eae7;color:#718077}
 #berlayar-summary-modal .bs-legend small{font-size:inherit}
-@media(max-width:700px){#berlayar-summary-modal .bs-all-blocks{gap:3px}#berlayar-summary-modal .bs-block-panel h3{font-size:10px}#berlayar-summary-modal .bs-block-count,#berlayar-summary-modal .bs-block-quota{font-size:8px}#berlayar-summary-modal .bs-block-quota{min-height:32px}#berlayar-summary-modal th:first-child{width:10px}#berlayar-summary-modal .bs-legend{font-size:9px;gap:6px}}
+@media(max-width:700px){#berlayar-summary-modal .bs-all-blocks{gap:3px}#berlayar-summary-modal .bs-block-panel h3{font-size:10px}#berlayar-summary-modal .bs-block-count,#berlayar-summary-modal .bs-block-quota{font-size:10px}#berlayar-summary-modal .bs-block-quota{min-height:40px}#berlayar-summary-modal th:first-child{width:10px}#berlayar-summary-modal .bs-legend{font-size:9px;gap:6px}}
 `;document.head.append(style);
 const modal=document.createElement('section');modal.id='berlayar-summary-modal';modal.hidden=true;modal.setAttribute('role','dialog');modal.setAttribute('aria-modal','true');modal.setAttribute('aria-label','Berlayar Rise selection summary');
 modal.innerHTML='<div class="bs-head"><h2>Berlayar Rise · Summary</h2><button type="button" id="berlayar-summary-close">Close ✕</button></div><nav class="bs-room-tabs" aria-label="Summary room type">'+rooms.map(r=>'<button type="button" data-room="'+r+'" aria-pressed="'+(r===activeRoom)+'">'+label(r)+'</button>').join('')+'</nav><div class="bs-body">Loading live records…</div>';document.body.append(modal);
