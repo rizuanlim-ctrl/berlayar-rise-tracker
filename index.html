@@ -152,10 +152,11 @@ html[data-tracker-theme="dark"] #berlayar-summary-modal .bs-head button{
 }
 html[data-tracker-theme="dark"] #berlayar-summary-modal .bs-note{color:#c5d8cb!important}
 </style><style id="overview-action-group">
-.app .roomrow{display:flex!important;flex-wrap:wrap!important;gap:10px!important;align-items:center!important}
-.app .roomrow .roomtabs{flex:1 1 650px!important;min-width:0!important}
-.app .tracker-overview-actions{display:flex;gap:8px;flex:0 0 auto;align-items:center;max-width:100%;margin-left:auto}
-@media(max-width:700px){.app .tracker-overview-actions{width:100%;margin-left:0}.app .tracker-overview-actions>button{flex:1 1 0!important}}
+.app .roomrow{display:grid!important;grid-template-columns:minmax(0,1fr) auto!important;gap:10px!important;align-items:center!important;height:auto!important;min-height:0!important}
+.app .roomrow .roomtabs{flex:none!important;min-width:0!important;width:100%!important;height:auto!important;min-height:0!important;align-self:center!important}
+.app .tracker-overview-actions{display:flex;gap:8px;align-items:center;max-width:100%;margin-left:0}
+@media(max-width:1100px){.app .roomrow{grid-template-columns:minmax(0,1fr)!important}.app .tracker-overview-actions{justify-self:end}}
+@media(max-width:700px){.app .tracker-overview-actions{width:100%;justify-self:stretch}.app .tracker-overview-actions>button{flex:1 1 0!important}}
 </style></head><body><a class="skip-link" href="#unit-explorer">Skip to unit search</a><details class="community-notice"><summary>Independent community tracker · update confirmed bookings only</summary><p>This independent tracker is maintained through community reports and is not an official HDB service. Record a selection only after the actual booking has been confirmed. “Available” means no booking is recorded here; HDB remains the source for current availability and eligibility.</p><p>Unconfirmed official quotas are left blank. Separate 3-room and 4-room planning estimates are labelled. Queue projections and the 3D surroundings are planning aids, not guaranteed outcomes or views.</p><a href="https://berlayar-rise-tracker.rizuanlim.chatgpt.site/activity">Owner activity &amp; notifications</a></details>
 <style id="font-reduction-10">/* Reduce non-header fonts by 10%, retaining breakpoints and touch target sizes. */
 @layer components;@layer utilities{.text-\[0\.8rem\]:where(:not(.topbar, .topbar *, .pageheading, .pageheading *)){font-size:calc((.8rem) * 0.9);}}
