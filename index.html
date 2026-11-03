@@ -106,7 +106,23 @@ html.tracker-large-text .app :is(.shortlist-storage-help,.shortlist-storage-help
 #community-counter-dialog #community-counter .counter-note{font-size:18px!important;line-height:1.6!important;color:inherit!important}
 #community-counter-dialog #community-counter .counter-error{font-size:19.5px!important;color:inherit!important}
 @media(max-width:500px){#community-counter-dialog #community-counter .counter-total span{font-size:16.5px!important}#community-counter-dialog #community-counter .counter-total strong{font-size:21px!important}}
-</style><style id="summary-contrast-fix">.app .roomtabs [role="tab"],.app .roomtabs [role="tab"] *, .app .roomrow [role="tab"],.app .roomrow [role="tab"] *{opacity:1!important;text-shadow:none!important}.app .roomtabs [role="tab"],.app .roomrow [role="tab"]{color:#163c29!important;font-weight:800!important}#community-counter-dialog th,#community-counter-dialog .counter-total span,#community-counter-dialog .counter-total strong{opacity:1!important;color:#173b29!important;font-weight:800!important}#berlayar-summary-modal .bs-stats span{color:#173b29!important;opacity:1!important}</style></head><body><a class="skip-link" href="#unit-explorer">Skip to unit search</a><details class="community-notice"><summary>Independent community tracker · update confirmed bookings only</summary><p>This independent tracker is maintained through community reports and is not an official HDB service. Record a selection only after the actual booking has been confirmed. “Available” means no booking is recorded here; HDB remains the source for current availability and eligibility.</p><p>Unconfirmed official quotas are left blank. Separate 3-room and 4-room planning estimates are labelled. Queue projections and the 3D surroundings are planning aids, not guaranteed outcomes or views.</p><a href="https://berlayar-rise-tracker.rizuanlim.chatgpt.site/activity">Owner activity &amp; notifications</a></details>
+</style><style id="summary-contrast-fix">.app .roomtabs [role="tab"],.app .roomtabs [role="tab"] *, .app .roomrow [role="tab"],.app .roomrow [role="tab"] *{opacity:1!important;text-shadow:none!important}.app .roomtabs [role="tab"],.app .roomrow [role="tab"]{color:#163c29!important;font-weight:800!important}#community-counter-dialog th,#community-counter-dialog .counter-total span,#community-counter-dialog .counter-total strong{opacity:1!important;color:#173b29!important;font-weight:800!important}#berlayar-summary-modal .bs-stats span{color:#173b29!important;opacity:1!important}</style><style id="summary-counter-button-parity-v2">
+.app .roomrow #counter-tab-trigger,
+.app .roomrow #berlayar-summary-open{
+ box-sizing:border-box!important;display:inline-flex!important;align-items:center!important;justify-content:center!important;
+ min-height:52px!important;height:52px!important;padding:10px 16px!important;
+ font-family:inherit!important;font-size:1.3rem!important;font-weight:800!important;line-height:1.25!important;
+ letter-spacing:normal!important;border:1px solid #8ea999!important;border-radius:8px!important;
+ background:var(--surface,transparent)!important;color:inherit!important;opacity:1!important;
+ margin:0!important;white-space:nowrap!important;flex:0 0 auto!important;
+}
+@media(max-width:700px){
+ .app .roomrow #counter-tab-trigger,.app .roomrow #berlayar-summary-open{
+ font-size:clamp(12px,3.25vw,16px)!important;height:46px!important;min-height:46px!important;
+ padding:8px 10px!important;flex:1 1 0!important;min-width:0!important;
+ }
+}
+</style></head><body><a class="skip-link" href="#unit-explorer">Skip to unit search</a><details class="community-notice"><summary>Independent community tracker · update confirmed bookings only</summary><p>This independent tracker is maintained through community reports and is not an official HDB service. Record a selection only after the actual booking has been confirmed. “Available” means no booking is recorded here; HDB remains the source for current availability and eligibility.</p><p>Unconfirmed official quotas are left blank. Separate 3-room and 4-room planning estimates are labelled. Queue projections and the 3D surroundings are planning aids, not guaranteed outcomes or views.</p><a href="https://berlayar-rise-tracker.rizuanlim.chatgpt.site/activity">Owner activity &amp; notifications</a></details>
 <style id="font-reduction-10">/* Reduce non-header fonts by 10%, retaining breakpoints and touch target sizes. */
 @layer components;@layer utilities{.text-\[0\.8rem\]:where(:not(.topbar, .topbar *, .pageheading, .pageheading *)){font-size:calc((.8rem) * 0.9);}}
 body:where(:not(.topbar, .topbar *, .pageheading, .pageheading *)){font-size:calc((16px) * 0.9);}
