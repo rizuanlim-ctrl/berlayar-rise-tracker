@@ -122,6 +122,35 @@ html.tracker-large-text .app :is(.shortlist-storage-help,.shortlist-storage-help
  padding:8px 10px!important;flex:1 1 0!important;min-width:0!important;
  }
 }
+</style><style id="summary-dark-mode-fix-v1">
+html[data-tracker-theme="dark"] #berlayar-summary-modal,
+html[data-tracker-theme="dark"] #berlayar-summary-modal .bs-head{
+ background:#14271e!important;color:#e2eee6!important;border-color:#526c5d!important;
+}
+html[data-tracker-theme="dark"] #berlayar-summary-modal .bs-room{
+ background:#1d3528!important;color:#e2eee6!important;border-color:#526c5d!important;
+}
+html[data-tracker-theme="dark"] #berlayar-summary-modal :is(h2,h3,h4,th,.bs-stats,.bs-quota),
+html[data-tracker-theme="dark"] #berlayar-summary-modal .bs-room{
+ color:#e2eee6!important;opacity:1!important;
+}
+html[data-tracker-theme="dark"] #berlayar-summary-modal .bs-stats span{
+ background:#294b38!important;color:#e2eee6!important;
+}
+html[data-tracker-theme="dark"] #berlayar-summary-modal th{
+ background:#294b38!important;color:#e2eee6!important;border-color:#526c5d!important;
+}
+html[data-tracker-theme="dark"] #berlayar-summary-modal td{
+ border-color:#526c5d!important;
+}
+html[data-tracker-theme="dark"] #berlayar-summary-modal td.taken{background:#9b3f65!important;color:#fff!important}
+html[data-tracker-theme="dark"] #berlayar-summary-modal td.available{background:#246c4c!important;color:#fff!important}
+html[data-tracker-theme="dark"] #berlayar-summary-modal td.unverified{background:#435365!important;color:#fff!important}
+html[data-tracker-theme="dark"] #berlayar-summary-modal .bs-block{border-color:#526c5d!important}
+html[data-tracker-theme="dark"] #berlayar-summary-modal .bs-head button{
+ background:#294b38!important;color:#e2eee6!important;border:1px solid #769581!important;border-radius:8px;
+}
+html[data-tracker-theme="dark"] #berlayar-summary-modal .bs-note{color:#c5d8cb!important}
 </style></head><body><a class="skip-link" href="#unit-explorer">Skip to unit search</a><details class="community-notice"><summary>Independent community tracker · update confirmed bookings only</summary><p>This independent tracker is maintained through community reports and is not an official HDB service. Record a selection only after the actual booking has been confirmed. “Available” means no booking is recorded here; HDB remains the source for current availability and eligibility.</p><p>Unconfirmed official quotas are left blank. Separate 3-room and 4-room planning estimates are labelled. Queue projections and the 3D surroundings are planning aids, not guaranteed outcomes or views.</p><a href="https://berlayar-rise-tracker.rizuanlim.chatgpt.site/activity">Owner activity &amp; notifications</a></details>
 <style id="font-reduction-10">/* Reduce non-header fonts by 10%, retaining breakpoints and touch target sizes. */
 @layer components;@layer utilities{.text-\[0\.8rem\]:where(:not(.topbar, .topbar *, .pageheading, .pageheading *)){font-size:calc((.8rem) * 0.9);}}
