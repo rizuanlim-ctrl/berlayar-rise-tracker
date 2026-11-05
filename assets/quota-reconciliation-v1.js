@@ -1,5 +1,5 @@
 /* Read-only reconciliation. Does not mutate tracker state or personal shortlists. */
-import {n as effective,r as quota} from './tracker-combined-export-v1.js?v=quota-20261105-all-six';
+import {n as effective,r as quota} from './tracker-combined-export-v1.js?v=quota-20261105-progress';
 const API='https://berlayar-rise-tracker.rizuanlim.chatgpt.site/api/tracker';
 const OPEN={'200A':[145,38,21],'200B':[152,40,22],'201A':[155,41,23],'201B':[145,38,21],'204A':[128,34,19],'204B':[108,29,16]};
 const REMAIN={'200A':[144,38,21],'200B':[151,40,22],'201A':[154,41,21],'201B':[136,37,20],'204A':[120,34,18],'204B':[105,29,15]};
