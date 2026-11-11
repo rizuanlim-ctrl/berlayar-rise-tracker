@@ -509,9 +509,9 @@ function isSingaporeSelectionDate(date){
 
 // Dated source records stay separate from live community bookings and shortlists.
 const DAILY_DROPOUT_RECORDS={
- '2R':{'2026-11-02':{queue:8,selected:5,cumulative:3},'2026-11-03':{queue:16,selected:13,cumulative:3},'2026-11-04':{queue:24,selected:21,cumulative:3},'2026-11-05':{queue:32,selected:29,cumulative:3},'2026-11-06':{queue:35,selected:30,cumulative:5}},
+ '2R':{'2026-11-02':{queue:8,selected:5,cumulative:3},'2026-11-03':{queue:16,selected:13,cumulative:3},'2026-11-04':{queue:24,selected:21,cumulative:3},'2026-11-05':{queue:32,selected:29,cumulative:3},'2026-11-06':{queue:35,selected:30,cumulative:5},'2026-11-10':{selected:36},'2026-11-11':{queue:51,selected:42,cumulative:9}},
  '3R':{'2026-11-02':{selected:7,cumulative:1},'2026-11-03':{queue:16,selected:15,cumulative:1},'2026-11-04':{queue:24,selected:22,cumulative:2},'2026-11-05':{queue:32,selected:29,cumulative:3}},
- '4R':{'2026-11-02':{queue:14,selected:14,cumulative:0},'2026-11-03':{queue:29,selected:29,cumulative:0},'2026-11-04':{queue:44,selected:43,cumulative:1},'2026-11-05':{queue:59,selected:58,cumulative:1},'2026-11-06':{queue:74,selected:70,cumulative:4}}
+ '4R':{'2026-11-02':{queue:14,selected:14,cumulative:0},'2026-11-03':{queue:29,selected:29,cumulative:0},'2026-11-04':{queue:44,selected:43,cumulative:1},'2026-11-05':{queue:59,selected:58,cumulative:1},'2026-11-06':{queue:74,selected:70,cumulative:4},'2026-11-10':{queue:89,selected:84,cumulative:5},'2026-11-11':{queue:104,selected:99,cumulative:5}}
 };
 function completedQueueProgress(room,progress){
  const records=Object.entries(DAILY_DROPOUT_RECORDS[room]||{}).filter(([date])=>isSingaporeSelectionDate(date)).sort(([a],[b])=>a.localeCompare(b));
@@ -553,7 +553,7 @@ function DailyDropoutHistory({room}){
       cell(new Date(row.date+'T00:00:00Z').toLocaleDateString('en-SG',{day:'2-digit',month:'short',year:'numeric',timeZone:'UTC'}),'date'),cell(row.queue===null?'Pending':'#'+row.queue,'queue'),cell(display(row.selected),'selected'),cell(display(row.dropouts),'dropouts'),cell(row.rate===null?'Pending':row.rate.toFixed(1)+'%','rate'),cell(display(row.cumulative),'cumulative'),cell(row.status,'status')]))))),
    !SG_PUBLIC_HOLIDAYS_BY_YEAR[singaporeSelectionDate().slice(0,4)]&&h('p',{role:'status'},'Selection dates for this year are pending the verified Singapore public holiday calendar.'),
    h('p',{style:{fontSize:'13px'}},'Daily dropouts = today’s cumulative dropouts − the previous selection day’s cumulative dropouts. Rate = daily dropouts ÷ (daily selections + daily dropouts). Scheduled queue gaps are estimates until appointment outcomes conclude. Missing data is never treated as zero.'),
-   h('p',{style:{fontSize:'13px'}},'Source: supplied HDB screenshots and community reports. The 4 November 4-room report is from 5:00 PM SGT. Historical rows update when dated figures are added; live booking changes do not rewrite past days.')
+   h('p',{style:{fontSize:'13px'}},'Source: supplied HDB screenshots and community reports. The 4 November 4-room report is from 5:00 PM SGT. Updated through 11 November 2026. The 2-room 10 November baseline confirms 36 selections; its cumulative dropouts are unconfirmed, so the 10–11 November daily dropout split remains pending. Historical rows update when dated figures are added; live booking changes do not rewrite past days.')
   )
  );
 }
