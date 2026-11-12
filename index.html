@@ -167,7 +167,51 @@ html[data-tracker-theme="dark"] #community-counter-dialog #community-counter th{
 html[data-tracker-theme="dark"] #community-counter-dialog #community-counter td{background:#1d3528!important}
 html[data-tracker-theme="dark"] #community-counter-dialog #community-counter :is(th,td){border-color:#526c5d!important}
 html[data-tracker-theme="dark"] #community-counter-dialog #counter-dialog-close{background:#294b38!important;color:#e2eee6!important;border-color:#769581!important}
-</style></head><body><a class="skip-link" href="#unit-explorer">Skip to unit search</a><details class="community-notice"><summary>Independent community tracker · update confirmed bookings only</summary><p>This independent tracker is maintained through community reports and is not an official HDB service. Record a selection only after the actual booking has been confirmed. “Available” means no booking is recorded here; HDB remains the source for current availability and eligibility.</p><p>Unconfirmed official quotas are left blank. Separate 3-room and 4-room planning estimates are labelled. Queue projections and the 3D surroundings are planning aids, not guaranteed outcomes or views.</p><a href="https://berlayar-rise-tracker.rizuanlim.chatgpt.site/activity">Owner activity &amp; notifications</a></details>
+</style>
+<style id="quota-fullscreen-purple-v1">
+/* Keep each block together and keyboard focus in normal document order. */
+html body .managedialog:has(.remaining-quota-editor){
+ position:fixed!important;inset:0!important;transform:none!important;
+ width:100vw!important;max-width:100vw!important;height:100dvh!important;max-height:100dvh!important;
+ margin:0!important;border-radius:0!important;padding:20px!important;
+ display:flex!important;flex-direction:column!important;gap:12px!important;overflow:hidden!important;
+}
+html body .managedialog:has(.remaining-quota-editor) [data-slot=dialog-header]{flex:none;padding-right:32px}
+html body .managedialog:has(.remaining-quota-editor) [data-slot=dialog-title]{font-size:28px!important}
+html body .managedialog:has(.remaining-quota-editor) .managebody{flex:1;min-height:0;overflow:auto;padding:3px 4px}
+html body .remaining-quota-editor{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px;align-content:start}
+html body .remaining-quota-editor>p,html body .remaining-quota-editor>.quota-editor-actions{grid-column:1/-1}
+html body .remaining-quota-editor fieldset{padding:10px 12px;gap:8px;align-content:start}
+html body .remaining-quota-editor .quota-number-row{grid-template-columns:minmax(0,1fr) 90px;gap:8px}
+html body .remaining-quota-editor input{min-height:42px;font-size:20px!important;padding:5px}
+html body .remaining-quota-editor .quota-number-label{font-size:15px}
+html body .remaining-quota-editor .quota-number-label small{font-size:12px}
+html body .remaining-quota-editor .quota-editor-help{font-size:13px;line-height:1.4}
+html body .remaining-quota-editor .quota-editor-actions{position:static;padding:4px 0;background:transparent!important}
+html body .remaining-quota-editor .quota-editor-actions button{flex:0 1 240px}
+@media(max-width:1000px){
+ html body .remaining-quota-editor{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+}
+@media(max-width:600px){
+ html body .managedialog:has(.remaining-quota-editor){padding:12px!important;gap:8px!important}
+ html body .managedialog:has(.remaining-quota-editor) [data-slot=dialog-title]{font-size:24px!important}
+ html body .remaining-quota-editor fieldset{padding:6px 8px;gap:6px}
+ html body .remaining-quota-editor legend{font-size:16px}
+ html body .remaining-quota-editor .quota-number-row{grid-template-columns:minmax(0,1fr) 62px;gap:4px}
+ html body .remaining-quota-editor .quota-number-label{font-size:12px;overflow-wrap:anywhere}
+ html body .remaining-quota-editor .quota-number-label small{font-size:10px}
+ html body .remaining-quota-editor input{min-height:38px;font-size:18px!important;padding:4px}
+ html body .remaining-quota-editor .quota-editor-actions button{flex:1}
+}
+@media(max-width:350px){html body .remaining-quota-editor{grid-template-columns:minmax(0,1fr)}}
+/* Explicit status selectors also cover dark mode and the summary portal. */
+html body .unverified,html body .app .unit.unverified,html body .app .unit-card.unverified,
+html body .app .badge.unverified,html body #berlayar-summary-modal td.unverified{
+ background:#b32dff!important;color:#fff!important;-webkit-text-fill-color:#fff!important;border-color:#7010a8!important;
+}
+html body .app .unit.unverified .unit-status-text,html body .app .unit-card.unverified :is(h3,p,.card-price){color:#fff!important;-webkit-text-fill-color:#fff!important}
+</style>
+</head><body><a class="skip-link" href="#unit-explorer">Skip to unit search</a><details class="community-notice"><summary>Independent community tracker · update confirmed bookings only</summary><p>This independent tracker is maintained through community reports and is not an official HDB service. Record a selection only after the actual booking has been confirmed. “Available” means no booking is recorded here; HDB remains the source for current availability and eligibility.</p><p>Unconfirmed official quotas are left blank. Separate 3-room and 4-room planning estimates are labelled. Queue projections and the 3D surroundings are planning aids, not guaranteed outcomes or views.</p><a href="https://berlayar-rise-tracker.rizuanlim.chatgpt.site/activity">Owner activity &amp; notifications</a></details>
 <style id="font-reduction-10">/* Reduce non-header fonts by 10%, retaining breakpoints and touch target sizes. */
 @layer components;@layer utilities{.text-\[0\.8rem\]:where(:not(.topbar, .topbar *, .pageheading, .pageheading *)){font-size:calc((.8rem) * 0.9);}}
 body:where(:not(.topbar, .topbar *, .pageheading, .pageheading *)){font-size:calc((16px) * 0.9);}
