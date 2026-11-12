@@ -449,16 +449,18 @@ function confirmTakenUpdate(message,finalStep=false){
   if(document.getElementById('taken-warning-dialog')){resolve(false);return;}
   if(!document.getElementById('taken-warning-styles')){
    const style=document.createElement('style');style.id='taken-warning-styles';style.textContent=`
-#taken-warning-dialog{box-sizing:border-box;width:min(760px,calc(100vw - 32px));max-width:none;max-height:calc(100dvh - 32px);overflow:auto;padding:32px;border:3px solid #b45309;border-radius:18px;background:#fffaf0;color:#292015;box-shadow:0 24px 80px #0008;font-family:Manrope,system-ui,sans-serif}
+#taken-warning-dialog{box-sizing:border-box;width:min(760px,calc(100vw - 32px));max-width:none;max-height:calc(100dvh - 32px);overflow:auto;padding:32px;border:3px solid #125c3c;border-radius:18px;background:#f4f8f5;color:#183c2c;box-shadow:0 24px 80px #0008;font-family:Manrope,system-ui,sans-serif}
 #taken-warning-dialog::backdrop{background:rgba(0,0,0,.72)}
-#taken-warning-dialog h2{margin:0 0 20px;font-size:clamp(26px,4vw,34px);line-height:1.3;font-weight:900;color:#8a3100}
+#taken-warning-dialog h2{margin:0 0 20px;font-size:clamp(26px,4vw,34px);line-height:1.3;font-weight:900;color:#125c3c}
 #taken-warning-dialog p{margin:0 0 28px;font-size:clamp(20px,3vw,25px);line-height:1.6;font-weight:800;overflow-wrap:break-word}
 #taken-warning-dialog .taken-warning-actions{display:flex;flex-wrap:wrap;justify-content:flex-end;gap:14px}
-#taken-warning-dialog button{font:800 20px/1.4 Manrope,system-ui,sans-serif;min-height:56px;padding:14px 22px;border:2px solid #765b42;border-radius:10px;background:#fff;color:#292015;cursor:pointer;white-space:normal}
-#taken-warning-dialog button[data-confirm]{background:#963b0a;border-color:#963b0a;color:#fff}
-#taken-warning-dialog button:focus-visible{outline:4px solid #2563eb;outline-offset:4px}
-html[data-tracker-theme=dark] #taken-warning-dialog{background:#281f16;color:#fff4df;border-color:#ffba66}
-html[data-tracker-theme=dark] #taken-warning-dialog h2{color:#ffba66}
+#taken-warning-dialog button{font:800 20px/1.4 Manrope,system-ui,sans-serif;min-height:56px;padding:14px 22px;border:2px solid #64796c;border-radius:10px;background:#fff;color:#183c2c;cursor:pointer;white-space:normal}
+#taken-warning-dialog button[data-confirm]{background:#125c3c;border-color:#125c3c;color:#fff}
+#taken-warning-dialog button:focus-visible{outline:4px solid #be6c23;outline-offset:4px}
+html[data-tracker-theme=dark] #taken-warning-dialog{background:#182e22;color:#e1eee6;border-color:#95c8a7}
+html[data-tracker-theme=dark] #taken-warning-dialog h2{color:#95c8a7}
+html[data-tracker-theme=dark] #taken-warning-dialog button{background:#243e2d;color:#e1eee6;border-color:#789984}
+html[data-tracker-theme=dark] #taken-warning-dialog button[data-confirm]{background:#38634a;color:#fff;border-color:#95c8a7}
 @media(max-width:600px){#taken-warning-dialog{padding:24px 20px}#taken-warning-dialog .taken-warning-actions{flex-direction:column}#taken-warning-dialog button{width:100%}}
 `;document.head.appendChild(style);
   }
