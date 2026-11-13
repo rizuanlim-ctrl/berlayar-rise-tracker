@@ -521,7 +521,7 @@ function isSingaporeSelectionDate(date){
 const DAILY_DROPOUT_RECORDS={
  '2R':{'2026-11-02':{queue:8,selected:5,cumulative:3},'2026-11-03':{queue:16,selected:13,cumulative:3},'2026-11-04':{queue:24,selected:21,cumulative:3},'2026-11-05':{queue:32,selected:29,cumulative:3},'2026-11-06':{queue:35,selected:30,cumulative:5},'2026-11-10':{queue:43,selected:36,cumulative:7},'2026-11-11':{queue:51,selected:42,cumulative:9}},
  '3R':{'2026-11-02':{selected:7,cumulative:1},'2026-11-03':{queue:16,selected:15,cumulative:1},'2026-11-04':{queue:24,selected:22,cumulative:2},'2026-11-05':{queue:32,selected:29,cumulative:3},'2026-11-10':{queue:38,selected:33,cumulative:5},'2026-11-11':{selected:40,cumulative:5},'2026-11-12':{queue:54,selected:49,cumulative:5}},
- '4R':{'2026-11-02':{queue:14,selected:14,cumulative:0},'2026-11-03':{queue:29,selected:29,cumulative:0},'2026-11-04':{queue:44,selected:43,cumulative:1},'2026-11-05':{queue:59,selected:58,cumulative:1},'2026-11-06':{queue:74,selected:70,cumulative:4},'2026-11-10':{queue:89,selected:84,cumulative:5},'2026-11-11':{queue:104,selected:99,cumulative:5},'2026-11-12':{queue:124,selected:119,cumulative:5}}
+ '4R':{'2026-11-02':{queue:14,selected:14,cumulative:0},'2026-11-03':{queue:29,selected:29,cumulative:0},'2026-11-04':{queue:44,selected:43,cumulative:1},'2026-11-05':{queue:59,selected:58,cumulative:1},'2026-11-06':{queue:74,selected:70,cumulative:4},'2026-11-10':{queue:89,selected:84,cumulative:5},'2026-11-11':{queue:104,selected:99,cumulative:5},'2026-11-12':{queue:124,selected:119,cumulative:5},'2026-11-13':{queue:144,selected:137,cumulative:7}}
 };
 function reportedQueueLabel(room,progress){
  if(progress.queue===null)return 'Not recorded';
