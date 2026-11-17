@@ -544,6 +544,10 @@ function dailyDropoutRows(room,progress,now=new Date()){
  for(let day=new Date('2026-11-02T00:00:00Z');day.toISOString().slice(0,10)<=today;day.setUTCDate(day.getUTCDate()+1)){
   if(!isSingaporeSelectionDate(day.toISOString().slice(0,10)))continue;
   const date=day.toISOString().slice(0,10),stored=records[date]||{},cutoff=false;
+  if(room==='3R'&&date==='2026-11-06'){
+   rows.push({date,queue:previous.queue??null,selected:0,dropouts:0,cumulative:previous.cumulative,rate:null,status:'No appointments'});
+   continue;
+  }
   // Use manually saved queue/dropout totals for today's snapshot when dated records have not yet been entered.
   // Never overwrite a dated report or backfill an earlier date with today's state.
   const live=date===today&&!records[date]&&Number.isInteger(progress?.queue)&&Number.isInteger(progress?.dropouts)&&progress.queue>=previous.queue&&progress.dropouts>=previous.cumulative;
