@@ -536,7 +536,8 @@ function completedQueueProgress(room,progress){
  const latest=records.at(-1)?.[1];
  const completed=records.filter(([,r])=>!r.partial&&Number.isInteger(r.queue)&&Number.isInteger(r.cumulative)).at(-1)?.[1];
  const pending=!!(latest?.partial&&completed&&(progress.queue===null||progress.queue<=latest.queue));
- return {pending,progress:pending?{...progress,queue:completed.queue,dropouts:completed.cumulative}:progress};
+ const useDatedReport=room==='3R'&&completed&&(progress.queue===null||progress.queue<completed.queue);
+ return {pending,progress:pending||useDatedReport?{...progress,queue:completed.queue,dropouts:completed.cumulative}:progress};
 }
 function dailyDropoutRows(room,progress,now=new Date()){
  const sg=new Date(now.getTime()+8*3600000),today=singaporeSelectionDate(now),records=DAILY_DROPOUT_RECORDS[room]||{},rows=[];
