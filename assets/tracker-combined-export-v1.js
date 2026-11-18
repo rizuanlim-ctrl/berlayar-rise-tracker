@@ -548,6 +548,7 @@ function dailyDropoutRows(room,progress,now=new Date()){
   // Use manually saved queue/dropout totals for today's snapshot when dated records have not yet been entered.
   // Never overwrite a dated report or backfill an earlier date with today's state.
   const live=date===today&&!records[date]&&Number.isInteger(progress?.queue)&&Number.isInteger(progress?.dropouts)&&progress.queue>=previous.queue&&progress.dropouts>=previous.cumulative;
+  if(!records[date]&&!live)continue; // Display dated updates only, never a speculative Pending row.
   const record=live?{queue:progress.queue,selected:progress.queue-progress.dropouts,cumulative:progress.dropouts,live:true}:stored;
   const ready=!cutoff&&!record.partial;
   const cumulative=ready&&Number.isInteger(record.cumulative)?record.cumulative:null;
@@ -568,15 +569,12 @@ function DailyDropoutHistory({room,progress}){
   h('button',{type:'button',className:'primary',style:{margin:'10px 0'},onClick:()=>{setTick(n=>n+1);dialog.current?.showModal()}},'Daily dropout history'),
   h('dialog',{ref:dialog,'aria-label':labels[room]+' daily dropout history',style:{position:'fixed',inset:0,margin:'auto',width:'min(1000px,94vw)',maxWidth:'94vw',maxHeight:'88dvh',padding:'20px',border:'1px solid #8ea999',borderRadius:'14px',background:'var(--card, #ffffff)',color:'var(--foreground, #183d2a)'}},
    h('div',{style:{display:'flex',alignItems:'center',justifyContent:'space-between',gap:'16px'}},h('h2',{style:{fontSize:'22px',margin:0}},labels[room]+' · Daily dropouts'),h('button',{type:'button',onClick:()=>dialog.current?.close(),'aria-label':'Close daily dropout history',style:{background:'var(--secondary, #edf4ef)',color:'inherit',border:'1px solid #8ea999',borderRadius:'8px',padding:'10px 14px',cursor:'pointer'}},'Close ✕')),
-   h('p',null,'Selection days from 2 November 2026 follow the Singapore calendar: Monday to Friday, excluding public holidays and observed replacement holidays. Manually saved figures are reported immediately, regardless of time. Missing figures remain pending rather than being invented.'),
    h('div',{tabIndex:0,role:'region','aria-label':'Daily dropout table',style:{overflowX:'auto',maxHeight:'60dvh'}},
     h('table',{style:{borderCollapse:'collapse',width:'100%',textAlign:'left',fontSize:'14px'}},
      h('thead',null,h('tr',null,['Date (SGT)','Last queue','Selected that day','Dropouts that day','Dropout rate','Cumulative dropouts','Status'].map(label=>h('th',{key:label,scope:'col',style:{padding:'10px',whiteSpace:'nowrap',borderBottom:'2px solid #8ea999'}},label)))),
      h('tbody',null,dailyDropoutRows(room,progress).map(row=>h('tr',{key:row.date},[
       cell(new Date(row.date+'T00:00:00Z').toLocaleDateString('en-SG',{day:'2-digit',month:'short',year:'numeric',timeZone:'UTC'}),'date'),cell(row.queue===null?'Pending':'#'+row.queue,'queue'),cell(display(row.selected),'selected'),cell(display(row.dropouts),'dropouts'),cell(row.rate===null?'Pending':row.rate.toFixed(1)+'%','rate'),cell(display(row.cumulative),'cumulative'),cell(row.status,'status')]))))),
-   !SG_PUBLIC_HOLIDAYS_BY_YEAR[singaporeSelectionDate().slice(0,4)]&&h('p',{role:'status'},'Selection dates for this year are pending the verified Singapore public holiday calendar.'),
-   h('p',{style:{fontSize:'13px'}},'Daily dropouts = today’s cumulative dropouts − the previous selection day’s cumulative dropouts. Rate = daily dropouts ÷ (daily selections + daily dropouts). Scheduled queue gaps are estimates until appointment outcomes conclude. A live manual snapshot is derived from the saved queue and cumulative dropouts immediately; it is not a separately verified dated report. Missing data is never treated as zero.'),
-   h('p',{style:{fontSize:'13px'}},'Source: supplied HDB screenshots and community reports. The 4 November 4-room report is from 5:00 PM SGT. 4-room history updated through 17 November 2026 (177 selected, 7 cumulative dropouts). 2-room history updated through 16 November 2026 against the community spreadsheet Queue log: 2 dropouts on 12 November, 2 on 13 November and 1 on 16 November, reaching 14 cumulative dropouts. Historical rows update when dated figures are added; live booking changes do not rewrite past days.')
+
   )
  );
 }
