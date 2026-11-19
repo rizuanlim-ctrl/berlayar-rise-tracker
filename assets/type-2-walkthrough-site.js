@@ -97,7 +97,7 @@ function fillPolygon(rings, y, draw, color, light) {
   }
 }
 
-export function drawNeighbourhood(site, elevation, solar, draw) {
+export function drawNeighbourhood(site, elevation, solar, draw, simplified=false) {
   const ground = -elevation;
   const light = Math.max(.36, Math.min(1,.58+solar.altitude/75));
   const surface = (polygon, height, color) => fillPolygon([polygon],height,draw,color,light);
@@ -136,8 +136,17 @@ export function drawNeighbourhood(site, elevation, solar, draw) {
       const nx=outward*(v-z)/len,nz=outward*(x-u)/len;
       const shade=light*(.79+.16*Math.max(0,nx*sunX+nz*sunZ));
       const wall=kind==='tower'?'facade':kind==='landmark'?'remoteFacade':'facility';
+      if(simplified&&len>2&&floors>3){
+        // Split tall walls into alternating bands for the canvas painter.
+        for(let floor=0;floor<floors;floor++){
+          const y=ground+floor*STOREY_METRES, band=y+.28;
+          draw([x,y,z],[u,y,v],[u,band,v],[x,band,z],wall,shade*.86);
+          draw([x,band,z],[u,band,v],[u,y+STOREY_METRES,v],[x,y+STOREY_METRES,z],wall,shade);
+        }
+        return;
+      }
       draw([x,ground,z],[u,ground,v],[u,height,v],[x,height,z],wall,shade);
-      if(len<1)return;
+      if(simplified||len<1)return;
       const bays=Math.max(1,Math.round(len/(kind==='landmark'?6.4:3.2)));
       const distance=Math.hypot((x+u)/2,(z+v)/2);
       const offset=.045+distance*.00034;
