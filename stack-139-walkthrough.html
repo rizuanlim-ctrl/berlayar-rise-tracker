@@ -6,11 +6,11 @@
 <main><header><div><small>BERLAYAR RISE / 2-ROOM FLEXI TYPE 2</small><h1 id="stack-title">Stack 139</h1></div><div><button id="walk" aria-pressed="true">Walk inside</button> <button id="overview" aria-pressed="false">3D overview</button> <button id="focus" aria-pressed="false">Immersive view</button></div></header>
 <section class="scene" aria-label="Interactive 3D apartment"><canvas id="world" aria-label="Apartment model, drag to look" tabindex="0"></canvas><div class="viewlabel" id="label">3D overview</div><div class="map"><canvas id="map" width="150" height="190" aria-label="Floor plan and position"></canvas></div>
 <div class="pad hide" id="pad" aria-label="Movement controls"><button data-m="w" aria-label="Forward">↑</button><button data-m="a" aria-label="Strafe left">←</button><button data-m="s" aria-label="Backward">↓</button><button data-m="d" aria-label="Strafe right">→</button></div><span class="reticle" id="reticle" aria-hidden="true"></span><button class="exit hide" id="exit">Exit immersive view</button><div class="actions"><button id="use" class="hide"></button><button id="furn" aria-pressed="false">Furniture off</button></div></section>
-<nav class="bar" id="rooms" aria-label="Jump to room"></nav><p class="note" id="help">Drag to orbit. Choose a room to jump inside.</p><p class="note">Approximate layout traced from the supplied plan. Ceiling height, furniture, window details and daylight are illustrative.</p></main>
-<script>
+<nav class="bar" id="rooms" aria-label="Jump to room"></nav><p class="note" id="help">Drag to orbit. Choose a room to jump inside.</p><p class="note">Approximate layout based on the HDB floor plans. Ceiling height, furniture, window details and daylight are illustrative.</p></main>
+<script type="module">
+import {type2WalkthroughLayouts as layouts} from "./assets/type-2-walkthrough-layouts.js?v=1";
 const $=id=>document.getElementById(id);
 const params=new URLSearchParams(location.search);
-const layouts=new Map([['133',[1,-1]],['135',[-1,-1]],['137',[-1,1]],['139',[1,1]]]);
 const stack=layouts.has(params.get('stack'))?params.get('stack'):'139';
 const [flipX,flipZ]=layouts.get(stack);
 // The brochure plans use the same Type 2 footprint in four orientations.

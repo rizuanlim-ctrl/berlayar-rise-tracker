@@ -1,3 +1,4 @@
+import {type2WalkthroughLayouts} from "./type-2-walkthrough-layouts.js?v=1";
 function availableFallbackState(state){
  const next=structuredClone(state);
  for(const unit of Object.values(next.overrides||{})){
@@ -355,7 +356,6 @@ Object.assign(trackerTranslations,{
  "Close walkthrough":["关闭室内导览","Tutup paparan 3D","3D காட்சியை மூடவும்"],
  "Illustrative interior":["室内示意","Gambaran dalaman","மாதிரி உட்புறம்"]
 });
-const walkthroughStacks = new Set(["133", "135", "137", "139"]);
 function UnitWalkthrough({stack}){
  const title = `Stack ${stack} · ${trackerText("Illustrative interior")}`;
  const dialog=(0,C.useRef)(null),launcher=(0,C.useRef)(null);
@@ -376,7 +376,7 @@ function UnitWalkthrough({stack}){
     (0,LocalizedJSX.jsx)("h2",{id:"unit-walkthrough-title",children:title}),
     (0,LocalizedJSX.jsx)("button",{type:"button",autoFocus:true,onClick:()=>dialog.current.close(),children:"Close walkthrough"})
    ]}),
-   open&&(0,LocalizedJSX.jsx)("iframe",{src:`/stack-139-walkthrough.html?embedded=1&stack=${stack}&v=2`,title})
+   open&&(0,LocalizedJSX.jsx)("iframe",{src:`/stack-139-walkthrough.html?embedded=1&stack=${stack}&v=3`,title})
   ]})
  ]});
 }
@@ -396,7 +396,7 @@ function UnitPlanGallery({unit}){
  return(0,LocalizedJSX.jsxs)(`section`,{className:`detail-project-plans`,style:{padding:`16px`,borderTop:`1px solid #cbdace`,minWidth:0},"aria-label":`Project plans`,children:[
   (0,LocalizedJSX.jsx)(`h3`,{style:{margin:`0 0 10px`,fontSize:`16px`},children:`Project plans`}),
 
-  (0,LocalizedJSX.jsx)(`div`,{role:`group`,"aria-label":`Project plans`,style:{display:`flex`,flexWrap:`wrap`,gap:`8px`,marginBottom:`12px`},children:[...Object.entries(labels).map(([value,label])=>(0,LocalizedJSX.jsx)(`button`,{type:`button`,"aria-pressed":kind===value,onClick:()=>{setKind(value);setSiteZoom(1)},style:{minHeight:`44px`,padding:`8px 12px`,border:`1px solid #40574b`,borderRadius:`8px`,color:kind===value?`#fff`:`#183c2c`,background:kind===value?`#183c2c`:`#edf3ee`,whiteSpace:`normal`,maxWidth:`100%`,overflowWrap:`anywhere`},children:label},value)),unit.block===`201A`&&unit.room===`2R`&&valid&&walkthroughStacks.has(stack)&&(0,LocalizedJSX.jsx)(UnitWalkthrough,{stack},stack)]}),
+  (0,LocalizedJSX.jsx)(`div`,{role:`group`,"aria-label":`Project plans`,style:{display:`flex`,flexWrap:`wrap`,gap:`8px`,marginBottom:`12px`},children:[...Object.entries(labels).map(([value,label])=>(0,LocalizedJSX.jsx)(`button`,{type:`button`,"aria-pressed":kind===value,onClick:()=>{setKind(value);setSiteZoom(1)},style:{minHeight:`44px`,padding:`8px 12px`,border:`1px solid #40574b`,borderRadius:`8px`,color:kind===value?`#fff`:`#183c2c`,background:kind===value?`#183c2c`:`#edf3ee`,whiteSpace:`normal`,maxWidth:`100%`,overflowWrap:`anywhere`},children:label},value)),unit.room===`2R`&&unit.type===`Type 2`&&valid&&type2WalkthroughLayouts.has(stack)&&(0,LocalizedJSX.jsx)(UnitWalkthrough,{stack},stack)]}),
   (0,LocalizedJSX.jsx)(`style`,{children:`.site-plan-zoom{display:none!important}.site-plan-viewport{width:100%;overflow:auto}@media(min-width:721px){.site-plan-zoom{display:flex!important;align-items:center;flex-wrap:wrap;gap:8px;margin-bottom:10px}.site-plan-zoom button{min-height:36px;padding:6px 10px;border:1px solid #40574b;border-radius:8px;background:#edf3ee;color:#183c2c}.site-plan-zoom button:disabled{opacity:.45;cursor:default}.site-plan-viewport{max-height:440px}.site-plan-viewport img{width:var(--site-zoom-width)!important;max-width:none!important}}`}),
   kind===`site`&&(0,LocalizedJSX.jsxs)(`div`,{className:`site-plan-zoom`,role:`group`,"aria-label":`Site plan zoom`,children:[(0,LocalizedJSX.jsx)(`button`,{type:`button`,disabled:siteZoom<=1,onClick:()=>setSiteZoom(value=>Math.max(1,value-.25)),children:`Zoom Out`}),(0,LocalizedJSX.jsx)(`output`,{"aria-live":`polite`,style:{minWidth:`40px`,textAlign:`center`},children:`${Math.round(siteZoom*100)}%`}),(0,LocalizedJSX.jsx)(`button`,{type:`button`,disabled:siteZoom>=4,onClick:()=>setSiteZoom(value=>Math.min(4,value+.25)),children:`Zoom In`})]}),
   (0,LocalizedJSX.jsxs)(`figure`,{style:{margin:0,padding:`8px`,border:`1px solid #cbdace`,borderRadius:`8px`,background:`white`},children:[src?(kind===`site`?(0,LocalizedJSX.jsx)(`div`,{className:`site-plan-viewport`,tabIndex:0,"aria-label":trackerText(`Site Plan`),style:{"--site-zoom-width":`${siteZoom*100}%`},children:image}):image):(0,LocalizedJSX.jsx)(`p`,{children:`Floor plan unavailable for this unit.`}),(0,LocalizedJSX.jsxs)(`figcaption`,{style:{marginTop:`8px`,color:`#183c2c`,fontSize:`13px`,lineHeight:1.6},children:[trackerText(labels[kind]),` · `,trackerText(`Block `),unit.block,` · #`,unit.unit]})]}),
