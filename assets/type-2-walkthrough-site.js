@@ -1,15 +1,20 @@
+import {additionalStacks} from "./walkthrough-layouts.js?v=1";
 import {coastline} from "./berlayar-coastline.js?v=1";
 import {models, roads, PIXELS_PER_METRE, STOREY_METRES} from "./berlayar-site-model.js?v=1";
 
 // Approximate stack centres traced from the same HDB site-plan image as the building footprints.
 const blocks = [
+  {id:'200A', angle:.025, skips:[9,29], stacks:[]},
+  {id:'201B', angle:.085, skips:[22,36], stacks:[]},
   {id:'200B', angle:.073, skips:[20,40], stacks:[[117,444,233],[119,461,234],[121,457,264],[123,439,263]]},
   {id:'201A', angle:.085, skips:[9,29], stacks:[[133,607,245],[135,622,247],[137,619,278],[139,601,277]]},
   {id:'204A', angle:.078, skips:[], stacks:[[108,400,477],[110,416,478],[112,415,508],[114,397,507]]},
   {id:'204B', angle:.082, skips:[], stacks:[[124,265,603],[126,283,605],[128,280,636],[130,261,634]]},
 ];
-const placements = new Map(blocks.flatMap(block => block.stacks.map(([stack,x,y]) =>
-  [String(stack), {block, x, y}])));
+const placements = new Map(blocks.flatMap(block => {
+  const extra=Object.values(additionalStacks[block.id]).flat().map(([stack,,,x,y])=>[stack,x,y]);
+  return [...block.stacks,...extra].map(([stack,x,y])=>[String(stack),{block,x,y}]);
+}));
 
 const landscape = [
   [[226,133],[843,172],[821,302],[757,490],[725,600],[650,641],[492,654],[431,681],[413,744],[247,777],[138,743],[70,680],[115,609],[178,507],[211,390]],
@@ -37,10 +42,9 @@ const treeRows = [
   [[349,346],[413,321],23],[[474,454],[437,523],30],[[569,586],[633,562],22],
 ];
 
-export function unitSite(stack) {
+export function unitSite(stack, centre=[3.135,4.845]) {
   const {block,x,y} = placements.get(stack);
   const cos = Math.cos(block.angle), sin = Math.sin(block.angle);
-  const centre = [3.135,4.845];
   const toRoom = ([px,py]) => {
     const east = (px-x)/PIXELS_PER_METRE, south = (py-y)/PIXELS_PER_METRE;
     return [centre[0]+east*cos+south*sin, centre[1]-east*sin+south*cos];
@@ -52,7 +56,7 @@ export function unitSite(stack) {
   const maxFloor = models.find(model => model.id === block.id).floors;
   const floors = Array.from({length:maxFloor-1}, (_,i)=>i+2).filter(floor=>!block.skips.includes(floor));
   return {
-    floors, buildings,
+    floors, buildings, centre,
     ground: landscape.map(polygon=>polygon.map(toRoom)),
     water: coastline.map(polygon=>polygon.map(ring=>ring.map(toRoom))),
     streets: [...roads,...estateRoads].map(road=>({width:road.w/PIXELS_PER_METRE, path:road.p.map(toRoom)})),
@@ -110,6 +114,7 @@ function fillPolygon(rings, y, draw, color, light) {
 
 export function drawNeighbourhood(site, elevation, solar, draw, simplified=false) {
   const ground = -elevation;
+  const [centreX,centreZ]=site.centre;
   const light = Math.max(.40, Math.min(1,.64+solar.altitude/92));
   const surface = (polygon, height, color, shade=light) => fillPolygon([polygon],height,draw,color,shade);
   surface([[-1450,-1250],[1450,-1250],[1450,1600],[-1450,1600]],ground,'terrain');
@@ -177,10 +182,10 @@ export function drawNeighbourhood(site, elevation, solar, draw, simplified=false
         if(len<.12)return;
         const nx=outward*(v-z)/len,nz=outward*(x-u)/len;
         // The viewer stays inside the flat. Skip façades that face away from the whole unit.
-        if((3.1-x)*nx+(4.8-z)*nz < -7)return;
+        if((centreX-x)*nx+(centreZ-z)*nz < -9)return;
         const shade=light*(.76+.22*Math.max(0,nx*sunX+nz*sunZ));
         const wall=kind==='tower'?(i%5===0?'facadeAccent':'facade'):kind==='landmark'?'remoteFacade':'facility';
-        const distance=Math.hypot((x+u)/2-3.1,(z+v)/2-4.8);
+        const distance=Math.hypot((x+u)/2-centreX,(z+v)/2-centreZ);
         const face=(a,b,low,high,color,brightness,offset=0)=>{
           const at=(t,y)=>[x+(u-x)*t+nx*offset,y,z+(v-z)*t+nz*offset];
           draw(at(a,low),at(b,low),at(b,high),at(a,high),color,brightness);
