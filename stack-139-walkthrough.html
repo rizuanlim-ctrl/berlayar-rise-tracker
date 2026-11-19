@@ -1,0 +1,272 @@
+<!doctype html>
+<html lang="en"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><title>Berlayar Rise · Stack 139</title>
+<style>
+*{box-sizing:border-box}body{margin:0;background:#17191b;color:#f5f4ed;font:16px system-ui,sans-serif}main{max-width:1480px;margin:auto;padding:clamp(12px,3vw,38px)}header{display:flex;justify-content:space-between;align-items:end;gap:12px;flex-wrap:wrap;margin-bottom:18px}small{color:#b8cec3}h1{font-size:clamp(29px,5vw,52px);line-height:1;margin:6px 0 0;letter-spacing:-.055em}button{cursor:pointer;background:#273137;color:#edf3ee;border:1px solid #53605e;border-radius:9px;padding:9px 12px;font:inherit;font-size:14px;touch-action:none}button[aria-pressed=true]{background:#f0eee9;color:#182822;border-color:#f0eee9}button:focus-visible{outline:3px solid #f0be83}.scene{position:relative;height:clamp(375px,72svh,800px);border:1px solid #566765;border-radius:17px;overflow:hidden;background:#29363c}#world{width:100%;height:100%;display:block;touch-action:none;cursor:grab}.map{position:absolute;right:12px;top:12px;width:clamp(80px,16vw,145px);background:#152126e8;border:1px solid #748883;border-radius:10px;padding:5px;pointer-events:none}.map canvas{display:block;width:100%;height:auto}.viewlabel{position:absolute;top:12px;left:12px;background:#152126e8;padding:8px 11px;border-radius:9px;font-size:14px;pointer-events:none}.pad{position:absolute;bottom:12px;left:12px;display:grid;grid-template-columns:repeat(3,40px);gap:3px}.pad button{padding:8px 0;background:#172329e8}.pad button:first-child{grid-column:2}.pad button:nth-child(2){grid-column:1}.actions{position:absolute;bottom:12px;right:12px;display:grid;gap:4px;text-align:right}.actions button{background:#172329e8;color:#edf3ee}.actions button[aria-pressed=true]{background:#f0eee9;color:#182822}.bar{margin-top:12px;display:flex;gap:6px;flex-wrap:wrap}.note{color:#c7d3cb;font-size:14px;margin-bottom:0}.error{padding:24px}.hide{display:none!important}
+.scene.immersive{position:fixed;inset:0;height:100dvh;border:0;border-radius:0;z-index:5}.scene.immersive .map,.scene.immersive .viewlabel,.scene.immersive #furn{display:none}.exit{position:absolute;top:12px;right:12px;background:#1c2024e8}.reticle{position:absolute;left:50%;top:50%;width:4px;height:4px;border-radius:50%;background:#fff8;box-shadow:0 0 2px #0008;pointer-events:none}.scene.immersive .pad{bottom:max(16px,env(safe-area-inset-bottom))}@media(pointer:coarse){.pad{grid-template-columns:repeat(3,46px)}.pad button{min-height:42px}}html.embedded main{padding:12px}html.embedded header small,html.embedded header h1{display:none}html.embedded header{margin-bottom:10px}html.embedded .scene{height:clamp(300px,65svh,760px)}html.embedded .scene.immersive{height:100dvh}</style>
+<main><header><div><small>BERLAYAR RISE / 2-ROOM FLEXI TYPE 2</small><h1>Stack 139</h1></div><div><button id="walk" aria-pressed="true">Walk inside</button> <button id="overview" aria-pressed="false">3D overview</button> <button id="focus" aria-pressed="false">Immersive view</button></div></header>
+<section class="scene" aria-label="Interactive 3D apartment"><canvas id="world" aria-label="Apartment model, drag to look" tabindex="0"></canvas><div class="viewlabel" id="label">3D overview</div><div class="map"><canvas id="map" width="150" height="190" aria-label="Floor plan and position"></canvas></div>
+<div class="pad hide" id="pad" aria-label="Movement controls"><button data-m="w" aria-label="Forward">↑</button><button data-m="a" aria-label="Strafe left">←</button><button data-m="s" aria-label="Backward">↓</button><button data-m="d" aria-label="Strafe right">→</button></div><span class="reticle" id="reticle" aria-hidden="true"></span><button class="exit hide" id="exit">Exit immersive view</button><div class="actions"><button id="use" class="hide"></button><button id="furn" aria-pressed="false">Furniture off</button></div></section>
+<nav class="bar" id="rooms" aria-label="Jump to room"></nav><p class="note" id="help">Drag to orbit. Choose a room to jump inside.</p><p class="note">Approximate layout traced from the supplied plan. Ceiling height, furniture, window details and daylight are illustrative.</p></main>
+<script>
+const $=id=>document.getElementById(id);
+const embedded=window.parent!==window&&new URLSearchParams(location.search).has('embedded');
+document.documentElement.classList.toggle('embedded',embedded);
+const canvas=$('world'), gl=canvas.getContext('webgl',{antialias:true,alpha:false});
+const flat=gl?null:canvas.getContext('2d');
+let uniforms;
+if(gl){
+const vertex=`
+attribute vec3 point; attribute vec3 rgb; varying vec3 color;
+uniform vec3 eye; uniform vec3 front; uniform vec3 right; uniform vec3 up;
+uniform float aspect; uniform float ortho; uniform float zoom;
+void main(){
+ vec3 p=point-eye; vec3 q=vec3(dot(p,right),dot(p,up),dot(p,front));
+ color=rgb;
+ if(ortho>0.5){gl_Position=vec4(q.x/(zoom*aspect),q.y/zoom,q.z/30.0,1.0);}
+ else{gl_Position=vec4(q.x*1.45/aspect,q.y*1.45,1.0025*q.z-0.100125,q.z);}
+}`;
+const fragment=`precision mediump float; varying vec3 color; void main(){gl_FragColor=vec4(color,1.0);}`;
+function shader(type,source){const s=gl.createShader(type);gl.shaderSource(s,source);gl.compileShader(s);if(!gl.getShaderParameter(s,gl.COMPILE_STATUS))throw Error(gl.getShaderInfoLog(s));return s}
+const program=gl.createProgram();gl.attachShader(program,shader(gl.VERTEX_SHADER,vertex));gl.attachShader(program,shader(gl.FRAGMENT_SHADER,fragment));gl.linkProgram(program);if(!gl.getProgramParameter(program,gl.LINK_STATUS))throw Error(gl.getProgramInfoLog(program));gl.useProgram(program);gl.enable(gl.DEPTH_TEST);
+const buffer=gl.createBuffer();gl.bindBuffer(gl.ARRAY_BUFFER,buffer);
+for(const [name,offset] of [['point',0],['rgb',12]]){const loc=gl.getAttribLocation(program,name);gl.enableVertexAttribArray(loc);gl.vertexAttribPointer(loc,3,gl.FLOAT,false,24,offset)}
+uniforms=Object.fromEntries(['eye','front','right','up','aspect','ortho','zoom'].map(k=>[k,gl.getUniformLocation(program,k)]));
+}
+const meter=.0095, X=n=>(n-180)*meter,Z=n=>(n-90)*meter;
+const colors={
+ wall:'#f1f0ed', ceiling:'#f9f8f4', structure:'#dadad6', trim:'#bfbfbb',
+ floor:'#594437', plankLight:'#624b3d', plankDark:'#523e34', seam:'#493629',
+ tile:'#898b88', grout:'#777a77', tiledWall:'#a4a7a3', shelter:'#838583',
+ frame:'#24272a', glass:'#f5f8f5', sky:'#dfeaf0', light:'#f3d9aa',
+ door:'#4b4b49', metal:'#c4c6c2', wood:'#885f44', sage:'#708e81',
+ cream:'#e4d7be', dark:'#34444a'
+};
+const rooms=[
+ ['Entrance',592,264,0],['Living / dining',604,600,.25],['Bedroom',438,836,-.40],
+ ['Kitchen',430,278,-1.1],['Bath / WC',425,502,-1.1],['Household shelter',778,337,-1.45]
+];
+const floors=[
+ [185,106,486,350,'tile'],[486,234,680,385,'floor'],[520,385,680,479,'floor'],
+ [260,385,520,582,'tile'],[715,235,846,444,'shelter'],[189,582,520,765,'floor'],
+ [520,479,844,927,'floor'],[189,765,519,1082,'floor']
+];
+const walls=[
+ [184,108,522,108],[503,108,503,232],[522,231,539,231],[678,225,863,225],
+ [863,225,863,944],[698,461,863,461],[698,225,698,299],[698,380,698,461],
+ [186,364,518,364],[255,374,255,582],[255,582,517,582],[516,374,516,454],
+ [516,565,516,582],[170,548,255,548],[168,548,168,1087],[168,1087,238,1087],
+ [437,1087,510,1087],[510,930,510,1087],[510,934,583,934],[782,934,863,934],
+ [179,761,394,761],[394,761,394,695],[394,695,514,695],[513,798,513,934]
+];
+const windows=[
+ {a:[238,1087],b:[437,1087],turn:1,daylight:true,name:'Bedroom window'},
+ {a:[583,934],b:[782,934],turn:1,daylight:true,name:'Living room window'},
+ {a:[185,110],b:[185,350],turn:-1,name:'Kitchen opening'}
+];
+const doors=[
+ {a:[675,225],b:[540,225],turn:-1,name:'Front door'},
+ {a:[516,565],b:[516,454],turn:-1,name:'Bathroom door'},
+ {a:[698,380],b:[698,299],turn:1,name:'Shelter door'}
+];
+const furniture=[
+ [733,553,821,718,.73,'sage'],[733,553,755,718,.93,'sage'],[733,553,821,573,.86,'sage'],[733,698,821,718,.86,'sage'],
+ [637,592,705,660,.38,'wood'],[538,620,556,717,.48,'wood'],[550,627,557,709,.82,'dark'],
+ [230,619,355,703,.74,'wood'],[250,591,296,609,.54,'sage'],[250,713,296,737,.54,'sage'],
+ [205,837,415,992,.43,'wood'],[210,841,412,989,.58,'cream'],[201,837,218,992,.84,'wood'],
+ [220,852,267,907,.64,'wall'],[220,925,267,979,.64,'wall'],[276,843,413,987,.61,'sage'],[198,771,366,816,2.03,'wood'],
+ [270,120,481,179,.89,'sage'],[269,119,482,180,.93,'cream'],[353,136,400,166,.95,'dark'],
+ [265,391,362,449,.84,'cream'],[267,504,318,555,.48,'wall']
+];
+const keys=new Set(), player={x:X(592),z:Z(264),yaw:0,pitch:0};let overview=false, furnished=false, orbit=.56, tilt=.97, dirty=true, verts=[], faces=[], layer=2, count=0;
+function rgb(key,light){return colors[key].slice(1).match(/../g).map(h=>parseInt(h,16)*light/255)}
+function quad(a,b,c,d,key,light=1){
+ const color=rgb(key,light);
+ if(gl){for(const p of [a,b,c,a,c,d])verts.push(...p,...color);return}
+ const mix=(p,q,t)=>p.map((v,i)=>v+(q[i]-v)*t);
+ const segments=(p,q)=>Math.ceil(Math.hypot(...p.map((v,i)=>v-q[i]))/.94)||1;
+ const cols=segments(a,b), rows=segments(a,d), fill='rgb('+color.map(v=>Math.round(v*255)).join(',')+')';
+ for(let j=0;j<rows;j++)for(let i=0;i<cols;i++){
+  const p=mix(a,d,j/rows),q=mix(b,c,j/rows),r=mix(a,d,(j+1)/rows),s=mix(b,c,(j+1)/rows);
+  faces.push({points:[mix(p,q,i/cols),mix(p,q,(i+1)/cols),mix(r,s,(i+1)/cols),mix(r,s,i/cols)],fill,layer});
+ }
+}
+function paint(w,h,eye,[front,right,up],zoom){
+ flat.fillStyle=overview?'#29363d':'#8caeb5';flat.fillRect(0,0,w,h);
+ const dot=(p,q)=>p[0]*q[0]+p[1]*q[1]+p[2]*q[2], polygons=[];
+ for(const face of faces){
+  const projected=face.points.map(p=>{const v=p.map((n,i)=>n-eye[i]);return [dot(v,right),dot(v,up),dot(v,front)]});
+  const clipped=[];
+  for(let i=0;i<4;i++){
+   const a=projected[i],b=projected[(i+1)%4];
+   if(a[2]>=.05)clipped.push(a);
+   if((a[2]>=.05)!==(b[2]>=.05)){const t=(.05-a[2])/(b[2]-a[2]);clipped.push(a.map((n,j)=>n+(b[j]-n)*t))}
+  }
+  if(clipped.length<3)continue;
+  const screen=clipped.map(([x,y,z])=>{const scale=overview?h/(2*zoom):h*.725/z;return [w/2+x*scale,h/2-y*scale]});
+  if(screen.every(p=>p[0]<0)||screen.every(p=>p[0]>w)||screen.every(p=>p[1]<0)||screen.every(p=>p[1]>h))continue;
+  polygons.push({screen,depth:clipped.reduce((v,p)=>v+p[2],0)/clipped.length,fill:face.fill,layer:face.layer});
+ }
+ polygons.sort((a,b)=>a.layer-b.layer||b.depth-a.depth);
+ for(const {screen,fill} of polygons){flat.beginPath();flat.moveTo(...screen[0]);for(const p of screen.slice(1))flat.lineTo(...p);flat.closePath();flat.fillStyle=flat.strokeStyle=fill;flat.lineWidth=.65;flat.fill();flat.stroke()}
+}
+function block(a,b,width,y,h,key){
+ const [x,z]=a,[u,v]=b,len=Math.hypot(u-x,v-z);const dx=(v-z)*width/(2*len),dz=(x-u)*width/(2*len);
+ const low=[[x+dx,y,z+dz],[u+dx,y,v+dz],[u-dx,y,v-dz],[x-dx,y,z-dz]];
+ const top=low.map(([px,_,pz])=>[px,h,pz]);
+ quad(...top,key);for(let i=0;i<4;i++){const n=(i+1)%4;quad(low[i],low[n],top[n],top[i],key,[.86,.74,.90,.80][i]);}
+}
+function rect(x,z,u,v,y,h,key){block([X(x),Z((z+v)/2)],[X(u),Z((z+v)/2)],Z(v)-Z(z),y,h,key)}
+function wall(a,b,y,h,key='wall',w=.15){block([X(a[0]),Z(a[1])],[X(b[0]),Z(b[1])],w,y,h,key)}
+function end(o){
+ if(o.b===undefined)return o.a;
+ const [dx,dz]=[o.b[0]-o.a[0],o.b[1]-o.a[1]], t=o.open?(o.turn??1)*Math.PI*.48:0;
+ return [o.a[0]+dx*Math.cos(t)-dz*Math.sin(t),o.a[1]+dx*Math.sin(t)+dz*Math.cos(t)];
+}
+function surface(x,z,u,v,y,key){quad([X(x),y,Z(z)],[X(u),y,Z(z)],[X(u),y,Z(v)],[X(x),y,Z(v)],key)}
+function drawFloor(x,z,u,v,material){
+ const boards=material==='floor', step=boards?15:53;
+ for(let row=0,start=z;start<v;row++,start+=step){
+  const offset=boards?(row*39)%124:0, length=boards?124:54;
+  for(let col=0,left=x-offset;left<u;col++,left+=length){
+   const lo=Math.max(left,x), hi=Math.min(left+length,u);
+   const finish=boards?['floor','plankLight','floor','plankDark'][(row*13+col*11+(row>>2))%4]:material;
+   const bottom=Math.min(start+step,v);
+   surface(lo,start,hi,bottom,-.015,boards?'seam':'grout');
+   if(hi-lo>.8&&bottom-start>.8)surface(lo+.38,start+.38,hi-.38,bottom-.38,-.008,finish);
+  }
+ }
+}
+function daylight(o){
+ const [a,z]=o.a, [b]=o.b;
+ layer=1;
+ for(let row=0;row<2;row++)for(let col=0;col<4;col++){
+  const x1=a+(b-a)*col/4+2, x2=a+(b-a)*(col+1)/4-2;
+  const y1=.90+row*.66+.02, y2=.90+(row+1)*.66-.02;
+  // Project each pane along the same illustrative daylight direction.
+  const cast=(x,y)=>[X(x)+.11*y,.002,Z(z)-.87*y];
+  quad(cast(x1,y1),cast(x2,y1),cast(x2,y2),cast(x1,y2),'light',row?.92:1);
+ }
+ layer=2;
+}
+function glazing(o,top){
+ wall(o.a,o.b,0,overview?.27:.85,'structure');
+ if(overview)return;
+ wall(o.a,o.b,2.23,top);
+ wall(o.a,o.b,.81,.89,'frame',.18);
+ wall(o.a,o.b,2.17,2.23,'frame',.18);
+ const b=end(o), at=t=>o.a.map((a,i)=>a+(b[i]-a)*t);
+ for(let col=0;col<4;col++){
+  const a=at(col/4+.014),b=at((col+1)/4-.014);
+  wall(a,b,.89,1.51,'glass',.028);wall(a,b,1.55,2.17,'glass',.028);
+ }
+ wall(o.a,b,1.51,1.55,'frame',.067);
+ for(const t of [0,.25,.5,.75,1]){
+  const p=at(t);wall(p,[p[0]+1,p[1]+1],.88,2.18,'frame',.061);
+ }
+ if(o.daylight&&!furnished)daylight(o);
+}
+function build(){
+ verts=[];faces=[];const top=overview?.68:2.62;
+ layer=0;
+ for(const floor of floors)drawFloor(...floor);
+ layer=2;
+ rect(539,182,677,234,-.14,-.02,'tile');
+ rect(119,386,248,548,-.16,-.04,'structure');
+ if(!overview)for(const [x,z,u,v] of floors)rect(x-8,z-8,u+8,v+8,2.605,2.62,'ceiling');
+ for(const [x,z,u,v] of walls){
+  const a=[x,z],b=[u,v];
+  const tiled=(z===108||z===364||x===255||z===582||x===516);
+  wall(a,b,-.08,top,tiled?'tiledWall':'wall');
+  wall(a,b,0,.066,tiled?'grout':'trim',.175);
+  if(tiled&&!overview)for(let h=.38;h<top-.1;h+=.38)wall(a,b,h,h+.008,'grout',.153);
+ }
+ for(const o of windows)glazing(o,top);
+ for(const o of doors){
+  const b=end(o);
+  wall(o.a,b,.015,overview?.47:2.08,'door',.062);
+  if(overview)continue;
+  wall(o.a,o.b,2.12,top);
+  for(const p of [o.a,o.b])wall(p,[p[0]+1,p[1]+1],0,2.13,'frame',.075);
+  const at=t=>o.a.map((a,i)=>a+(b[i]-a)*t);
+  wall(at(.77),at(.91),.98,1.02,'metal',.125);
+ }
+ if(furnished)for(const [x,z,u,v,h,k] of furniture)rect(x,z,u,v,0,h,k);
+ if(gl)gl.bufferData(gl.ARRAY_BUFFER,new Float32Array(verts),gl.STATIC_DRAW);
+ count=verts.length/6;dirty=false;
+}
+function basis(yaw,pitch){const s=Math.sin(yaw),c=Math.cos(yaw),p=Math.sin(pitch),q=Math.cos(pitch);return [[s*q,p,c*q],[c,0,-s],[-s*p,q,-c*p]]}
+function inFloor(x,z){return floors.some(([a,b,c,d])=>x>=X(a)-.18&&x<=X(c)+.18&&z>=Z(b)-.18&&z<=Z(d)+.18)||x>X(540)&&x<X(677)&&z>Z(186)&&z<Z(260)}
+function distance(x,z,a,b){const ax=X(a[0]),az=Z(a[1]),dx=X(b[0])-ax,dz=Z(b[1])-az;const t=Math.max(0,Math.min(1,((x-ax)*dx+(z-az)*dz)/(dx*dx+dz*dz)));return Math.hypot(x-ax-t*dx,z-az-t*dz)}
+function clear(x,z){
+ if(!inFloor(x,z))return false;
+ if(walls.some(([a,b,c,d])=>distance(x,z,[a,b],[c,d])<.22))return false;
+ if(windows.some(o=>distance(x,z,o.a,o.b)<.22)||doors.some(o=>distance(x,z,o.a,end(o))<.17))return false;
+ return !furnished||!furniture.some(([a,b,c,d])=>x>X(a)-.13&&x<X(c)+.13&&z>Z(b)-.13&&z<Z(d)+.13);
+}
+function nearest(){let best=.95, result;for(const o of [...doors,...windows]){const d=distance(player.x,player.z,o.a,o.b);if(d<best){best=d;result=o}}return result}
+function interact(){const o=nearest();if(overview||!o)return;o.open=!o.open;if(!clear(player.x,player.z)){o.open=!o.open;return}dirty=true}
+function setMode(value){overview=value;dirty=true;$('reticle').classList.toggle('hide',value);$('overview').setAttribute('aria-pressed',value);$('walk').setAttribute('aria-pressed',!value);$('pad').classList.toggle('hide',value);$('help').textContent=value?'Drag to orbit. Choose a room to jump inside.':'Drag to look. Use the direction pad or WASD to move. Press E or use the on-screen button near a door or window.'}
+function jump([name,x,z,yaw]){keys.clear();Object.assign(player,{x:X(x),z:Z(z),yaw,pitch:0});setMode(false);$('label').textContent=name}
+$('overview').onclick=()=>{setMode(true);$('label').textContent='3D overview'};
+$('walk').onclick=()=>jump(rooms[0]);$('use').onclick=interact;
+const scene=document.querySelector('.scene');
+function immersive(value){
+ scene.classList.toggle('immersive',value);
+ $('focus').setAttribute('aria-pressed',value);
+ $('exit').classList.toggle('hide',!value);
+ (value?$('exit'):$('focus')).focus();
+}
+$('focus').onclick=()=>immersive(true);
+$('exit').onclick=()=>immersive(false);
+addEventListener('keydown',e=>{if(e.key!=='Escape')return;if(scene.classList.contains('immersive'))immersive(false);else if(embedded)window.parent.postMessage('close-unit-walkthrough',location.origin)});
+$('furn').onclick=()=>{furnished=!furnished;if(!overview&&!clear(player.x,player.z))jump(rooms[0]);$('furn').setAttribute('aria-pressed',furnished);$('furn').textContent=furnished?'Furniture on':'Furniture off';dirty=true};
+for(const room of rooms){const b=document.createElement('button');b.textContent=room[0];b.onclick=()=>jump(room);$('rooms').append(b)}
+const keymap={arrowup:'w',arrowdown:'s',arrowleft:'a',arrowright:'d',w:'w',a:'a',s:'s',d:'d'};
+addEventListener('keydown',e=>{if(overview)return;const k=e.key.toLowerCase();if(keymap[k]){e.preventDefault();keys.add(keymap[k])}if(k==='e'&&!e.repeat)interact()});
+addEventListener('keyup',e=>keys.delete(keymap[e.key.toLowerCase()]));addEventListener('blur',()=>keys.clear());
+document.querySelectorAll('[data-m]').forEach(b=>{b.onpointerdown=e=>{b.setPointerCapture(e.pointerId);keys.add(b.dataset.m)};b.onlostpointercapture=()=>keys.delete(b.dataset.m)});
+let drag=null;
+canvas.onpointerdown=e=>{if(drag)return;canvas.setPointerCapture(e.pointerId);drag=[e.pointerId,e.clientX,e.clientY]};
+canvas.onlostpointercapture=()=>drag=null;
+canvas.onpointermove=e=>{if(!drag||drag[0]!==e.pointerId)return;const dx=e.clientX-drag[1],dy=e.clientY-drag[2];drag=[e.pointerId,e.clientX,e.clientY];if(overview){orbit+=dx*.009;tilt=Math.max(.32,Math.min(1.45,tilt+dy*.009))}else{player.yaw-=dx*.007;player.pitch=Math.max(-1.15,Math.min(1.15,player.pitch+dy*.007))}};
+const map=$('map').getContext('2d'), mx=x=>8+(x-158)*.18,mz=z=>5+(z-95)*.176;
+function drawMap(){
+ map.clearRect(0,0,150,190);
+ for(const [x,z,u,v,k] of floors){map.fillStyle=colors[k];map.fillRect(mx(x),mz(z),mx(u)-mx(x),mz(v)-mz(z))}
+ map.strokeStyle='#efeade';map.lineWidth=2;
+ for(const [x,z,u,v] of walls){map.beginPath();map.moveTo(mx(x),mz(z));map.lineTo(mx(u),mz(v));map.stroke()}
+ map.fillStyle='#f6fbf7';map.font='bold 8px system-ui';map.textAlign='center';
+ for(const [label,x,z] of [['KITCHEN',329,240],['BATH',386,490],['SHELTER',782,337],['LIVING',689,720],['BEDROOM',341,967]])map.fillText(label,mx(x),mz(z));
+ if(!overview){map.save();map.translate(mx(player.x/meter+180),mz(player.z/meter+90));map.rotate(-player.yaw);map.beginPath();map.moveTo(0,8);map.lineTo(-5,-4);map.lineTo(5,-4);map.closePath();map.fillStyle='#142b27';map.fill();map.strokeStyle='#c8ffdf';map.stroke();map.restore()}
+}
+let prev=0,lastView='', speedX=0, speedZ=0;
+function frame(t){
+ const dt=Math.min(.035,(t-prev)/1000);prev=t;
+ if(!overview){
+  const f=+keys.has('w')-keys.has('s'), r=+keys.has('d')-keys.has('a');
+  const ease=1-Math.exp(-dt*16);
+  speedX+=((Math.sin(player.yaw)*f+Math.cos(player.yaw)*r)/(Math.hypot(f,r)||1)-speedX)*ease;
+  speedZ+=((Math.cos(player.yaw)*f-Math.sin(player.yaw)*r)/(Math.hypot(f,r)||1)-speedZ)*ease;
+  const dx=Math.abs(speedX)>.005?speedX*1.48*dt:0,dz=Math.abs(speedZ)>.005?speedZ*1.48*dt:0;
+  if(dx&&clear(player.x+dx,player.z))player.x+=dx;if(dz&&clear(player.x,player.z+dz))player.z+=dz;
+  const near=nearest();$('use').classList.toggle('hide',!near);if(near){const label=(near.open?'Close ':'Open ')+near.name.toLowerCase();if($('use').textContent!==label)$('use').textContent=label}
+ }else $('use').classList.add('hide');
+ const ratio=Math.min(devicePixelRatio||1,2),w=Math.round(canvas.clientWidth*ratio),h=Math.round(canvas.clientHeight*ratio);
+ if(canvas.width!==w||canvas.height!==h){canvas.width=w;canvas.height=h}
+ const updated=dirty;
+ if(dirty)build();
+ const b=overview?basis(orbit,-tilt):basis(player.yaw,player.pitch);
+ const target=[3.22,0,4.86],eye=overview?target.map((n,i)=>n-12*b[0][i]):[player.x,1.58,player.z];
+ const zoom=Math.max(5,5.5*h/Math.max(w,1));
+ const view=[w,h,...eye,...b[0]].join();
+ if(flat&&(updated||view!==lastView))paint(w,h,eye,b,zoom);
+ lastView=view;
+ if(gl){gl.viewport(0,0,w,h);gl.clearColor(...(overview?[.16,.21,.24]:[.55,.69,.72]),1);gl.clear(gl.COLOR_BUFFER_BIT|gl.DEPTH_BUFFER_BIT);
+ for(const [k,value] of Object.entries({eye,front:b[0],right:b[1],up:b[2]}))gl.uniform3fv(uniforms[k],value);
+ gl.uniform1f(uniforms.aspect,w/Math.max(h,1));gl.uniform1f(uniforms.ortho,+overview);gl.uniform1f(uniforms.zoom,zoom);
+ gl.drawArrays(gl.TRIANGLES,0,count);}drawMap();requestAnimationFrame(frame);
+}
+jump(rooms[1]);
+player.pitch=-.15;
+requestAnimationFrame(frame);
+</script></html>
