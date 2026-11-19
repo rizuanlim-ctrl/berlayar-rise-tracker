@@ -1,3 +1,4 @@
+import {coastline} from "./berlayar-coastline.js?v=1";
 import {models, roads, PIXELS_PER_METRE, STOREY_METRES} from "./berlayar-site-model.js?v=1";
 
 // Approximate stack centres traced from the same HDB site-plan image as the building footprints.
@@ -20,6 +21,14 @@ const estateRoads = [
   {w:25,p:[[0,714],[91,783],[183,819],[293,829],[439,801],[566,781],[697,750],[779,678],[844,557],[923,311],[966,198]]},
   {w:16,p:[[0,616],[63,560],[114,496],[153,417],[183,310],[204,177],[213,83],[185,0]]},
   {w:31,p:[[263,0],[360,26],[527,28],[704,50],[867,66],[971,52],[1060,24]]},
+];
+// Main pedestrian links traced from the precinct site plan.
+const estatePaths = [
+  {w:9,p:[[141,336],[230,351],[336,359],[377,326],[412,305],[449,297],[589,302],[649,308]]},
+  {w:8,p:[[490,304],[480,350],[489,401],[507,448]]},
+  {w:10,p:[[148,573],[297,583],[431,594],[552,608],[635,602],[672,567]]},
+  {w:8,p:[[349,730],[380,687],[395,638],[407,600],[392,563],[387,542]]},
+  {w:7,p:[[437,685],[469,653],[525,631],[591,628],[628,614],[647,565],[655,501]]},
 ];
 const treeRows = [
   [[237,141],[805,179],38],[[221,231],[197,381],35],[[186,433],[152,513],26],
@@ -45,7 +54,9 @@ export function unitSite(stack) {
   return {
     floors, buildings,
     ground: landscape.map(polygon=>polygon.map(toRoom)),
+    water: coastline.map(polygon=>polygon.map(ring=>ring.map(toRoom))),
     streets: [...roads,...estateRoads].map(road=>({width:road.w/PIXELS_PER_METRE, path:road.p.map(toRoom)})),
+    paths: estatePaths.map(path=>({width:path.w/PIXELS_PER_METRE,path:path.p.map(toRoom)})),
     trees: treeRows.flatMap(([a,b,spacing])=>{
       const count = Math.max(1,Math.floor(Math.hypot(b[0]-a[0],b[1]-a[1])/spacing));
       return Array.from({length:count},(_,i)=>toRoom(a.map((v,j)=>v+(b[j]-v)*(i+.5)/count)));
@@ -99,75 +110,130 @@ function fillPolygon(rings, y, draw, color, light) {
 
 export function drawNeighbourhood(site, elevation, solar, draw, simplified=false) {
   const ground = -elevation;
-  const light = Math.max(.36, Math.min(1,.58+solar.altitude/75));
-  const surface = (polygon, height, color) => fillPolygon([polygon],height,draw,color,light);
-  surface([[-1100,-1100],[1100,-1100],[1100,1100],[-1100,1100]],ground,'terrain');
-  for (const patch of site.ground) surface(patch,ground+.035,'landscape');
-  for (const {width,path} of site.streets) for(let i=1;i<path.length;i++){
-    const [x,z]=path[i-1], [u,v]=path[i], len=Math.hypot(u-x,v-z);
-    if(len<.01)continue;
-    const bx=(v-z)*width/(2*len), bz=(x-u)*width/(2*len), y=ground+.08;
-    draw([x-bx,y,z-bz],[u-bx,y,v-bz],[u+bx,y,v+bz],[x+bx,y,z+bz],'road',light);
+  const light = Math.max(.40, Math.min(1,.64+solar.altitude/92));
+  const surface = (polygon, height, color, shade=light) => fillPolygon([polygon],height,draw,color,shade);
+  surface([[-1450,-1250],[1450,-1250],[1450,1600],[-1450,1600]],ground,'terrain');
+  for(const polygon of site.water)fillPolygon(polygon,ground+.24,draw,'water',light);
+  for (const patch of site.ground) surface(patch,ground+.045,'landscape');
+  function paths(routes,y,material,extraWidth=0) {
+    for(const {width,path} of routes) {
+      const radius=(width+extraWidth)/2;
+      const edges=path.map(([x,z],i)=>{
+        const direction=([a,b],[c,d])=>{
+          const length=Math.hypot(c-a,d-b)||1;
+          return [(d-b)/length,(a-c)/length];
+        };
+        const a=direction(path[Math.max(0,i-1)],path[Math.max(1,i)]);
+        const b=direction(path[Math.min(i,path.length-2)],path[Math.min(i+1,path.length-1)]);
+        const scale=radius/Math.max(1+a[0]*b[0]+a[1]*b[1],1);
+        const dx=(a[0]+b[0])*scale,dz=(a[1]+b[1])*scale;
+        return [[x-dx,y,z-dz],[x+dx,y,z+dz]];
+      });
+      for(let i=1;i<edges.length;i++)draw(...edges[i-1],edges[i][1],edges[i][0],material,light);
+    }
   }
-  for(const [i,[x,z]] of site.trees.entries()){
-    const size=1.6+(i%5)*.26, y=ground+1.8;
-    const low=[x,ground+.2,z], top=[x,y+size,z];
-    const points=[[x-size,y,z],[x,y+.4,z+size],[x+size,y,z],[x,y+.2,z-size]];
-    points.forEach((p,j)=>{
-      const q=points[(j+1)%4];
-      draw(p,q,top,top,'tree',light*(.78+.07*j));
-      draw(p,low,q,q,'tree',light*(.67+.06*j));
-    });
-  }
+  paths(site.streets,ground+.13,'kerb',1);
+  paths(site.streets,ground+.17,'road');
+  paths(site.paths,ground+.19,'path');
+
   const [sunX,,sunZ] = site.sunVector(solar.azimuth,solar.altitude);
+  for(const [i,[x,z]] of site.trees.entries()){
+    const size=1.4+(i*17%9)*.19, crown=ground+size*1.55+.8;
+    const trunk=.12+size*.025;
+    const corners=[[-trunk,-trunk],[trunk,-trunk],[trunk,trunk],[-trunk,trunk]];
+    for(let j=0;j<4;j++){
+      const [a,b]=corners[j],[c,d]=corners[(j+1)%4];
+      draw([x+a,ground,z+b],[x+c,ground,z+d],[x+c,crown,z+d],[x+a,crown,z+b],'bark',light*(.78+j*.05));
+    }
+    const count=simplified?7:10;
+    const rings=[[.35,-.53],[.86,-.22],[1,.16],[.65,.59],[.13,.91]].map(([radius,height],row)=>
+      Array.from({length:count},(_,j)=>{
+        const angle=j*2*Math.PI/count;
+        const spread=radius*size*(.93+(i*7+row*5+j*13)%11*.015);
+        return [x+Math.cos(angle)*spread,crown+height*size,z+Math.sin(angle)*spread];
+      }));
+    for(let row=1;row<rings.length;row++)for(let j=0;j<count;j++){
+      const k=(j+1)%count;
+      const angle=(j+.5)*2*Math.PI/count;
+      const sunlight=Math.max(0,Math.cos(angle)*sunX+Math.sin(angle)*sunZ);
+      draw(rings[row-1][j],rings[row-1][k],rings[row][k],rings[row][j],i%4===0?'treeLight':'tree',light*(.59+.085*row+.22*sunlight));
+    }
+    const canopy=rings.at(-1), top=[x,crown+size*.98,z];
+    for(let j=0;j<count;j++)draw(canopy[j],canopy[(j+1)%count],top,top,'treeLight',light*.99);
+  }
+
   for (const building of site.buildings) {
     const {polygon,hole,kind,floors}=building, height=ground+floors*STOREY_METRES;
     const rings=hole?[polygon,hole]:[polygon];
     fillPolygon(rings,height,draw,kind==='facility'?'roofGarden':'roof',light);
     for(const ring of rings){
-     const area=ring.reduce((total,[x,z],i)=>{
-      const [u,v]=ring[(i+1)%ring.length];
-      return total+x*v-u*z;
-     },0);
-     const outward=(area>0?1:-1)*(ring===hole?-1:1);
-     ring.forEach(([x,z],i)=>{
-      const [u,v]=ring[(i+1)%ring.length], len=Math.hypot(u-x,v-z);
-      if(len<.12)return;
-      const nx=outward*(v-z)/len,nz=outward*(x-u)/len;
-      const shade=light*(.79+.16*Math.max(0,nx*sunX+nz*sunZ));
-      const wall=kind==='tower'?'facade':kind==='landmark'?'remoteFacade':'facility';
-      if(simplified&&len>2&&floors>3){
-        // Split tall walls into alternating bands for the canvas painter.
-        for(let floor=0;floor<floors;floor++){
-          const y=ground+floor*STOREY_METRES, band=y+.28;
-          draw([x,y,z],[u,y,v],[u,band,v],[x,band,z],wall,shade*.86);
-          draw([x,band,z],[u,band,v],[u,y+STOREY_METRES,v],[x,y+STOREY_METRES,z],wall,shade);
+      const area=ring.reduce((total,[x,z],i)=>{
+        const [u,v]=ring[(i+1)%ring.length];
+        return total+x*v-u*z;
+      },0);
+      const outward=(area>0?1:-1)*(ring===hole?-1:1);
+      ring.forEach(([x,z],i)=>{
+        const [u,v]=ring[(i+1)%ring.length], len=Math.hypot(u-x,v-z);
+        if(len<.12)return;
+        const nx=outward*(v-z)/len,nz=outward*(x-u)/len;
+        // The viewer stays inside the flat. Skip façades that face away from the whole unit.
+        if((3.1-x)*nx+(4.8-z)*nz < -7)return;
+        const shade=light*(.76+.22*Math.max(0,nx*sunX+nz*sunZ));
+        const wall=kind==='tower'?(i%5===0?'facadeAccent':'facade'):kind==='landmark'?'remoteFacade':'facility';
+        const distance=Math.hypot((x+u)/2-3.1,(z+v)/2-4.8);
+        const face=(a,b,low,high,color,brightness,offset=0)=>{
+          const at=(t,y)=>[x+(u-x)*t+nx*offset,y,z+(v-z)*t+nz*offset];
+          draw(at(a,low),at(b,low),at(b,high),at(a,high),color,brightness);
+        };
+        if(len<1.5||kind==='existing'||ring===hole){
+          face(0,1,ground,height,wall,shade);
+          return;
         }
-        return;
-      }
-      draw([x,ground,z],[u,ground,v],[u,height,v],[x,height,z],wall,shade);
-      if(simplified||len<1)return;
-      const bays=Math.max(1,Math.round(len/(kind==='landmark'?6.4:3.2)));
-      const distance=Math.hypot((x+u)/2,(z+v)/2);
-      const offset=.045+distance*.00034;
-      const drawBand=(a,b,low,high,color,brightness)=>{
-        const at=(t,y)=>[x+(u-x)*t+nx*offset,y,z+(v-z)*t+nz*offset];
-        draw(at(a,low),at(b,low),at(b,high),at(a,high),color,brightness);
-      };
-      const stride=kind==='landmark'?2:1;
-      for(let floor=0;floor<floors;floor+=stride){
-        const y=ground+floor*STOREY_METRES;
-        if(kind==='facility'){
-          if(len>4)drawBand(.06,.94,y+.9,y+1.65,'facadeGlass',shade);
-          continue;
+        if(simplified){
+          const stride=distance>300?4:distance>125?2:1;
+          const bays=Math.max(1,Math.round(len/(distance>125?6.6:3.6)));
+          for(let level=0;level<floors;level+=stride){
+            const y=ground+level*STOREY_METRES, rise=Math.min(stride,floors-level)*STOREY_METRES;
+            for(let bay=0;bay<bays;bay++){
+              const a=bay/bays,b=(bay+1)/bays;
+              face(a,b,y,y+rise,wall,shade*(.96+(bay+level)%3*.02));
+              const low=y+rise*.31,high=y+rise*.72,pad=(b-a)*.20;
+              const tint=shade*(.84+((bay*3+level+i)%5)*.05);
+              face(a+pad,b-pad,low,high,kind==='facility'?'deckVoid':'facadeGlass',tint,.22);
+            }
+          }
+          return;
         }
-        if(kind==='existing')continue;
-        if(len>3)drawBand(.005,.995,y+.12,y+.27,'roof',shade);
-        for(let bay=0;bay<bays;bay++){
-          drawBand((bay+.16)/bays,(bay+.84)/bays,y+.95,y+2.19,'facadeGlass',shade*(.82+((bay+floor*3+i)%5)*.06));
+        const distant=distance>225;
+        const stride=distant?2:1;
+        const bays=Math.max(1,Math.round(len/(distant?6.4:3.25)));
+        const setback=.065+distance*.00024;
+        for(let level=0;level<floors;level+=stride){
+          const y=ground+level*STOREY_METRES;
+          const rise=Math.min(stride,floors-level)*STOREY_METRES;
+          const deck=kind==='facility';
+          const sill=y+(deck ? .90 : .86), lintel=y+(deck?1.84:2.23);
+          face(0,1,y,y+.22,'facadeLedge',shade*.92,setback*.6);
+          face(0,1,y+.22,sill,wall,shade);
+          face(0,1,lintel,y+rise,wall,shade);
+          for(let bay=0;bay<bays;bay++){
+            const start=bay/bays,end=(bay+1)/bays;
+            const a=start+.18/bays,b=end-.18/bays;
+            face(start,a,sill,lintel,wall,shade);
+            face(b,end,sill,lintel,wall,shade);
+            const tint=shade*(.86+((bay*3+level*7+i)%9)*.025);
+            face(a,b,sill,lintel,deck?'deckVoid':'facadeGlass',tint,-setback);
+            if(!distant){
+              const lip=Math.min(.032,(b-a)*.12);
+              const midpoint=(a+b)/2;
+              face(a,a+lip,sill,lintel,'windowReveal',shade*.87);
+              face(b-lip,b,sill,lintel,'windowReveal',shade*.76);
+              face(a+lip,b-lip,sill,sill+.085,'windowReveal',shade);
+              if(!deck)face(midpoint-lip*.4,midpoint+lip*.4,sill+.085,lintel,'windowReveal',shade*.77);
+            }
+          }
         }
-      }
-     });
+      });
     }
   }
 }

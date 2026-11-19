@@ -23,11 +23,11 @@
 <nav class="bar" id="rooms" aria-label="Jump to room"></nav>
 <p class="note" id="help">Drag to orbit. Choose a room to jump inside.</p>
 <p class="note" id="light-status" aria-live="polite"></p>
-<p class="note">Indicative view based on the HDB plans and the tracker's 3D site model. Stack positions, storey heights, terrain and daylight are approximate. The selected block's exterior and unconfirmed future buildings are excluded. Nearby map features © <a style="color:inherit" href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener noreferrer">OpenStreetMap contributors</a>.</p></main>
+<p class="note">Indicative view based on the HDB plans and the tracker's 3D site model. Stack positions, façades, terrain, coastline and daylight are approximate. The selected block's exterior and unconfirmed future buildings are excluded. Nearby map features and coastline © <a style="color:inherit" href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener noreferrer">OpenStreetMap contributors</a>.</p></main>
 <script type="module">
 import {type2WalkthroughLayouts as layouts} from "./assets/type-2-walkthrough-layouts.js?v=1";
 import {solarPosition} from "./assets/berlayar-site-model.js?v=1";
-import {unitSite, floorElevation, sunBlocked, drawNeighbourhood} from "./assets/type-2-walkthrough-site.js?v=2";
+import {unitSite, floorElevation, sunBlocked, drawNeighbourhood} from "./assets/type-2-walkthrough-site.js?v=3";
 const $=id=>document.getElementById(id);
 const params=new URLSearchParams(location.search);
 const stack=layouts.has(params.get('stack'))?params.get('stack'):'139';
@@ -64,7 +64,7 @@ $('stack-title').textContent='Stack '+stack;
 document.title='Berlayar Rise · Stack '+stack;
 const embedded=window.parent!==window&&params.has('embedded');
 document.documentElement.classList.toggle('embedded',embedded);
-const canvas=$('world'), gl=canvas.getContext('webgl',{antialias:true,alpha:false});
+const canvas=$('world'), gl=canvas.getContext('webgl',{antialias:true,alpha:true});
 const flat=gl?null:canvas.getContext('2d');
 let uniforms;
 if(gl){
@@ -87,13 +87,15 @@ uniforms=Object.fromEntries(['eye','front','right','up','aspect','ortho','zoom',
 }
 const meter=.0095, X=n=>(n-180)*meter,Z=n=>(n-90)*meter;
 const colors={
- wall:'#f1f0ed', ceiling:'#f9f8f4', structure:'#dadad6', trim:'#a19c92', edge:'#756f64',
- floor:'#594437', plankLight:'#624b3d', plankDark:'#523e34', seam:'#493629',
+ wall:'#edece6', ceiling:'#f4f2ec', structure:'#dddcd2', trim:'#c3bcb0', edge:'#8d8275',
+ floor:'#79604b', plankLight:'#806650', plankDark:'#725846', seam:'#604a3b',
  tile:'#898b88', grout:'#777a77', tiledWall:'#a4a7a3', shelter:'#838583',
- frame:'#24292d', glass:'#b7dce8', light:'#a28262',
- terrain:'#a4b294', landscape:'#88a36b', road:'#858b87', tree:'#4f7747',
- facade:'#e3e5df', facility:'#cdd0ca', facadeGlass:'#566c72', remoteFacade:'#cad8dc',
- roof:'#e1e5df', roofGarden:'#799466',
+ frame:'#30363a', frameEdge:'#41494d', glass:'#c8deec', light:'#b69266', penumbra:'#917557',
+ terrain:'#9ba68b', landscape:'#839870', road:'#858781', kerb:'#cbc5b6', path:'#b9a88d',
+ tree:'#587746', treeLight:'#698650', bark:'#706052',
+ facade:'#e3e0d5', facadeAccent:'#b9bdb2', facility:'#c9cbc1', facadeGlass:'#6c8992', remoteFacade:'#becbd0',
+ deckVoid:'#4a5553', facadeLedge:'#eeece5', windowReveal:'#b2bebd', roof:'#d4d3c7', roofGarden:'#759264',
+ water:'#78a1af',
  door:'#4b4b49', metal:'#c4c6c2', wood:'#885f44', sage:'#708e81',
  cream:'#e4d7be', dark:'#34444a'
 };
@@ -139,26 +141,67 @@ const furniture=[
 const keys=new Set(), player={x:X(rooms[0][1]),z:Z(rooms[0][2]),yaw:rooms[0][3],pitch:0};let overview=false, furnished=false, orbit=.56, tilt=.97, dirty=true;
 let verts=[], faces=[], glassFaces=[], layer=2, count=0, glassCount=0;
 let exterior=null, exteriorFaces=[], exteriorKey='', exteriorCount=0;
+let gpuExterior=null, gpuBytes=0;
 let speedX=0,speedZ=0;
 const palette=Object.fromEntries(Object.entries(colors).map(([key,hex])=>
  [key,hex.slice(1).match(/../g).map(value=>parseInt(value,16)/255)]));
 function rgb(key,light){return palette[key].map(channel=>channel*light)}
+const cssColor=color=>'rgb('+color.map(v=>Math.round(v*255)).join(',')+')';
+const softMaterials=new Set(['wall','ceiling','structure','floor','plankLight','plankDark','seam','trim','tiledWall']);
+const apertureCentres=windows.filter(o=>o.daylight).map(o=>[X((o.a[0]+o.b[0])/2),Z(o.a[1])]);
+function roomLight([x,y,z]){
+ const nearest=Math.min(...apertureCentres.map(([u,v])=>Math.hypot(x-u,z-v)));
+ const daylight=Math.max(.2,Math.min(1,.55+solar.altitude/55));
+ const bounce=.11*Math.exp(-nearest*.60)*daylight;
+ const contact=y<0?0:.08*Math.max(0,1-Math.min(y,2.62-y)*9);
+ return Math.min(1.02,.91+bounce-contact);
+}
 function quad(a,b,c,d,key,light=1){
- const color=rgb(key,light);
- if(gl){for(const p of [a,b,c,a,c,d])verts.push(...p,...color);return}
+ const color=rgb(key,light), soft=softMaterials.has(key)&&!overview;
+ if(gl){
+  for(const p of [a,b,c,a,c,d]){
+   const brightness=soft?roomLight(p):1;
+   verts.push(...p,...color.map(channel=>channel*brightness));
+  }
+  return;
+ }
  const mix=(p,q,t)=>p.map((v,i)=>v+(q[i]-v)*t);
- const segments=(p,q)=>Math.ceil(Math.hypot(...p.map((v,i)=>v-q[i]))/.94)||1;
- const cols=segments(a,b), rows=segments(a,d), fill='rgb('+color.map(v=>Math.round(v*255)).join(',')+')';
+ const segments=(p,q)=>Math.ceil(Math.hypot(...p.map((v,i)=>v-q[i]))/.76)||1;
+ const cols=segments(a,b), rows=segments(a,d);
+ const fill=cssColor(color);
  for(let j=0;j<rows;j++)for(let i=0;i<cols;i++){
   const p=mix(a,d,j/rows),q=mix(b,c,j/rows),r=mix(a,d,(j+1)/rows),s=mix(b,c,(j+1)/rows);
-  faces.push({points:[mix(p,q,i/cols),mix(p,q,(i+1)/cols),mix(r,s,(i+1)/cols),mix(r,s,i/cols)],fill,layer});
+  const points=[mix(p,q,i/cols),mix(p,q,(i+1)/cols),mix(r,s,(i+1)/cols),mix(r,s,i/cols)];
+  const centre=mix(points[0],points[2],.5);
+  faces.push({points,fill:soft?cssColor(color.map(channel=>channel*roomLight(centre))):fill,layer});
  }
 }
+const outsideLayers={terrain:-7,water:-6,landscape:-5,kerb:-4,road:-3,path:-3};
+function outdoorQuad(a,b,c,d,key,light){
+ const points=[a,b,c,d];
+ const x=(a[0]+b[0]+c[0]+d[0])/4,z=(a[2]+b[2]+c[2]+d[2])/4;
+ const distance=Math.hypot(x-3.135,z-4.845);
+ const haze=key==='water'?.42:key==='terrain'?.37:Math.min(.89,1-Math.exp(-Math.max(0,distance-28)/360));
+ const sky=solar.altitude>0?[.80,.855,.87]:[.28,.36,.45];
+ const color=rgb(key,light).map((channel,i)=>channel*(1-haze)+sky[i]*haze);
+ if(gl){for(const p of [a,b,c,a,c,d])verts.push(...p,...color);return}
+ const radius=Math.max(...points.map(p=>Math.hypot(p[0]-x,p[1]-(a[1]+c[1])/2,p[2]-z)));
+ exteriorFaces.push({points,fill:cssColor(color),layer:outsideLayers[key]??-2,centre:[x,(a[1]+c[1])/2,z],radius});
+}
 function paint(w,h,eye,[front,right,up],zoom,focal){
- flat.fillStyle=overview?'#29363d':solar.altitude>0?'#a7c0cd':'#657687';flat.fillRect(0,0,w,h);
- const dot=(p,q)=>p[0]*q[0]+p[1]*q[1]+p[2]*q[2], polygons=[];
- for(const collection of [overview?[]:exteriorFaces,faces])for(const face of collection){
-  const projected=face.points.map(p=>{const v=p.map((n,i)=>n-eye[i]);return [dot(v,right),dot(v,up),dot(v,front)]});
+ flat.clearRect(0,0,w,h);
+ const polygons=[];
+ const glass=glassFaces.map(points=>({points,fill:'rgba(196,221,236,.075)',layer:-1}));
+ for(const collection of [overview?[]:exteriorFaces,glass,faces])for(const face of collection){
+  if(face.centre){
+   const dx=face.centre[0]-eye[0],dy=face.centre[1]-eye[1],dz=face.centre[2]-eye[2];
+   const depth=dx*front[0]+dy*front[1]+dz*front[2];
+   if(depth < -face.radius)continue;
+  }
+  const projected=face.points.map(p=>{
+   const dx=p[0]-eye[0],dy=p[1]-eye[1],dz=p[2]-eye[2];
+   return [dx*right[0]+dy*right[1]+dz*right[2],dx*up[0]+dy*up[1]+dz*up[2],dx*front[0]+dy*front[1]+dz*front[2]];
+  });
   const clipped=[];
   for(let i=0;i<4;i++){
    const a=projected[i],b=projected[(i+1)%4];
@@ -171,7 +214,11 @@ function paint(w,h,eye,[front,right,up],zoom,focal){
   polygons.push({screen,depth:clipped.reduce((v,p)=>v+p[2],0)/clipped.length,fill:face.fill,layer:face.layer});
  }
  polygons.sort((a,b)=>a.layer-b.layer||b.depth-a.depth);
- for(const {screen,fill} of polygons){flat.beginPath();flat.moveTo(...screen[0]);for(const p of screen.slice(1))flat.lineTo(...p);flat.closePath();flat.fillStyle=flat.strokeStyle=fill;flat.lineWidth=.65;flat.fill();flat.stroke()}
+ for(const {screen,fill,layer} of polygons){
+  flat.beginPath();flat.moveTo(...screen[0]);for(const p of screen.slice(1))flat.lineTo(...p);
+  flat.closePath();flat.fillStyle=flat.strokeStyle=fill;flat.fill();
+  if(layer< -1||layer===0||layer>=2){flat.lineWidth=layer>=2?.45:.62;flat.stroke();}
+ }
 }
 function block(a,b,width,y,h,key,outlined=false){
  const [x,z]=a,[u,v]=b,len=Math.hypot(u-x,v-z);const dx=(v-z)*width/(2*len),dz=(x-u)*width/(2*len);
@@ -199,7 +246,7 @@ function rect(x,z,u,v,y,h,key){block([X(x),Z((z+v)/2)],[X(u),Z((z+v)/2)],Z(v)-Z(
 function wall(a,b,y,h,key='wall',w=.15,outlined=false){block([X(a[0]),Z(a[1])],[X(b[0]),Z(b[1])],w,y,h,key,outlined)}
 function end(o){
  if(o.b===undefined)return o.a;
- const [dx,dz]=[o.b[0]-o.a[0],o.b[1]-o.a[1]], t=o.open?(o.turn??1)*Math.PI*.48:0;
+ const [dx,dz]=[o.b[0]-o.a[0],o.b[1]-o.a[1]], t=(o.amount??+!!o.open)*(o.turn??1)*Math.PI*.48;
  return [o.a[0]+dx*Math.cos(t)-dz*Math.sin(t),o.a[1]+dx*Math.sin(t)+dz*Math.cos(t)];
 }
 function surface(x,z,u,v,y,key){quad([X(x),y,Z(z)],[X(u),y,Z(z)],[X(u),y,Z(v)],[X(x),y,Z(v)],key)}
@@ -233,7 +280,13 @@ function clipToRoom(polygon,[left,back,right,front]){
  return polygon;
 }
 const windowRoomBounds=[planRect([189,765,519,1082]),planRect([520,479,844,927])];
-const windowRows=[[.81,1.13],[1.13,1.86],[1.86,2.25]];
+const windowRows=[[.80,1.13],[1.13,1.86],[1.86,2.25]];
+function litPatch(polygon,room,outer){
+ layer=outer?1:1.1;
+ const clipped=clipToRoom(polygon,room);
+ for(let i=1;i+1<clipped.length;i++)
+  quad(clipped[0],clipped[i],clipped[i+1],clipped[i+1],outer?'penumbra':'light');
+}
 function daylight(o, room, at){
  if(solar.altitude<1)return false;
  const [sx,sy,sz]=site.sunVector(solar.azimuth,solar.altitude);
@@ -249,10 +302,10 @@ function daylight(o, room, at){
    const [x,z]=at(t);
    return [X(x)-sx*h/sy,.002,Z(z)-sz*h/sy];
   };
-  const left=col/4+.014,right=(col+1)/4-.014;
-  const polygon=clipToRoom([cast(left,bottom+.024),cast(right,bottom+.024),cast(right,top-.024),cast(left,top-.024)],room);
-  for(let i=1;i+1<polygon.length;i++)
-   quad(polygon[0],polygon[i],polygon[i+1],polygon[i+1],'light',.83+.17*Math.min(1,sy)*Math.abs(sz));
+  const left=col/4+.012,right=(col+1)/4-.012;
+  litPatch([cast(left,bottom+.019),cast(right,bottom+.019),cast(right,top-.019),cast(left,top-.019)],room,true);
+  const core=[cast(left+.009,bottom+.04),cast(right-.009,bottom+.04),cast(right-.009,top-.04),cast(left+.009,top-.04)];
+  litPatch(core.map(([x,y,z])=>[x,y+.0007,z]),room,false);
  }
  layer=2;
  return reachesWindow;
@@ -261,18 +314,19 @@ function glazing(o,top,room){
  const at=t=>o.a.map((value,i)=>value+(o.b[i]-value)*t);
  wall(o.a,o.b,0,overview?.27:.82,'structure',.23);
  if(overview)return false;
- wall(o.a,o.b,2.25,top,'wall',.23);
- for(const y of [.82,1.13,1.86,2.25])wall(o.a,o.b,y-.03,y+.03,'frame',.14);
+ wall(o.a,o.b,2.25,top,'wall',.24);
+ wall(o.a,o.b,.792,.823,'structure',.32);
+ for(const y of [.83,1.13,1.86,2.25])wall(o.a,o.b,y-.019,y+.019,'frame',.097);
  for(const t of [0,.25,.5,.75,1]){
   const p=at(t);
-  wall(p,[p[0]+.5,p[1]+.5],.82,2.25,'frame',.067);
+  wall(p,[p[0]+.5,p[1]+.5],.82,2.25,'frame',.047);
  }
  function pane(a,b,low,high,opening,dark){
   const endPoint=end(opening), point=(p,y)=>[X(p[0]),y,Z(p[1])];
   glassFaces.push([point(a,low),point(endPoint,low),point(endPoint,high),point(a,high)]);
   if(!dark)return;
-  for(const y of [low,high])wall(a,endPoint,y-.022,y+.022,'frame',.039);
-  for(const p of [a,endPoint])wall(p,[p[0]+.5,p[1]+.5],low,high,'frame',.043);
+  for(const y of [low,high])wall(a,endPoint,y-.014,y+.014,'frameEdge',.028);
+  for(const p of [a,endPoint])wall(p,[p[0]+.5,p[1]+.5],low,high,'frame',.034);
   const handle=a.map((v,i)=>v+(endPoint[i]-v)*.89);
   wall(handle,[handle[0]+.5,handle[1]+.5],(low+high)/2-.063,(low+high)/2+.063,'metal',.035);
  }
@@ -280,7 +334,7 @@ function glazing(o,top,room){
   const a=at(col/4+.015),b=at((col+1)/4-.015);
   const casement=row===1&&(col===1||col===2);
   const [start,finish]=col===2?[b,a]:[a,b];
-  pane(start,finish,low+.033,high-.033,{a:start,b:finish,open:o.open&&casement,turn:(col===1?1:-1)*o.turn*.74},casement);
+  pane(start,finish,low+.033,high-.033,{a:start,b:finish,amount:casement?(o.amount??0):0,turn:(col===1?1:-1)*o.turn*.74},casement);
  }
  return room?daylight(o,room,at):false;
 }
@@ -289,18 +343,9 @@ function build(){
  if(!overview){
   const key=[floor,solar.azimuth,solar.altitude].join();
   if(key!==exteriorKey){
-   if(gl){
-    drawNeighbourhood(site,floorElevation(floor),solar,quad);
-    exterior=new Float32Array(verts);
-    verts=[];
-   }else{
-    exteriorFaces=[];
-    drawNeighbourhood(site,floorElevation(floor),solar,(a,b,c,d,color,light)=>{
-     const depthOrder={terrain:-5,landscape:-4,road:-3};
-     const fill='rgb('+rgb(color,light).map(v=>Math.round(v*255)).join(',')+')';
-     exteriorFaces.push({points:[a,b,c,d],fill,layer:depthOrder[color]??-2});
-    },true);
-   }
+   exteriorFaces=[];
+   drawNeighbourhood(site,floorElevation(floor),solar,outdoorQuad,!gl);
+   if(gl){exterior=new Float32Array(verts);verts=[];}
    exteriorKey=key;
   }
  }
@@ -338,8 +383,13 @@ function build(){
   for(const points of glassFaces)quad(...points,'glass');
   const interior=new Float32Array(verts);
   const exteriorBytes=exteriorCount*6*Float32Array.BYTES_PER_ELEMENT;
-  gl.bufferData(gl.ARRAY_BUFFER,exteriorBytes+interior.byteLength,gl.STATIC_DRAW);
-  if(exteriorCount)gl.bufferSubData(gl.ARRAY_BUFFER,0,exterior);
+  const activeExterior=exteriorCount?exterior:null;
+  const bytes=exteriorBytes+interior.byteLength;
+  if(activeExterior!==gpuExterior||bytes>gpuBytes){
+   gpuExterior=activeExterior;gpuBytes=bytes+65536;
+   gl.bufferData(gl.ARRAY_BUFFER,gpuBytes,gl.DYNAMIC_DRAW);
+   if(activeExterior)gl.bufferSubData(gl.ARRAY_BUFFER,0,activeExterior);
+  }
   gl.bufferSubData(gl.ARRAY_BUFFER,exteriorBytes,interior);
  }
  glassCount=verts.length/6-count;
@@ -356,7 +406,19 @@ function clear(x,z){
  return !furnished||!furniture.some(([a,b,c,d])=>x>X(a)-.13&&x<X(c)+.13&&z>Z(b)-.13&&z<Z(d)+.13);
 }
 function nearest(){let best=.95, result;for(const o of [...doors,...windows]){const d=distance(player.x,player.z,o.a,o.b);if(d<best){best=d;result=o}}return result}
-function interact(){const o=nearest();if(overview||!o)return;o.open=!o.open;if(!clear(player.x,player.z)){o.open=!o.open;return}dirty=true}
+const reduceMotion=matchMedia('(prefers-reduced-motion: reduce)');
+function interact(){
+ const opening=nearest();
+ if(overview||!opening)return;
+ opening.open=!opening.open;
+ if(!clear(player.x,player.z)){opening.open=!opening.open;return}
+ if(windows.includes(opening)){
+  const target=Number(opening.open);
+  opening.animation=reduceMotion.matches?null:{started:performance.now(),from:opening.amount??0,target,step:-1};
+  if(!opening.animation)opening.amount=target;
+ }
+ dirty=true;
+}
 function setMode(value){overview=value;dirty=true;$('reticle').classList.toggle('hide',value);$('overview').setAttribute('aria-pressed',value);$('walk').setAttribute('aria-pressed',!value);$('pad').classList.toggle('hide',value);$('help').textContent=value?'Drag to orbit. Choose a room to jump inside.':'Drag to look. Use the direction pad or WASD to move. Press E or use the on-screen button near a door or window.'}
 function jump([name,x,z,yaw,pitch=0]){
  keys.clear();
@@ -426,6 +488,19 @@ function frame(t){
  }else $('use').classList.add('hide');
  const ratio=Math.min(devicePixelRatio||1,2),w=Math.round(canvas.clientWidth*ratio),h=Math.round(canvas.clientHeight*ratio);
  if(canvas.width!==w||canvas.height!==h){canvas.width=w;canvas.height=h}
+ for(const opening of windows){
+  const animation=opening.animation;
+  if(!animation)continue;
+  const progress=Math.min(1,Math.max(0,(t-animation.started)/255));
+  const step=gl?progress:Math.floor(progress*7)/7;
+  if(step!==animation.step){
+   animation.step=step;
+   const ease=step*step*(3-2*step);
+   opening.amount=animation.from+(animation.target-animation.from)*ease;
+   dirty=true;
+  }
+  if(progress===1)opening.animation=null;
+ }
  const updated=dirty;
  if(dirty)build();
  const b=overview?basis(orbit,-tilt):basis(player.yaw,player.pitch);
@@ -434,10 +509,13 @@ function frame(t){
  const focal=Math.min(1.45,Math.max(.72,1.85*aspect));
  const view=[w,h,...eye,...b[0]].join();
  if(updated||view!==lastView){
+  const horizon=Math.max(6,Math.min(94,50+b[0][1]*70));
+  canvas.style.background=overview?'#29363d':solar.altitude>0
+   ?`linear-gradient(180deg,#7eaccd,#d8e6e9 ${horizon}%,#d3dfe1)`
+   :`linear-gradient(180deg,#252f49,#677f94 ${horizon}%,#667782)`;
   if(flat)paint(w,h,eye,b,zoom,focal);
   if(gl){
-   const sky=solar.altitude>0?[.65,.76,.83]:[.36,.45,.56];
-   gl.viewport(0,0,w,h);gl.clearColor(...(overview?[.16,.21,.24]:sky),1);
+   gl.viewport(0,0,w,h);gl.clearColor(0,0,0,0);
    gl.clear(gl.COLOR_BUFFER_BIT|gl.DEPTH_BUFFER_BIT);
    for(const [key,value] of Object.entries({eye,front:b[0],right:b[1],up:b[2]}))gl.uniform3fv(uniforms[key],value);
    gl.uniform1f(uniforms.aspect,aspect);gl.uniform1f(uniforms.ortho,+overview);
@@ -445,7 +523,7 @@ function frame(t){
    gl.drawArrays(gl.TRIANGLES,0,exteriorCount+count);
    if(glassCount){
     gl.enable(gl.BLEND);gl.blendFunc(gl.SRC_ALPHA,gl.ONE_MINUS_SRC_ALPHA);
-    gl.depthMask(false);gl.uniform1f(uniforms.opacity,.13);
+    gl.depthMask(false);gl.uniform1f(uniforms.opacity,.085);
     gl.drawArrays(gl.TRIANGLES,exteriorCount+count,glassCount);
     gl.depthMask(true);gl.disable(gl.BLEND);
    }
