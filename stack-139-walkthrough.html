@@ -10,24 +10,38 @@
 .scene>:focus-visible{outline-offset:-3px}
 #light-status{min-height:1.3em;margin-top:5px}
 @media(max-width:520px){.conditions{gap:6px 9px}.conditions input,.conditions select{padding-inline:6px}.viewlabel{max-width:calc(100% - 114px);font-size:12px}}
+.tour-button{background:#dbe8de;color:#173529;border-color:#c6dbcc;font-weight:650}
+.actions{z-index:2}
+.window-panel{position:absolute;right:0;bottom:calc(100% + 8px);width:min(315px,calc(100vw - 48px));max-height:min(46vh,380px);overflow:auto;padding:10px 12px;text-align:left;background:#18272cf7;border:1px solid #6c7f79;border-radius:12px}
+.window-panel h2{font-size:16px;margin:0 0 7px}.window-row{display:grid;grid-template-columns:1fr auto auto;gap:5px;align-items:center;border-top:1px solid #61716d;padding:6px 0}.window-row button{padding:6px 8px;min-height:36px}.window-state{display:block;color:#c5d8d0;font-size:12px}
+.landmarks,.tour-controls{position:absolute;bottom:max(12px,env(safe-area-inset-bottom));left:50%;transform:translateX(-50%);z-index:2;width:max-content;max-width:calc(100% - 20px);display:flex;justify-content:center;align-items:center;gap:6px;flex-wrap:wrap}.landmarks button,.tour-controls button{background:#18272cf5}.landmarks button[aria-pressed=true]{background:#f0eee9;color:#182822}
+.tour-controls{padding:7px;background:#18272cf5;border-radius:10px}.tour-controls progress{width:clamp(66px,19vw,175px);accent-color:#b8d8c4}.tour-fade{position:absolute;inset:0;pointer-events:none;background:#171c1e;opacity:0}
+.scene.outside .actions,.scene.touring .actions,.scene.touring .map,.scene.outside .map{display:none}.scene.touring .viewlabel,.scene.outside .viewlabel{display:block}.scene.immersive .viewlabel{max-width:calc(100% - 180px)}.viewlabel{z-index:1}.scene.immersive .exit{z-index:3}
 </style>
-<main><header><div><small id="layout-title">Berlayar Rise</small><h1 id="stack-title">Stack 139</h1></div><div><button id="walk" aria-pressed="true">Walk inside</button> <button id="overview" aria-pressed="false">3D overview</button> <button id="focus" aria-pressed="false">Immersive view</button></div></header>
+<main><header><div><small id="layout-title">Berlayar Rise</small><h1 id="stack-title">Stack 139</h1></div><div><button id="walk" aria-pressed="true">Walk inside</button> <button id="overview" aria-pressed="false">3D overview</button> <button id="outlook" aria-pressed="false">Outlook</button> <button id="focus" aria-pressed="false">Immersive view</button> <button id="play-tour" class="tour-button" aria-controls="tour-controls">Play Tour</button></div></header>
 <div class="conditions" aria-label="Window view and daylight settings">
 <label>View floor <select id="view-floor"></select></label>
 <label>Sun date <input id="sun-date" type="date" value="2031-12-21"></label>
 <label>Time (SGT) <input id="sun-time" type="time" value="16:00"></label>
 </div>
 <section class="scene" aria-label="Interactive 3D apartment"><canvas id="world" aria-label="Apartment model, drag to look" tabindex="0"></canvas><div class="viewlabel" id="label">3D overview</div><div class="map"><canvas id="map" width="150" height="190" aria-label="Floor plan and position"></canvas></div>
-<div class="pad hide" id="pad" aria-label="Movement controls"><button data-m="w" aria-label="Forward">↑</button><button data-m="a" aria-label="Strafe left">←</button><button data-m="s" aria-label="Backward">↓</button><button data-m="d" aria-label="Strafe right">→</button></div><span class="reticle" id="reticle" aria-hidden="true"></span><button class="exit hide" id="exit">Exit immersive view</button><div class="actions"><button id="use" class="hide"></button><button id="furn" aria-pressed="false">Furniture off</button></div></section>
-<nav class="bar" id="windows" aria-label="Jump to window"></nav>
+<div class="pad hide" id="pad" aria-label="Movement controls"><button data-m="w" aria-label="Forward">↑</button><button data-m="a" aria-label="Strafe left">←</button><button data-m="s" aria-label="Backward">↓</button><button data-m="d" aria-label="Strafe right">→</button></div><span class="reticle" id="reticle" aria-hidden="true"></span><button class="exit hide" id="exit">Exit immersive view</button><div class="actions"><button id="use" class="hide"></button><button id="window-controls" aria-expanded="false" aria-controls="window-panel">Windows</button>
+<section class="window-panel hide" id="window-panel" aria-labelledby="window-title"><h2 id="window-title">Windows</h2><div id="window-rows"></div></section><button id="furn" aria-pressed="false">Furniture off</button></div>
+<div class="tour-fade" id="tour-fade" aria-hidden="true"></div>
+<nav class="landmarks hide" id="landmarks" aria-label="Outlook landmarks"></nav>
+<div class="tour-controls hide" id="tour-controls" aria-label="Guided tour controls">
+ <progress id="tour-progress" aria-label="Tour progress" value="0" max="1"></progress>
+ <button id="tour-pause">Pause tour</button><button id="tour-stop">End tour</button>
+</div></section>
 <nav class="bar" id="rooms" aria-label="Jump to room"></nav>
 <p class="note" id="help">Drag to orbit. Choose a room to jump inside.</p>
 <p class="note" id="light-status" aria-live="polite"></p>
-<p class="note">Typical HDB layout with illustrative dimensions, fittings and furniture. Stack positions, floor-specific exterior details, terrain and daylight are approximate. The selected block's exterior and unconfirmed future buildings are excluded. Nearby map features and coastline © <a style="color:inherit" href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener noreferrer">OpenStreetMap contributors</a>.</p></main>
+<p class="note">Typical HDB layout with illustrative dimensions, fittings and furniture. The site model includes nearby wings and mapped landmarks. Facades, terrain, future development and sightlines are approximate. Nearby map features and coastline © <a style="color:inherit" href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener noreferrer">OpenStreetMap contributors</a>.</p></main>
 <script type="module">
-import {walkthroughLayouts as layouts, layoutLabels, unitTemplates} from "./assets/walkthrough-layouts.js?v=1";
+import {walkthroughLayouts as layouts, layoutLabels, unitTemplates} from "./assets/walkthrough-layouts.js?v=2";
 import {solarPosition} from "./assets/berlayar-site-model.js?v=1";
-import {unitSite, floorElevation, sunBlocked, drawNeighbourhood} from "./assets/type-2-walkthrough-site.js?v=4";
+import {unitSite, floorElevation, sunBlocked, drawNeighbourhood} from "./assets/type-2-walkthrough-site.js?v=5";
+import {roomSpot, buildTour, tourFrame, loungeFurniture, tableFurniture} from "./assets/walkthrough-presentation.js?v=1";
 const $=id=>document.getElementById(id);
 const params=new URLSearchParams(location.search);
 const stack=layouts.has(params.get('stack'))?params.get('stack'):'139';
@@ -38,6 +52,7 @@ const [left,back,right,front]=template?.bounds??[0,0,1031,1195];
 const cropScale=2.63;
 const site=unitSite(stack,template?[(right-left)*cropScale*meter/2,(front-back)*cropScale*meter/2]:undefined);
 const selectedFloor=Number(params.get('floor'));
+const renderUnit=floor=>String(floor).padStart(2,'0')+'-'+stack;
 let floor=site.floors.includes(selectedFloor)?selectedFloor:site.floors[0];
 for(const level of site.floors)$('view-floor').add(new Option(String(level),String(level)));
 $('view-floor').value=String(floor);
@@ -54,7 +69,13 @@ const updateSolar=()=>{
 };
 solarDate.addEventListener('input',updateSolar);
 solarTime.addEventListener('input',updateSolar);
-$('view-floor').addEventListener('change',()=>{floor=Number($('view-floor').value);dirty=true});
+$('view-floor').addEventListener('change',()=>{
+ floor=Number($('view-floor').value);
+ $('stack-title').textContent='Unit #'+renderUnit(floor);
+ document.title='Berlayar Rise · #'+renderUnit(floor);
+ if(outside&&!tour&&activeLandmark)aimAt(activeLandmark);
+ dirty=true;
+});
 // The same floor plan can be mirrored on either axis in the brochure.
 function planPoint([x,z]){
  const u=flipX===1?x:left+right-x, v=flipZ===1?z:back+front-z;
@@ -69,9 +90,9 @@ function planOpening(opening){
  return {...opening,a:planPoint(opening.a),b:planPoint(opening.b),turn:opening.turn*flipX*flipZ,
   out:out&&[out[0]*flipX,out[1]*flipZ],room:room&&planRect(room)};
 }
-$('stack-title').textContent='Stack '+stack;
-$('layout-title').textContent='Berlayar Rise / '+layoutLabels[kind];
-document.title='Berlayar Rise · Stack '+stack;
+$('stack-title').textContent='Unit #'+renderUnit(floor);
+$('layout-title').textContent='Berlayar Rise · Block '+site.block+' · '+layoutLabels[kind];
+document.title='Berlayar Rise · #'+renderUnit(floor);
 const embedded=window.parent!==window&&params.has('embedded');
 document.documentElement.classList.toggle('embedded',embedded);
 const canvas=$('world'), gl=canvas.getContext('webgl',{antialias:true,alpha:true});
@@ -79,25 +100,47 @@ const flat=gl?null:canvas.getContext('2d');
 let uniforms;
 if(gl){
 const vertex=`
-attribute vec3 point; attribute vec3 rgb; varying vec3 color;
+attribute vec3 point; attribute vec3 rgb; attribute float finish;
+varying mediump vec3 color; varying mediump vec3 world; varying mediump float material;
 uniform vec3 eye; uniform vec3 front; uniform vec3 right; uniform vec3 up;
 uniform float aspect; uniform float ortho; uniform float zoom; uniform float focal;
 void main(){
  vec3 p=point-eye; vec3 q=vec3(dot(p,right),dot(p,up),dot(p,front));
- color=rgb;
+ color=rgb; world=point; material=finish;
  if(ortho>0.5){gl_Position=vec4(q.x/(zoom*aspect),q.y/zoom,q.z/30.0,1.0);}
  else{gl_Position=vec4(q.x*focal/aspect,q.y*focal,1.00009*q.z-0.100005,q.z);}
 }`;
-const fragment=`precision mediump float; varying vec3 color; uniform float opacity; void main(){gl_FragColor=vec4(color,opacity);}`;
+const fragment=`
+precision mediump float;
+varying mediump vec3 color; varying mediump vec3 world; varying mediump float material;
+uniform float opacity;
+float grain(vec2 p){
+ vec3 q=fract(p.xyx*vec3(.1031,.11369,.13787));
+ q+=dot(q,q.yzx+11.73);
+ return fract((q.x+q.y)*q.z);
+}
+void main(){
+ vec3 finish=color;
+ if(material>.5&&material<1.5){
+  float varnish=grain(floor(world.xz*vec2(12.0,135.0)));
+  finish*=.978+varnish*.045;
+ }
+ if(material>1.5&&material<2.5&&opacity>.9){
+  finish*=.91+.09*smoothstep(0.0,.32,world.y);
+ }
+ gl_FragColor=vec4(finish,opacity);
+}`;
 function shader(type,source){const s=gl.createShader(type);gl.shaderSource(s,source);gl.compileShader(s);if(!gl.getShaderParameter(s,gl.COMPILE_STATUS))throw Error(gl.getShaderInfoLog(s));return s}
 const program=gl.createProgram();gl.attachShader(program,shader(gl.VERTEX_SHADER,vertex));gl.attachShader(program,shader(gl.FRAGMENT_SHADER,fragment));gl.linkProgram(program);if(!gl.getProgramParameter(program,gl.LINK_STATUS))throw Error(gl.getProgramInfoLog(program));gl.useProgram(program);gl.enable(gl.DEPTH_TEST);
 const buffer=gl.createBuffer();gl.bindBuffer(gl.ARRAY_BUFFER,buffer);
-for(const [name,offset] of [['point',0],['rgb',12]]){const loc=gl.getAttribLocation(program,name);gl.enableVertexAttribArray(loc);gl.vertexAttribPointer(loc,3,gl.FLOAT,false,24,offset)}
+for(const [name,size,offset] of [['point',3,0],['rgb',3,12],['finish',1,24]]){
+ const loc=gl.getAttribLocation(program,name);gl.enableVertexAttribArray(loc);gl.vertexAttribPointer(loc,size,gl.FLOAT,false,28,offset);
+}
 uniforms=Object.fromEntries(['eye','front','right','up','aspect','ortho','zoom','focal','opacity'].map(k=>[k,gl.getUniformLocation(program,k)]));
 }
 const colors={
  wall:'#edece6', ceiling:'#f4f2ec', structure:'#dddcd2', trim:'#c3bcb0', edge:'#8d8275',
- floor:'#79604b', plankLight:'#806650', plankDark:'#725846', seam:'#604a3b',
+ floor:'#a3866a', plankLight:'#a98e73', plankDark:'#9c7e63', seam:'#806650',
  tile:'#898b88', grout:'#777a77', tiledWall:'#a4a7a3', shelter:'#838583',
  frame:'#30363a', frameEdge:'#41494d', glass:'#c8deec', light:'#b69266', penumbra:'#917557',
  terrain:'#9ba68b', landscape:'#839870', road:'#858781', kerb:'#cbc5b6', path:'#b9a88d',
@@ -105,7 +148,8 @@ const colors={
  facade:'#e3e0d5', facadeAccent:'#b9bdb2', facility:'#c9cbc1', facadeGlass:'#6c8992', remoteFacade:'#becbd0',
  deckVoid:'#4a5553', facadeLedge:'#eeece5', windowReveal:'#b2bebd', roof:'#d4d3c7', roofGarden:'#759264',
  water:'#78a1af',
- door:'#4b4b49', metal:'#c4c6c2', wood:'#885f44', sage:'#708e81',
+ door:'#876f59', metal:'#c4c6c2', wood:'#ac8c6e', sage:'#687e75',
+ upholstery:'#82958c',accent:'#668395',rug:'#b4a896',lamp:'#f6ecd4',
  cream:'#e4d7be', dark:'#34444a'
 };
 const rooms=(template?.rooms??[
@@ -131,7 +175,7 @@ const walls=(template?.walls??[
 const windows=(template?.windows??[
  {a:[238,1087],b:[437,1087],turn:1,out:[0,1],room:[189,765,519,1082],name:'Bedroom window'},
  {a:[583,934],b:[782,934],turn:1,out:[0,1],room:[520,479,844,927],name:'Living room window'},
- {a:[185,110],b:[185,350],turn:-1,name:'Kitchen opening'}
+ {a:[185,110],b:[185,350],turn:-1,out:[-1,0],name:'Kitchen window'}
 ]).map(planOpening);
 const doors=(template?.doors??[
  {a:[675,225],b:[540,225],turn:-1,name:'Front door'},
@@ -147,7 +191,9 @@ const furniture=(template?.furniture??[
  [270,120,481,179,.89,'sage'],[269,119,482,180,.93,'cream'],[353,136,400,166,.95,'dark'],
  [265,391,362,449,.84,'cream'],[267,504,318,555,.48,'wall']
 ]).map(planRect);
-const keys=new Set(), player={x:X(rooms[0][1]),z:Z(rooms[0][2]),yaw:rooms[0][3],pitch:0};let overview=false, furnished=false, orbit=.56, tilt=.97, dirty=true;
+const keys=new Set(), player={x:X(rooms[0][1]),z:Z(rooms[0][2]),yaw:rooms[0][3],pitch:0};let overview=false, furnished=true, outside=false, orbit=.56, tilt=.97, dirty=true;
+let tour=null,activeLandmark='Window outlook';
+const lookout={x:0,z:0,yaw:0,pitch:-.12};
 let verts=[], faces=[], glassFaces=[], layer=2, count=0, glassCount=0;
 let exterior=null, exteriorFaces=[], exteriorKey='', exteriorCount=0;
 let gpuExterior=null, gpuBytes=0;
@@ -157,7 +203,7 @@ const palette=Object.fromEntries(Object.entries(colors).map(([key,hex])=>
 function rgb(key,light){return palette[key].map(channel=>channel*light)}
 const cssColor=color=>'rgb('+color.map(v=>Math.round(v*255)).join(',')+')';
 const softMaterials=new Set(['wall','ceiling','structure','floor','plankLight','plankDark','seam','trim','tiledWall']);
-const apertureCentres=windows.filter(o=>o.room).map(o=>[X((o.a[0]+o.b[0])/2),Z(o.a[1])]);
+const apertureCentres=windows.map(o=>[X((o.a[0]+o.b[0])/2),Z((o.a[1]+o.b[1])/2)]);
 function roomLight([x,y,z]){
  const nearest=Math.min(...apertureCentres.map(([u,v])=>Math.hypot(x-u,z-v)));
  const daylight=Math.max(.2,Math.min(1,.55+solar.altitude/55));
@@ -167,10 +213,11 @@ function roomLight([x,y,z]){
 }
 function quad(a,b,c,d,key,light=1){
  const color=rgb(key,light), soft=softMaterials.has(key)&&!overview;
+ const finish=key==='floor'||key.startsWith('plank')?1:key==='wall'||key==='tiledWall'?2:0;
  if(gl){
   for(const p of [a,b,c,a,c,d]){
    const brightness=soft?roomLight(p):1;
-   verts.push(...p,...color.map(channel=>channel*brightness));
+   verts.push(...p,...color.map(channel=>channel*brightness),finish);
   }
   return;
  }
@@ -193,7 +240,7 @@ function outdoorQuad(a,b,c,d,key,light){
  const haze=key==='water'?.42:key==='terrain'?.37:Math.min(.89,1-Math.exp(-Math.max(0,distance-28)/360));
  const sky=solar.altitude>0?[.80,.855,.87]:[.28,.36,.45];
  const color=rgb(key,light).map((channel,i)=>channel*(1-haze)+sky[i]*haze);
- if(gl){for(const p of [a,b,c,a,c,d])verts.push(...p,...color);return}
+ if(gl){for(const p of [a,b,c,a,c,d])verts.push(...p,...color,0);return}
  const radius=Math.max(...points.map(p=>Math.hypot(p[0]-x,p[1]-(a[1]+c[1])/2,p[2]-z)));
  exteriorFaces.push({points,fill:cssColor(color),layer:outsideLayers[key]??-2,centre:[x,(a[1]+c[1])/2,z],radius});
 }
@@ -206,6 +253,8 @@ function paint(w,h,eye,[front,right,up],zoom,focal){
    const dx=face.centre[0]-eye[0],dy=face.centre[1]-eye[1],dz=face.centre[2]-eye[2];
    const depth=dx*front[0]+dy*front[1]+dz*front[2];
    if(depth < -face.radius)continue;
+   const sideways=Math.abs(dx*right[0]+dy*right[1]+dz*right[2]);
+   if(sideways > (depth+face.radius)*(w/Math.max(h,1))*2/focal+face.radius)continue;
   }
   const projected=face.points.map(p=>{
    const dx=p[0]-eye[0],dy=p[1]-eye[1],dz=p[2]-eye[2];
@@ -237,7 +286,7 @@ function block(a,b,width,y,h,key,outlined=false){
  for(let i=0;i<4;i++){
   const n=(i+1)%4;
   quad(low[i],low[n],top[n],top[i],key,[.87,.72,.95,.81][i]);
-  if(!outlined)continue;
+  if(!outlined||!overview)continue;
   // A thin edge on the exposed cap and a vertical seam at each segment end.
   const inset=.012;
   const toward=(p,q,amount)=>{
@@ -323,8 +372,17 @@ function daylight(o, at, rows){
 function glazing(o,top){
  const columns=o.columns??4, sill=windowSill(o);
  const at=t=>o.a.map((value,i)=>value+(o.b[i]-value)*t);
- wall(o.a,o.b,0,overview?.27:sill,'structure',.23);
- if(overview)return false;
+ wall(o.a,o.b,0,overview&&!tour ? .27 : sill,'structure',.23);
+ if(overview){
+  if(tour){
+   for(const y of [sill+.02,top-.024])wall(o.a,o.b,y-.017,y+.017,'frame',.077);
+   for(let i=0;i<=columns;i++){
+    const p=at(i/columns);
+    wall(p,[p[0]+.5,p[1]+.5],sill,top,'frame',.044);
+   }
+  }
+  return false;
+ }
  const rails=[sill+.016,1.13,1.86,2.25];
  const rows=rails.slice(0,-1).map((height,i)=>[height,rails[i+1]]);
  wall(o.a,o.b,2.25,top,'wall',.24);
@@ -355,7 +413,7 @@ function glazing(o,top){
  return o.room?daylight(o,at,rows):false;
 }
 function build(){
- verts=[];faces=[];glassFaces=[];const top=overview?.68:2.62;
+ verts=[];faces=[];glassFaces=[];const top=overview?(tour?1.50:.68):2.62;
  if(!overview){
   const key=[floor,solar.azimuth,solar.altitude].join();
   if(key!==exteriorKey){
@@ -365,7 +423,7 @@ function build(){
    exteriorKey=key;
   }
  }
- exteriorCount=gl&&!overview?exterior.length/6:0;
+ exteriorCount=gl&&!overview?exterior.length/7:0;
  layer=0;
  for(const floor of floors)drawFloor(...floor);
  layer=2;
@@ -388,19 +446,54 @@ function build(){
  }
  for(const o of doors){
   const b=end(o);
-  wall(o.a,b,.015,overview?.47:2.08,'door',.062);
+  wall(o.a,b,.015,overview?(tour?1.35:.47):2.08,'door',.062);
   if(overview)continue;
   wall(o.a,o.b,2.12,top);
   for(const p of [o.a,o.b])wall(p,[p[0]+1,p[1]+1],0,2.13,'frame',.075);
   const at=t=>o.a.map((a,i)=>a+(b[i]-a)*t);
   wall(at(.77),at(.91),.98,1.02,'metal',.125);
  }
- if(furnished)for(const [x,z,u,v,h,k] of furniture)rect(x,z,u,v,0,h,k);
- count=verts.length/6;
+ if(furnished){
+  const [sofa,...items]=furniture;
+  const middle=(a,b)=>(a+b)/2;
+  const rug=items.find(item=>item[4]===.38);
+  if(rug){
+   const [x,z,u,v]=rug;
+   const sat=Math.min((u-x)*.55,(v-z)*.55);
+   const border=[x-sat,z-sat,u+sat,v+sat];
+   const corners=[[border[0],border[1]],[border[2],border[1]],[border[2],border[3]],[border[0],border[3]]];
+   if(corners.every(([a,b])=>inFloor(X(a),Z(b))))rect(...border,.001,.009,'rug');
+  }
+  loungeFurniture(sofa,rooms[1].slice(1,3),rect);
+  for(const item of (template?items:items.slice(3))){
+   const [x,z,u,v,h,k]=item;
+   if((h===.38||h===.74)&&k==='wood'){
+    tableFurniture(item,rect);
+    if(h===.74&&!overview){
+     const a=middle(x,u),b=middle(z,v);
+     rect(a-1,b-1,a+1,b+1,2.0,2.606,'dark');
+     rect(a-12,b-8,a+12,b+8,1.89,2.033,'lamp');
+    }
+   }else if(k==='chair'){
+    const [,tz,,tv]=furniture.find(box=>box[4]===.74)??[x,z,u,v];
+    const back=middle(z,v)>=middle(tz,tv)?v-3:z;
+    rect(x,z,u,v,.41,.47,'upholstery');
+    rect(x,back,u,back+3,.46,.86,'sage');
+    for(const [a,b] of [[x+2,z+2],[u-4,z+2],[x+2,v-4],[u-4,v-4]])rect(a,b,a+2,b+2,0,.42,'wood');
+   }else {
+    rect(x,z,u,v,0,h,k);
+    if(k==='cream'&&h>.91&&h<.98&&(u-x)>52&&(v-z)>12){
+     const a=middle(x,u),b=middle(z,v);
+     rect(a-8,b-4,a+8,b+4,h+.001,h+.008,'metal');
+    }
+   }
+  }
+ }
+ count=verts.length/7;
  if(gl){
   for(const points of glassFaces)quad(...points,'glass');
   const interior=new Float32Array(verts);
-  const exteriorBytes=exteriorCount*6*Float32Array.BYTES_PER_ELEMENT;
+  const exteriorBytes=exteriorCount*7*Float32Array.BYTES_PER_ELEMENT;
   const activeExterior=exteriorCount?exterior:null;
   const bytes=exteriorBytes+interior.byteLength;
   if(activeExterior!==gpuExterior||bytes>gpuBytes){
@@ -410,10 +503,10 @@ function build(){
   }
   gl.bufferSubData(gl.ARRAY_BUFFER,exteriorBytes,interior);
  }
- glassCount=verts.length/6-count;
+ glassCount=verts.length/7-count;
  dirty=false;
 }
-function basis(yaw,pitch){const s=Math.sin(yaw),c=Math.cos(yaw),p=Math.sin(pitch),q=Math.cos(pitch);return [[s*q,p,c*q],[c,0,-s],[-s*p,q,-c*p]]}
+function basis(yaw,pitch){const s=Math.sin(yaw),c=Math.cos(yaw),p=Math.sin(pitch),q=Math.cos(pitch);return [[s*q,p,c*q],[-c,0,s],[-s*p,q,-c*p]]}
 const walkableFloors=template?floors:[...floors,planRect([540,186,677,260])];
 function inFloor(x,z){return walkableFloors.some(([a,b,c,d])=>x>=X(a)-.18&&x<=X(c)+.18&&z>=Z(b)-.18&&z<=Z(d)+.18)}
 function distance(x,z,a,b){const ax=X(a[0]),az=Z(a[1]),dx=X(b[0])-ax,dz=Z(b[1])-az;const t=Math.max(0,Math.min(1,((x-ax)*dx+(z-az)*dz)/(dx*dx+dz*dz)));return Math.hypot(x-ax-t*dx,z-az-t*dz)}
@@ -425,29 +518,98 @@ function clear(x,z){
 }
 function nearest(){let best=.95, result;for(const o of [...doors,...windows]){const d=distance(player.x,player.z,o.a,o.b);if(d<best){best=d;result=o}}return result}
 const reduceMotion=matchMedia('(prefers-reduced-motion: reduce)');
-function interact(){
- const opening=nearest();
- if(overview||!opening)return;
+const scene=document.querySelector('.scene');
+const windowRows=new Map();
+function showWindows(show){
+ $('window-panel').classList.toggle('hide',!show);
+ $('window-controls').setAttribute('aria-expanded',show);
+}
+function syncWindow(opening){
+ const row=windowRows.get(opening);
+ if(!row)return;
+ row.state.textContent=opening.open?'Open':'Closed';
+ row.toggle.textContent=opening.open?'Close':'Open';
+ row.toggle.setAttribute('aria-label',row.toggle.textContent+' '+opening.name.toLowerCase());
+}
+function operate(opening){
+ if(overview||outside||tour||!opening)return;
  opening.open=!opening.open;
- if(!clear(player.x,player.z)){opening.open=!opening.open;return}
+ if(!windows.includes(opening)&&!clear(player.x,player.z)){opening.open=!opening.open;return}
  if(windows.includes(opening)){
   const target=Number(opening.open);
   opening.animation=reduceMotion.matches?null:{started:performance.now(),from:opening.amount??0,target,step:-1};
   if(!opening.animation)opening.amount=target;
+  syncWindow(opening);
  }
  dirty=true;
 }
-function setMode(value){overview=value;dirty=true;$('reticle').classList.toggle('hide',value);$('overview').setAttribute('aria-pressed',value);$('walk').setAttribute('aria-pressed',!value);$('pad').classList.toggle('hide',value);$('help').textContent=value?'Drag to orbit. Choose a room to jump inside.':'Drag to look. Use the direction pad or WASD to move. Press E or use the on-screen button near a door or window.'}
-function jump([name,x,z,yaw,pitch=0]){
+function interact(){operate(nearest())}
+function setMode(value,outlook=false){
+ overview=value;
+ outside=outlook;
+ dirty=true;
+ scene.classList.toggle('outside',outside);
+ const exploring=!overview&&!outside&&!tour;
+ $('reticle').classList.toggle('hide',!exploring);
+ $('overview').setAttribute('aria-pressed',overview&&!tour);
+ $('outlook').setAttribute('aria-pressed',outside&&!tour);
+ $('walk').setAttribute('aria-pressed',exploring);
+ $('pad').classList.toggle('hide',!exploring);
+ $('landmarks').classList.toggle('hide',!outside||!!tour);
+ $('help').textContent=tour?'The tour moves between furnished rooms. Use Pause tour or End tour at any time.'
+  :outside?'Drag to pan, or choose a landmark. Change View floor to compare sightlines.'
+  :overview?'Drag to orbit. Choose a room to jump inside.'
+  :'Drag to look. Use the direction pad or WASD to move. Choose Windows to look through or operate a window.';
+}
+function stopTour(returnToWalk=true){
+ if(!tour)return;
+ tour=null;
+ scene.classList.remove('touring');
+ $('tour-controls').classList.add('hide');
+ $('tour-fade').style.opacity=0;
+ $('play-tour').textContent='Play Tour';
+ if(returnToWalk)jump(rooms[1]);
+}
+function jump(room){
+ const [name,x,z,yaw,pitch=0]=room;
+ stopTour(false);
  keys.clear();
  speedX=speedZ=0;
- Object.assign(player,{x:X(x),z:Z(z),yaw,pitch});
+ const [wx,wz]=roomSpot(room,(a,b)=>[X(a),Z(b)],clear)??[X(x),Z(z)];
+ Object.assign(player,{x:wx,z:wz,yaw,pitch});
  setMode(false);
  $('label').textContent=name;
 }
-$('overview').onclick=()=>{setMode(true);$('label').textContent='3D overview'};
+function windowView(opening){
+ const [x,z]=opening.a.map((value,i)=>(value+opening.b[i])/2);
+ const [dx,dz]=opening.out;
+ const [a,b,c,d]=opening.room??planBounds;
+ for(const range of [99,80,64,119,151])for(const side of [0,-46,46,-76,76,-108,108]){
+  const u=x-dx*range-dz*side,v=z-dz*range+dx*side;
+  if(u<a||u>c||v<b||v>d||!clear(X(u),Z(v)))continue;
+  return [opening.name,u,v,Math.atan2(x-u,z-v),-.10];
+ }
+ const room=rooms.find(([name])=>name.startsWith(opening.name.split(' ')[0]))??rooms[1];
+ return [opening.name,room[1],room[2],Math.atan2(x-room[1],z-room[2]),-.08];
+}
+for(const opening of windows){
+ const row=document.createElement('div');row.className='window-row';
+ const title=document.createElement('div');title.textContent=opening.name;
+ const state=document.createElement('span');state.className='window-state';state.setAttribute('aria-live','polite');title.append(state);
+ const look=document.createElement('button');look.textContent='Look';look.setAttribute('aria-label','Look through '+opening.name.toLowerCase());
+ look.onclick=()=>{jump(windowView(opening));showWindows(false);$('window-controls').focus()};
+ const toggle=document.createElement('button');toggle.onclick=()=>{
+  if(overview)jump(windowView(opening));
+  operate(opening);
+ };
+ row.append(title,look,toggle);
+ $('window-rows').append(row);
+ windowRows.set(opening,{state,toggle});
+ syncWindow(opening);
+}
+$('window-controls').onclick=()=>showWindows($('window-panel').classList.contains('hide'));
+$('overview').onclick=()=>{stopTour(false);setMode(true);$('label').textContent='3D overview'};
 $('walk').onclick=()=>jump(rooms[0]);$('use').onclick=interact;
-const scene=document.querySelector('.scene');
 function immersive(value){
  scene.classList.toggle('immersive',value);
  $('focus').setAttribute('aria-pressed',value);
@@ -456,33 +618,118 @@ function immersive(value){
 }
 $('focus').onclick=()=>immersive(true);
 $('exit').onclick=()=>immersive(false);
-addEventListener('keydown',e=>{if(e.key!=='Escape')return;if(scene.classList.contains('immersive'))immersive(false);else if(embedded)window.parent.postMessage('close-unit-walkthrough',location.origin)});
-$('furn').onclick=()=>{furnished=!furnished;if(!overview&&!clear(player.x,player.z))jump(rooms[0]);$('furn').setAttribute('aria-pressed',furnished);$('furn').textContent=furnished?'Furniture on':'Furniture off';dirty=true};
-for(const room of rooms){const b=document.createElement('button');b.textContent=room[0];b.onclick=()=>jump(room);$('rooms').append(b)}
-for(const opening of windows.filter(window=>window.room)){
+addEventListener('keydown',e=>{
+ if(e.key!=='Escape')return;
+ if(!$('window-panel').classList.contains('hide')){showWindows(false);$('window-controls').focus()}
+ else if(tour)stopTour();
+ else if(scene.classList.contains('immersive'))immersive(false);
+ else if(embedded)window.parent.postMessage('close-unit-walkthrough',location.origin);
+});
+function showFurniture(value){
+ furnished=value;
+ $('furn').setAttribute('aria-pressed',furnished);
+ $('furn').textContent=furnished?'Furniture on':'Furniture off';
+ dirty=true;
+}
+$('furn').onclick=()=>{
+ showFurniture(!furnished);
+ if(!overview&&!clear(player.x,player.z))jump(rooms[0]);
+};
+for(const room of rooms){
  const button=document.createElement('button');
- button.textContent=opening.name+' view';
- button.onclick=()=>{
-  const [x,z]=opening.a.map((value,i)=>(value+opening.b[i])/2);
-  const [dx,dz]=opening.out;
-  const [a,b,c,d]=opening.room;
-  for(const range of [89,71,58,115,145])for(const side of [0,-76,76,-108,108]){
-   const u=x-dx*range-dz*side,v=z-dz*range+dx*side;
-   if(u<a||u>c||v<b||v>d||!clear(X(u),Z(v)))continue;
-   jump([opening.name,u,v,Math.atan2(x-u,z-v),-.11]);
-   return;
-  }
- };
- $('windows').append(button);
+ button.textContent=room[0];
+ button.onclick=()=>jump(room);
+ $('rooms').append(button);
+}
+const mainWindow=windows.find(opening=>opening.name.startsWith('Living'))??windows[0];
+const landmarks=new Map([['Window outlook',null],...site.landmarks.map(([name,...target])=>[name,target])]);
+const landmarkButtons=new Map();
+function aimAt(name){
+ activeLandmark=name;
+ const target=landmarks.get(name);
+ if(target){
+  const [[x,z],height]=target;
+  lookout.yaw=Math.atan2(x-lookout.x,z-lookout.z);
+  lookout.pitch=Math.atan2(height-(floorElevation(floor)+1.58),Math.hypot(x-lookout.x,z-lookout.z));
+ }else{
+  lookout.yaw=Math.atan2(...mainWindow.out);
+  lookout.pitch=-.14;
+ }
+ $('label').textContent=name;
+ for(const [label,button] of landmarkButtons)button.setAttribute('aria-pressed',label===name);
+}
+for(const name of landmarks.keys()){
+ const button=document.createElement('button');
+ button.textContent=name;button.onclick=()=>aimAt(name);
+ $('landmarks').append(button);
+ landmarkButtons.set(name,button);
+}
+function principalOutlook(){
+ const [a,b]=mainWindow.a.map((value,i)=>(value+mainWindow.b[i])/2);
+ const [dx,dz]=mainWindow.out;
+ return {point:[X(a)+dx*.46,Z(b)+dz*.46],yaw:Math.atan2(dx,dz)};
+}
+$('outlook').onclick=()=>{
+ stopTour(false);showWindows(false);keys.clear();
+ [lookout.x,lookout.z]=principalOutlook().point;
+ setMode(false,true);
+ aimAt('Window outlook');
+};
+$('play-tour').onclick=()=>{
+ if(tour){stopTour();return}
+ showWindows(false);
+ showFurniture(true);
+ keys.clear();speedX=speedZ=0;
+ const shots=buildTour(rooms,(x,z)=>[X(x),Z(z)],clear,principalOutlook());
+ tour={shots,total:shots.at(-1).end,elapsed:0,index:-1,paused:false};
+ scene.classList.add('touring');
+ $('tour-controls').classList.remove('hide');
+ $('tour-progress').value=0;
+ $('tour-pause').textContent='Pause tour';
+ $('play-tour').textContent='End tour';
+ setMode(true);
+ $('tour-pause').focus();
+};
+$('tour-pause').onclick=()=>{
+ if(!tour)return;
+ tour.paused=!tour.paused;
+ $('tour-pause').textContent=tour.paused?'Resume tour':'Pause tour';
+};
+$('tour-stop').onclick=()=>{stopTour();$('play-tour').focus()};
+function advanceTour(dt){
+ if(!tour||tour.paused)return;
+ tour.elapsed+=dt;
+ if(tour.elapsed>=tour.total){stopTour();return}
+ const index=tour.shots.findIndex(shot=>tour.elapsed<shot.end);
+ const shot=tour.shots[index];
+ if(tour.index!==index){
+  tour.index=index;
+  if(overview!==!!shot.overview||outside!==!!shot.outlook)setMode(!!shot.overview,!!shot.outlook);
+  $('label').textContent=shot.name;
+ }
+ const view=tourFrame(shot,tour.elapsed);
+ if(shot.overview){orbit=view.orbit;tilt=view.tilt}
+ else {
+  const {x,z,yaw,pitch}=view;
+  Object.assign(shot.outlook?lookout:player,{x,z,yaw,pitch});
+ }
+ $('tour-fade').style.opacity=reduceMotion.matches?0:view.fade;
+ $('tour-progress').value=tour.elapsed/tour.total;
 }
 const keymap={arrowup:'w',arrowdown:'s',arrowleft:'a',arrowright:'d',w:'w',a:'a',s:'s',d:'d'};
-addEventListener('keydown',e=>{if(overview||e.target instanceof HTMLInputElement||e.target instanceof HTMLSelectElement)return;const k=e.key.toLowerCase();if(keymap[k]){e.preventDefault();keys.add(keymap[k])}if(k==='e'&&!e.repeat)interact()});
+addEventListener('keydown',e=>{if(overview||outside||tour||e.target instanceof HTMLInputElement||e.target instanceof HTMLSelectElement)return;const k=e.key.toLowerCase();if(keymap[k]){e.preventDefault();keys.add(keymap[k])}if(k==='e'&&!e.repeat)interact()});
 addEventListener('keyup',e=>keys.delete(keymap[e.key.toLowerCase()]));addEventListener('blur',()=>keys.clear());
 document.querySelectorAll('[data-m]').forEach(b=>{b.onpointerdown=e=>{b.setPointerCapture(e.pointerId);keys.add(b.dataset.m)};b.onlostpointercapture=()=>keys.delete(b.dataset.m)});
 let drag=null;
-canvas.onpointerdown=e=>{if(drag)return;canvas.setPointerCapture(e.pointerId);drag=[e.pointerId,e.clientX,e.clientY]};
+canvas.onpointerdown=e=>{if(drag||tour)return;canvas.setPointerCapture(e.pointerId);drag=[e.pointerId,e.clientX,e.clientY]};
 canvas.onlostpointercapture=()=>drag=null;
-canvas.onpointermove=e=>{if(!drag||drag[0]!==e.pointerId)return;const dx=e.clientX-drag[1],dy=e.clientY-drag[2];drag=[e.pointerId,e.clientX,e.clientY];if(overview){orbit+=dx*.009;tilt=Math.max(.32,Math.min(1.45,tilt+dy*.009))}else{const sensitivity=touch?.0048:.006;player.yaw-=dx*sensitivity;player.pitch=Math.max(-1.15,Math.min(1.15,player.pitch+dy*sensitivity))}};
+canvas.onpointermove=e=>{if(!drag||drag[0]!==e.pointerId)return;const dx=e.clientX-drag[1],dy=e.clientY-drag[2];drag=[e.pointerId,e.clientX,e.clientY];if(overview){orbit+=dx*.009;tilt=Math.max(.32,Math.min(1.45,tilt+dy*.009))}else{const camera=outside?lookout:player,sensitivity=touch?.0048:.006;
+ camera.yaw+=dx*sensitivity;camera.pitch=Math.max(-1.15,Math.min(1.15,camera.pitch+dy*sensitivity));
+ if(outside&&activeLandmark){
+  landmarkButtons.get(activeLandmark).setAttribute('aria-pressed',false);
+  activeLandmark=null;
+  $('label').textContent='Window outlook';
+ }}};
 const map=$('map').getContext('2d');
 const planBounds=[
  Math.min(...floors.map(f=>f[0])),Math.min(...floors.map(f=>f[1])),
@@ -505,24 +752,26 @@ function drawMap(){
 let prev=0,lastView='';
 const touch=matchMedia('(pointer:coarse)').matches;
 function frame(t){
- const dt=Math.min(.035,(t-prev)/1000);prev=t;
- if(!overview){
+ const elapsed=Math.min(.13,(t-prev)/1000);prev=t;
+ const dt=Math.min(.035,elapsed);
+ advanceTour(elapsed);
+ if(!overview&&!outside&&!tour){
   const f=+keys.has('w')-keys.has('s'), r=+keys.has('d')-keys.has('a');
   const ease=1-Math.exp(-dt*16);
-  speedX+=((Math.sin(player.yaw)*f+Math.cos(player.yaw)*r)/(Math.hypot(f,r)||1)-speedX)*ease;
-  speedZ+=((Math.cos(player.yaw)*f-Math.sin(player.yaw)*r)/(Math.hypot(f,r)||1)-speedZ)*ease;
+  speedX+=((Math.sin(player.yaw)*f-Math.cos(player.yaw)*r)/(Math.hypot(f,r)||1)-speedX)*ease;
+  speedZ+=((Math.cos(player.yaw)*f+Math.sin(player.yaw)*r)/(Math.hypot(f,r)||1)-speedZ)*ease;
   const pace=touch?1.1:1.40;
   const dx=Math.abs(speedX)>.005?speedX*pace*dt:0,dz=Math.abs(speedZ)>.005?speedZ*pace*dt:0;
   if(dx&&clear(player.x+dx,player.z))player.x+=dx;if(dz&&clear(player.x,player.z+dz))player.z+=dz;
   const near=nearest();$('use').classList.toggle('hide',!near);if(near){const label=(near.open?'Close ':'Open ')+near.name.toLowerCase();if($('use').textContent!==label)$('use').textContent=label}
  }else $('use').classList.add('hide');
- const ratio=Math.min(devicePixelRatio||1,2),w=Math.round(canvas.clientWidth*ratio),h=Math.round(canvas.clientHeight*ratio);
+ const ratio=Math.min(devicePixelRatio||1,gl?1.75:1.2),w=Math.round(canvas.clientWidth*ratio),h=Math.round(canvas.clientHeight*ratio);
  if(canvas.width!==w||canvas.height!==h){canvas.width=w;canvas.height=h}
  for(const opening of windows){
   const animation=opening.animation;
   if(!animation)continue;
   const progress=Math.min(1,Math.max(0,(t-animation.started)/255));
-  const step=gl?progress:Math.floor(progress*7)/7;
+  const step=gl?progress:Math.floor(progress*9)/9;
   if(step!==animation.step){
    animation.step=step;
    const ease=step*step*(3-2*step);
@@ -533,8 +782,9 @@ function frame(t){
  }
  const updated=dirty;
  if(dirty)build();
- const b=overview?basis(orbit,-tilt):basis(player.yaw,player.pitch);
- const target=template?[site.centre[0],0,site.centre[1]]:[3.22,0,4.86],eye=overview?target.map((n,i)=>n-12*b[0][i]):[player.x,1.58,player.z];
+ const camera=outside?lookout:player;
+ const b=overview?basis(orbit,-tilt):basis(camera.yaw,camera.pitch);
+ const target=template?[site.centre[0],0,site.centre[1]]:[3.22,0,4.86],eye=overview?target.map((n,i)=>n-12*b[0][i]):[camera.x,1.58,camera.z];
  const aspect=w/Math.max(h,1);
  const planSize=template?Math.max(site.centre[1],site.centre[0]/Math.max(aspect,.1))*1.38:0;
  const zoom=Math.max(5,5.5/Math.max(aspect,.1),planSize);
@@ -542,8 +792,8 @@ function frame(t){
  const view=[w,h,...eye,...b[0]].join();
  if(updated||view!==lastView){
   const horizon=Math.max(6,Math.min(94,50+b[0][1]*70));
-  canvas.style.background=overview?'#29363d':solar.altitude>0
-   ?`linear-gradient(180deg,#7eaccd,#d8e6e9 ${horizon}%,#d3dfe1)`
+  canvas.style.background=overview?(tour?'linear-gradient(#dee5e4,#9caeaf)':'#29363d'):solar.altitude>0
+   ?`linear-gradient(180deg,#82a9bf18,#d8e6e9cc ${horizon}%,#d3dfe1), url('./assets/walkthrough-daylight.webp') center top / cover`
    :`linear-gradient(180deg,#252f49,#677f94 ${horizon}%,#667782)`;
   if(flat)paint(w,h,eye,b,zoom,focal);
   if(gl){
@@ -560,11 +810,12 @@ function frame(t){
     gl.depthMask(true);gl.disable(gl.BLEND);
    }
   }
-  drawMap();
+  if(!outside&&!tour)drawMap();
  }
  lastView=view;
  requestAnimationFrame(frame);
 }
+showFurniture(true);
 jump(rooms[1]);
 player.pitch=-.15;
 requestAnimationFrame(frame);

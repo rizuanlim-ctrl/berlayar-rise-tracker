@@ -37,6 +37,11 @@ for(const groups of Object.values(additionalStacks))
 const win = (name,a,b,out,room,columns,fullHeight=false) => ({name,a,b,out,room,columns,fullHeight,turn:1});
 const door = (name,a,b,turn) => ({name,a,b,turn});
 const living = (sofa, table) => [[...sofa,.76,'sage'],[...table,.38,'wood']];
+const dining=(x,z,w,d)=>[
+  [x,z,x+w,z+d,.74,'wood'],
+  [x+w*.23,z-15,x+w*.72,z,.89,'chair'],
+  [x+w*.23,z+d,x+w*.72,z+d+15,.89,'chair'],
+];
 const bed = (x,z) => [
   [x,z,x+62,z+78,.46,'wood'],
   [x+2,z+3,x+60,z+75,.58,'cream'],
@@ -75,6 +80,7 @@ export const unitTemplates = {
     ],
     furniture:[
       ...living([57,248,84,315],[91,266,114,294]),...bed(215,249),
+      ...dining(83,215,44,25),
       [174,29,220,50,.91,'sage'],[222,28,260,51,.94,'cream'],
     ],
   },
@@ -119,6 +125,7 @@ export const unitTemplates = {
     furniture:[
       ...living([374,240,396,327],[327,258,349,286]),
       ...bed(32,156),...bed(157,146),
+      ...dining(280,303,45,22),
       [168,432,188,474,.91,'sage'],[190,454,230,475,.94,'cream'],
     ],
   },
@@ -168,6 +175,7 @@ export const unitTemplates = {
     furniture:[
       ...living([6,267,32,350],[42,286,66,321]),
       ...bed(142,263),...bed(261,263),...bed(427,260),
+      ...dining(149,175,53,29),
       [151,52,205,71,.91,'sage'],[205,52,239,72,.94,'cream'],
     ],
   },
