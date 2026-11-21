@@ -36,11 +36,11 @@
 <nav class="bar" id="rooms" aria-label="Jump to room"></nav>
 <p class="note" id="help">Drag to orbit. Choose a room to jump inside.</p>
 <p class="note" id="light-status" aria-live="polite"></p>
-<p class="note">Layouts and nearby blocks follow HDB plans. Coastline, woodland and marina details are based on <a style="color:inherit" href="https://www.arcgis.com/home/item.html?id=10df2279f9684e4a9f6a7f08febac2a9" target="_blank" rel="noopener noreferrer">Esri World Imagery</a> and maps. Finishes, terrain heights and sightlines are approximate. Future buildings on reserved sites may change the view. Nearby map features and coastline © <a style="color:inherit" href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener noreferrer">OpenStreetMap contributors</a>.</p></main>
+<p class="note">Layouts and nearby blocks follow HDB plans. Coastline, woodland and marina details are based on <a style="color:inherit" href="https://www.arcgis.com/home/item.html?id=10df2279f9684e4a9f6a7f08febac2a9" target="_blank" rel="noopener noreferrer">Esri World Imagery</a> and maps. The elevated West Coast Highway and the surface roads use approximate dimensions and road markings. Finishes, terrain heights and sightlines are approximate. Future buildings on reserved sites may change the view. Nearby map features and coastline © <a style="color:inherit" href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener noreferrer">OpenStreetMap contributors</a>.</p></main>
 <script type="module">
 import {walkthroughLayouts as layouts, layoutLabels, unitTemplates} from "./assets/walkthrough-layouts.js?v=3";
 import {solarPosition} from "./assets/berlayar-site-model.js?v=1";
-import {unitSite, floorElevation, sunBlocked, drawNeighbourhood} from "./assets/type-2-walkthrough-site.js?v=7";
+import {unitSite, floorElevation, sunBlocked, drawNeighbourhood} from "./assets/type-2-walkthrough-site.js?v=8";
 import {roomSpot, buildTour, tourFrame, loungeFurniture, tableFurniture} from "./assets/walkthrough-presentation.js?v=1";
 const $=id=>document.getElementById(id);
 const params=new URLSearchParams(location.search);
@@ -155,6 +155,9 @@ const colors={
  tile:'#898b88', grout:'#777a77', tiledWall:'#a4a7a3', shelter:'#838583',
  frame:'#30363a', frameEdge:'#41494d', glass:'#c8deec', light:'#d6b990', penumbra:'#b09778',
  terrain:'#9ba68b', landscape:'#839870', road:'#858781', kerb:'#cbc5b6', path:'#b9a88d',
+ surfaceAsphalt:'#5d615e', surfaceEdge:'#eee9d8', highwayMedian:'#918b7d',
+ highwayAsphalt:'#414b50', highwayStripe:'#f2efe0', highwaySoffit:'#777e7b',
+ highwayFascia:'#a2a6a1', highwayRail:'#c3c5bd', railCap:'#e2e1d8', highwayPier:'#a3a49a',
  tree:'#587746', treeLight:'#698650', bark:'#706052',
  facade:'#e3e0d5', facadeAccent:'#b9bdb2', facility:'#c9cbc1', facadeGlass:'#6c8992', remoteFacade:'#becbd0',
  deckVoid:'#4a5553', facadeLedge:'#eeece5', windowReveal:'#b2bebd', roof:'#d4d3c7', roofGarden:'#759264',
@@ -261,7 +264,10 @@ function quad(a,b,c,d,key,light=1){
   faces.push({points,fill:soft?cssColor(color.map(channel=>channel*roomLight(centre,ground))):fill,layer});
  }
 }
-const outsideLayers={terrain:-7,water:-6,landscape:-5,kerb:-4,road:-3,path:-3,pontoon:-3};
+const outsideLayers={terrain:-7,water:-6,landscape:-5,kerb:-4,road:-3,path:-3,pontoon:-3,
+ surfaceAsphalt:-2.95,highwayMedian:-2.93,surfaceEdge:-2.91,highwayPier:-2.75,
+ highwaySoffit:-2.72,highwayFascia:-2.71,highwayAsphalt:-2.70,highwayStripe:-2.69,
+ highwayRail:-2.68,railCap:-2.67};
 function outdoorQuad(a,b,c,d,key,light){
  const points=[a,b,c,d];
  const x=(a[0]+b[0]+c[0]+d[0])/4,z=(a[2]+b[2]+c[2]+d[2])/4;
@@ -694,7 +700,12 @@ function aimAt(name){
   lookout.pitch=Math.atan2(height-(floorElevation(floor)+1.58),Math.hypot(x-lookout.x,z-lookout.z));
  }else{
   lookout.yaw=Math.atan2(...mainWindow.out);
-  lookout.pitch=-.14;
+  const highway=landmarks.get('West Coast Highway');
+  const [[x,z],height]=highway;
+  const nearHighway=Math.hypot(x-lookout.x,z-lookout.z);
+  const facesHighway=nearHighway<170&&Math.abs(relativeBearing(landmarkBearing(highway)))<.55;
+  const depression=Math.atan2(height-floorElevation(floor)-1.58,nearHighway);
+  lookout.pitch=facesHighway ? Math.max(-.58,Math.min(-.14,depression*.70)) : -.14;
  }
  $('label').textContent=name;
  for(const [label,button] of landmarkButtons)button.setAttribute('aria-pressed',label===name);

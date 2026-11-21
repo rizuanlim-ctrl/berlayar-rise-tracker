@@ -1,3 +1,4 @@
+import {highwayCentreline, highwayOutlook, drawHighway} from './berlayar-highway.js?v=1';
 import {aerialGroves, marinaPontoons, telokBlangahBuildings} from './berlayar-aerial-context.js?v=2';
 import {additionalStacks} from "./walkthrough-layouts.js?v=2";
 import {coastline} from "./berlayar-coastline.js?v=1";
@@ -41,9 +42,8 @@ const landscape = [
   [[0,59],[166,110],[152,248],[84,422],[0,560]],
 ];
 const estateRoads = [
-  {w:25,p:[[0,714],[91,783],[183,819],[293,829],[439,801],[566,781],[697,750],[779,678],[844,557],[923,311],[966,198]]},
+  {w:25,p:[[0,714],[91,783],[183,819],[293,829],[439,801],[566,781],[697,750],[779,678],[844,557],[923,311],[966,198],[972,100],[956,58]]},
   {w:16,p:[[0,616],[63,560],[114,496],[153,417],[183,310],[204,177],[213,83],[185,0]]},
-  {w:31,p:[[263,0],[360,26],[527,28],[704,50],[867,66],[971,52],[1060,24]]},
 ];
 // Main pedestrian links traced from the precinct site plan.
 const estatePaths = [
@@ -95,18 +95,20 @@ export function unitSite(stack, centre=[3.135,4.845]) {
     const range=building=>Math.hypot(...mean(building.polygon).map((value,i)=>value-centre[i]));
     return range(a)-range(b);
   })[0];
+  const highway = highwayCentreline.map(toRoom);
   const landmarks=[
     ['Car park',mean(carPark.polygon),elevationFor(carPark)],
     ['Nearby blocks',mean(closest.polygon),elevationFor(closest)*.55],
     ['Reflections at Keppel Bay',mean(reflections.map(building=>mean(building.polygon))),68],
+    ['West Coast Highway',...highwayOutlook(highway,centre)],
   ];
   return {
-    floors, buildings, centre, landmarks, gardenPlanting, block: block.id,
+    floors, buildings, centre, landmarks, highway, gardenPlanting, block: block.id,
     ground: landscape.map(polygon=>polygon.map(toRoom)),
     groves: aerialGroves.map(polygon=>polygon.map(toRoom)),
     pontoons: marinaPontoons.map(route=>({...route,path:route.path.map(toRoom)})),
     water: coastline.map(polygon=>polygon.map(ring=>ring.map(toRoom))),
-    streets: [...roads,...estateRoads].map(road=>({width:road.w/PIXELS_PER_METRE, path:road.p.map(toRoom)})),
+    streets: [...roads.filter(road=>road.n!=='Telok Blangah Road'||road.p.every(([x])=>x>1487)),...estateRoads].map(road=>({width:road.w/PIXELS_PER_METRE, path:road.p.map(toRoom)})),
     paths: estatePaths.map(path=>({width:path.w/PIXELS_PER_METRE,path:path.p.map(toRoom)})),
     trees: treeRows.flatMap(([a,b,spacing])=>{
       const count = Math.max(1,Math.floor(Math.hypot(b[0]-a[0],b[1]-a[1])/spacing));
@@ -188,6 +190,7 @@ export function drawNeighbourhood(site, elevation, solar, draw, simplified=false
   paths(site.streets,ground+.17,'road');
   paths(site.paths,ground+.19,'path');
   paths(site.pontoons,ground+.45,'pontoon');
+  drawHighway(site.highway,ground,light,draw);
 
   // Distant canopy uses broad patches and low-detail crowns to retain depth
   // cues through the windows without adding thousands of tree meshes.
