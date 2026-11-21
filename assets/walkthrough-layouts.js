@@ -45,7 +45,7 @@ const dining=(x,z,w,d)=>[
 const bed = (x,z) => [
   [x,z,x+62,z+78,.46,'wood'],
   [x+2,z+3,x+60,z+75,.58,'cream'],
-  [x+5,z+5,x+57,z+21,.66,'wall'],
+  [x+5,z+5,x+57,z+21,.66,'linen'],
   [x+6,z+24,x+56,z+72,.61,'sage'],
 ];
 export const unitTemplates = {

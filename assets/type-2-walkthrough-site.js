@@ -1,3 +1,4 @@
+import {aerialGroves, marinaPontoons} from './berlayar-aerial-context.js?v=1';
 import {additionalStacks} from "./walkthrough-layouts.js?v=2";
 import {coastline} from "./berlayar-coastline.js?v=1";
 import {walkthroughBuildings as models, roads, PIXELS_PER_METRE, STOREY_METRES} from "./berlayar-site-model.js?v=2";
@@ -30,7 +31,7 @@ const wingDimensions = {
 const mean = list => list.reduce(([x,z],[u,v])=>[x+u/list.length,z+v/list.length],[0,0]);
 function elevationFor(building) {
   return building.kind==='landmark'&&building.floors>=24
-    ? building.floors>=40?174:120 : building.floors*STOREY_METRES;
+    ? building.floors>=40?174:116 : building.floors*STOREY_METRES;
 }
 
 const landscape = [
@@ -102,6 +103,8 @@ export function unitSite(stack, centre=[3.135,4.845]) {
   return {
     floors, buildings, centre, landmarks, gardenPlanting, block: block.id,
     ground: landscape.map(polygon=>polygon.map(toRoom)),
+    groves: aerialGroves.map(polygon=>polygon.map(toRoom)),
+    pontoons: marinaPontoons.map(route=>({...route,path:route.path.map(toRoom)})),
     water: coastline.map(polygon=>polygon.map(ring=>ring.map(toRoom))),
     streets: [...roads,...estateRoads].map(road=>({width:road.w/PIXELS_PER_METRE, path:road.p.map(toRoom)})),
     paths: estatePaths.map(path=>({width:path.w/PIXELS_PER_METRE,path:path.p.map(toRoom)})),
@@ -184,6 +187,26 @@ export function drawNeighbourhood(site, elevation, solar, draw, simplified=false
   paths(site.streets,ground+.13,'kerb',1);
   paths(site.streets,ground+.17,'road');
   paths(site.paths,ground+.19,'path');
+  paths(site.pontoons,ground+.45,'pontoon');
+
+  // Distant canopy uses broad patches and low-detail crowns to retain depth
+  // cues through the windows without adding thousands of tree meshes.
+  for (const [index, grove] of site.groves.entries()) {
+    surface(grove,ground+.072,'grove',light*(.88+index%3*.05));
+    const centre=mean(grove);
+    for (const [j,[x,z]] of grove.entries()) {
+      if (simplified && j%2) continue;
+      const [cx,cz]=[x+(centre[0]-x)*.33,z+(centre[1]-z)*.33];
+      const radius=6+j%4*2, height=ground+5+j%5*1.4;
+      const crown=[cx,height,cz];
+      const rim=Array.from({length:7},(_,side)=>{
+        const bearing=side*2*Math.PI/7;
+        return [cx+Math.cos(bearing)*radius,ground+.08,cz+Math.sin(bearing)*radius];
+      });
+      for(let side=0;side<rim.length;side++)
+        draw(rim[side],rim[(side+1)%rim.length],crown,crown,'grove',light*(.86+side%4*.075));
+    }
+  }
 
   const [sunX,,sunZ] = site.sunVector(solar.azimuth,solar.altitude);
   const planting=[...site.trees.map(p=>[...p,0]),...site.gardenPlanting.map(p=>[...p,18])];
@@ -213,6 +236,25 @@ export function drawNeighbourhood(site, elevation, solar, draw, simplified=false
     for(let j=0;j<count;j++)draw(canopy[j],canopy[(j+1)%count],top,top,'treeLight',light*.99);
   }
 
+  // The three paired towers have skybridges. Footprints and tower heights
+  // come from the site model. Bridge levels and cross-sections are indicative.
+  for (const [a,b] of [[23,25],[27,29],[31,33]]) {
+    const pair=[a,b].map(id=>site.buildings.find(building=>building.id==='reflections-'+id));
+    const [start,end]=pair.map(building=>mean(building.polygon));
+    const lower=ground+78, upper=lower+3.4;
+    const span=Math.hypot(end[0]-start[0],end[1]-start[1]);
+    const nx=(end[1]-start[1])*1.9/span,nz=(start[0]-end[0])*1.9/span;
+    const base=[
+      [start[0]+nx,lower,start[1]+nz],[end[0]+nx,lower,end[1]+nz],
+      [end[0]-nx,lower,end[1]-nz],[start[0]-nx,lower,start[1]-nz],
+    ];
+    const top=base.map(([x,,z])=>[x,upper,z]);
+    draw(...top,'roofGarden',light);
+    for(let i=0;i<4;i++){
+      const j=(i+1)%4;
+      draw(base[i],base[j],top[j],top[i],'facadeGlass',light*.91);
+    }
+  }
   for (const building of site.buildings) {
     const {polygon,hole,kind,floors}=building;
     const height=ground+elevationFor(building), risePerStorey=(height-ground)/floors;
@@ -240,7 +282,9 @@ export function drawNeighbourhood(site, elevation, solar, draw, simplified=false
         // The viewer stays inside the flat. Skip façades that face away from the whole unit.
         if((centreX-x)*nx+(centreZ-z)*nz < -9)return;
         const shade=light*(.76+.22*Math.max(0,nx*sunX+nz*sunZ));
-        const wall=kind==='tower'?(i%5===0?'facadeAccent':'facade'):kind==='landmark'?(curved?'facadeGlass':'remoteFacade'):'facility';
+        const wall=kind==='tower'||kind==='construction'
+          ? (i%5===0?'facadeAccent':'facade')
+          : kind==='landmark' ? (curved?'facadeGlass':'remoteFacade') : 'facility';
         const distance=Math.hypot((x+u)/2-centreX,(z+v)/2-centreZ);
         const face=(a,b,low,high,color,brightness,offset=0)=>{
           const at=(t,y)=>[x+(u-x)*t+nx*offset,y,z+(v-z)*t+nz*offset];
