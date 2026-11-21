@@ -64,7 +64,9 @@ export function drawMapGround(ctx,project,{context,showTerrain,shade,zoom}){
     for(const {points,relief} of cells){
       ctx.beginPath();trace(ctx,points);
       const raised=showTerrain?Math.min(1,relief/150):0;
-      const color=shade(raised>.14?'#87a482':'#b9c6a7',.96+raised*.065);
+      const channels=[185-50*raised,198-34*raised,167-37*raised];
+      const tone='#'+channels.map(channel=>Math.round(channel).toString(16).padStart(2,'0')).join('');
+      const color=shade(tone,.97+raised*.035);
       ctx.fillStyle=color;ctx.fill();
       ctx.strokeStyle=color;ctx.lineWidth=.55;ctx.stroke();
     }
