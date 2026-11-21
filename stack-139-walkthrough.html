@@ -40,7 +40,7 @@
 <script type="module">
 import {walkthroughLayouts as layouts, layoutLabels, unitTemplates} from "./assets/walkthrough-layouts.js?v=3";
 import {solarPosition} from "./assets/berlayar-site-model.js?v=1";
-import {unitSite, floorElevation, sunBlocked, drawNeighbourhood} from "./assets/type-2-walkthrough-site.js?v=8";
+import {unitSite, floorElevation, sunBlocked, drawNeighbourhood} from "./assets/type-2-walkthrough-site.js?v=9";
 import {roomSpot, buildTour, tourFrame, loungeFurniture, tableFurniture} from "./assets/walkthrough-presentation.js?v=1";
 const $=id=>document.getElementById(id);
 const params=new URLSearchParams(location.search);
@@ -268,7 +268,7 @@ const outsideLayers={terrain:-7,water:-6,landscape:-5,kerb:-4,road:-3,path:-3,po
  surfaceAsphalt:-2.95,highwayMedian:-2.93,surfaceEdge:-2.91,highwayPier:-2.75,
  highwaySoffit:-2.72,highwayFascia:-2.71,highwayAsphalt:-2.70,highwayStripe:-2.69,
  highwayRail:-2.68,railCap:-2.67};
-function outdoorQuad(a,b,c,d,key,light){
+function outdoorQuad(a,b,c,d,key,light,paintOrder){
  const points=[a,b,c,d];
  const x=(a[0]+b[0]+c[0]+d[0])/4,z=(a[2]+b[2]+c[2]+d[2])/4;
  const distance=Math.hypot(x-site.centre[0],z-site.centre[1]);
@@ -277,7 +277,7 @@ function outdoorQuad(a,b,c,d,key,light){
  const color=rgb(key,light).map((channel,i)=>channel*(1-haze)+sky[i]*haze);
  if(gl){for(const p of [a,b,c,a,c,d])verts.push(...p,...color,key==='water'?3:0);return}
  const radius=Math.max(...points.map(p=>Math.hypot(p[0]-x,p[1]-(a[1]+c[1])/2,p[2]-z)));
- exteriorFaces.push({points,fill:cssColor(color),layer:outsideLayers[key]??-2,centre:[x,(a[1]+c[1])/2,z],radius});
+ exteriorFaces.push({points,fill:cssColor(color),layer:paintOrder??outsideLayers[key]??-2,centre:[x,(a[1]+c[1])/2,z],radius});
 }
 function paint(w,h,eye,[front,right,up],zoom,focal){
  flat.clearRect(0,0,w,h);

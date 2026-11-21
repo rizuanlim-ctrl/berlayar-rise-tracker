@@ -270,7 +270,10 @@ export function drawNeighbourhood(site, elevation, solar, draw, simplified=false
       return [x+lean*8*fraction*fraction,y+(x-midX)*.42*fraction**6,z-4*fraction*fraction];
     };
     const rings=hole?[polygon,hole]:[polygon];
-    const shaped=(a,b,c,d,color,shade)=>draw(shape(a),shape(b),shape(c),shape(d),color,shade);
+    // In canvas mode, Telok Blangah's far-side skyline belongs behind the
+    // viaduct deck. WebGL resolves this using depth instead.
+    const paintOrder=kind==='context'?-2.85:undefined;
+    const shaped=(a,b,c,d,color,shade)=>draw(shape(a),shape(b),shape(c),shape(d),color,shade,paintOrder);
     fillPolygon(rings,height,shaped,kind==='facility'?'roofGarden':'roof',light);
     for(const ring of rings){
       const area=ring.reduce((total,[x,z],i)=>{
