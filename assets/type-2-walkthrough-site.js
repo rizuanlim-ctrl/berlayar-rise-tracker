@@ -1,4 +1,4 @@
-import {aerialGroves, marinaPontoons} from './berlayar-aerial-context.js?v=1';
+import {aerialGroves, marinaPontoons, telokBlangahBuildings} from './berlayar-aerial-context.js?v=2';
 import {additionalStacks} from "./walkthrough-layouts.js?v=2";
 import {coastline} from "./berlayar-coastline.js?v=1";
 import {walkthroughBuildings as models, roads, PIXELS_PER_METRE, STOREY_METRES} from "./berlayar-site-model.js?v=2";
@@ -67,7 +67,7 @@ export function unitSite(stack, centre=[3.135,4.845]) {
     const east = (px-x)/PIXELS_PER_METRE, south = (py-y)/PIXELS_PER_METRE;
     return [centre[0]+east*cos+south*sin, centre[1]-east*sin+south*cos];
   };
-  const buildings = models.filter(model => model.id !== block.id).map(model => ({
+  const buildings = [...models.filter(model => model.id !== block.id), ...telokBlangahBuildings].map(model => ({
     id:model.id, kind:model.kind, floors:model.floors,
     polygon:model.p.map(toRoom), hole:model.hole?.map(toRoom),
   }));

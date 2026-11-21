@@ -14,7 +14,7 @@
 .actions{z-index:2}
 .window-panel{position:absolute;right:0;bottom:calc(100% + 8px);width:min(315px,calc(100vw - 48px));max-height:min(46vh,380px);overflow:auto;padding:10px 12px;text-align:left;background:#18272cf7;border:1px solid #6c7f79;border-radius:12px}
 .window-panel h2{font-size:16px;margin:0 0 7px}.window-row{display:grid;grid-template-columns:1fr auto auto;gap:5px;align-items:center;border-top:1px solid #61716d;padding:6px 0}.window-row button{padding:6px 8px;min-height:36px}.window-state{display:block;color:#c5d8d0;font-size:12px}
-.landmarks,.tour-controls{position:absolute;bottom:max(12px,env(safe-area-inset-bottom));left:50%;transform:translateX(-50%);z-index:2;width:max-content;max-width:calc(100% - 20px);display:flex;justify-content:center;align-items:center;gap:6px;flex-wrap:wrap}.landmarks button,.tour-controls button{background:#18272cf5}.landmarks button[aria-pressed=true]{background:#f0eee9;color:#182822}
+.landmarks,.tour-controls{position:absolute;bottom:max(12px,env(safe-area-inset-bottom));left:50%;transform:translateX(-50%);z-index:2;width:max-content;max-width:calc(100% - 20px);display:flex;justify-content:center;align-items:center;gap:6px;flex-wrap:wrap}.landmarks button,.tour-controls button{background:#18272cf5}.landmarks button:disabled{opacity:.48;cursor:default}.landmarks button[aria-pressed=true]{background:#f0eee9;color:#182822}
 .tour-controls{padding:7px;background:#18272cf5;border-radius:10px}.tour-controls progress{width:clamp(66px,19vw,175px);accent-color:#b8d8c4}.tour-fade{position:absolute;inset:0;pointer-events:none;background:#171c1e;opacity:0}
 .scene.outside .actions,.scene.touring .actions,.scene.touring .map,.scene.outside .map{display:none}.scene.touring .viewlabel,.scene.outside .viewlabel{display:block}.scene.immersive .viewlabel{max-width:calc(100% - 180px)}.viewlabel{z-index:1}.scene.immersive .exit{z-index:3}
 </style>
@@ -40,7 +40,7 @@
 <script type="module">
 import {walkthroughLayouts as layouts, layoutLabels, unitTemplates} from "./assets/walkthrough-layouts.js?v=3";
 import {solarPosition} from "./assets/berlayar-site-model.js?v=1";
-import {unitSite, floorElevation, sunBlocked, drawNeighbourhood} from "./assets/type-2-walkthrough-site.js?v=6";
+import {unitSite, floorElevation, sunBlocked, drawNeighbourhood} from "./assets/type-2-walkthrough-site.js?v=7";
 import {roomSpot, buildTour, tourFrame, loungeFurniture, tableFurniture} from "./assets/walkthrough-presentation.js?v=1";
 const $=id=>document.getElementById(id);
 const params=new URLSearchParams(location.search);
@@ -589,7 +589,7 @@ function setMode(value,outlook=false){
  $('pad').classList.toggle('hide',!exploring);
  $('landmarks').classList.toggle('hide',!outside||!!tour);
  $('help').textContent=tour?'The tour moves between furnished rooms. Use Pause tour or End tour at any time.'
-  :outside?'Drag to pan, or choose a landmark. Change View floor to compare sightlines.'
+  :outside?'Drag to pan from the living-room windows. Dimmed landmarks are outside this facing. Change View floor to compare sightlines.'
   :overview?'Drag to orbit. Choose a room to jump inside.'
   :'Drag to look. Use the direction pad or WASD to move. Choose Windows to look through or operate a window.';
 }
@@ -676,12 +676,21 @@ for(const room of rooms){
 const mainWindow=windows.find(opening=>opening.name.startsWith('Living'))??windows[0];
 const landmarks=new Map([['Window outlook',null],...site.landmarks.map(([name,...target])=>[name,target])]);
 const landmarkButtons=new Map();
+const outlookHalfAngle=Math.PI*.42;
+function relativeBearing(yaw){
+ const rotation=yaw-Math.atan2(...mainWindow.out);
+ return Math.atan2(Math.sin(rotation),Math.cos(rotation));
+}
+function landmarkBearing(target){
+ const [[x,z]]=target;
+ return Math.atan2(x-lookout.x,z-lookout.z);
+}
 function aimAt(name){
  activeLandmark=name;
  const target=landmarks.get(name);
  if(target){
   const [[x,z],height]=target;
-  lookout.yaw=Math.atan2(x-lookout.x,z-lookout.z);
+  lookout.yaw=landmarkBearing(target);
   lookout.pitch=Math.atan2(height-(floorElevation(floor)+1.58),Math.hypot(x-lookout.x,z-lookout.z));
  }else{
   lookout.yaw=Math.atan2(...mainWindow.out);
@@ -704,6 +713,10 @@ function principalOutlook(){
 $('outlook').onclick=()=>{
  stopTour(false);showWindows(false);keys.clear();
  [lookout.x,lookout.z]=principalOutlook().point;
+ for(const [name,button] of landmarkButtons){
+  const target=landmarks.get(name);
+  button.disabled=!!target&&Math.abs(relativeBearing(landmarkBearing(target)))>outlookHalfAngle;
+ }
  setMode(false,true);
  aimAt('Window outlook');
 };
@@ -756,7 +769,12 @@ let drag=null;
 canvas.onpointerdown=e=>{if(drag||tour)return;canvas.setPointerCapture(e.pointerId);drag=[e.pointerId,e.clientX,e.clientY]};
 canvas.onlostpointercapture=()=>drag=null;
 canvas.onpointermove=e=>{if(!drag||drag[0]!==e.pointerId)return;const dx=e.clientX-drag[1],dy=e.clientY-drag[2];drag=[e.pointerId,e.clientX,e.clientY];if(overview){orbit+=dx*.009;tilt=Math.max(.32,Math.min(1.45,tilt+dy*.009))}else{const camera=outside?lookout:player,sensitivity=touch?.0048:.006;
- camera.yaw+=dx*sensitivity;camera.pitch=Math.max(-1.15,Math.min(1.15,camera.pitch+dy*sensitivity));
+ camera.yaw+=dx*sensitivity;
+ if(outside){
+  const bearing=Math.max(-outlookHalfAngle,Math.min(outlookHalfAngle,relativeBearing(camera.yaw)));
+  camera.yaw=Math.atan2(...mainWindow.out)+bearing;
+ }
+ camera.pitch=Math.max(-1.15,Math.min(1.15,camera.pitch+dy*sensitivity));
  if(outside&&activeLandmark){
   landmarkButtons.get(activeLandmark).setAttribute('aria-pressed',false);
   activeLandmark=null;
