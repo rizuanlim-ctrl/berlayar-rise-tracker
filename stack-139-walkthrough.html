@@ -40,7 +40,7 @@
 <script type="module">
 import {walkthroughLayouts as layouts, layoutLabels, unitTemplates} from "./assets/walkthrough-layouts.js?v=3";
 import {solarPosition} from "./assets/berlayar-site-model.js?v=1";
-import {unitSite, floorElevation, sunBlocked, drawNeighbourhood} from "./assets/type-2-walkthrough-site.js?v=9";
+import {unitSite, floorElevation, sunBlocked, drawNeighbourhood} from "./assets/type-2-walkthrough-site.js?v=10";
 import {roomSpot, buildTour, tourFrame, loungeFurniture, tableFurniture} from "./assets/walkthrough-presentation.js?v=1";
 const $=id=>document.getElementById(id);
 const params=new URLSearchParams(location.search);
@@ -879,5 +879,6 @@ function frame(t){
 showFurniture(true);
 jump(rooms[1]);
 player.pitch=-.15;
+if(params.get('view')==='outlook')$('outlook').click();
 requestAnimationFrame(frame);
 </script></html>

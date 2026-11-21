@@ -1,3 +1,4 @@
+import {buildingProfile, drawReflectionsBridges, elevationFor, isReflectionsTower} from './berlayar-building-shapes.js?v=1';
 import {highwayCentreline, highwayOutlook, drawHighway} from './berlayar-highway.js?v=1';
 import {aerialGroves, marinaPontoons, telokBlangahBuildings} from './berlayar-aerial-context.js?v=2';
 import {additionalStacks} from "./walkthrough-layouts.js?v=2";
@@ -30,35 +31,35 @@ const wingDimensions = {
   type1:[2.8,4.0], type2:[3.0,4.6], three:[4.8,4.3], four:[5.8,4.2]
 };
 const mean = list => list.reduce(([x,z],[u,v])=>[x+u/list.length,z+v/list.length],[0,0]);
-function elevationFor(building) {
-  return building.kind==='landmark'&&building.floors>=24
-    ? building.floors>=40?174:116 : building.floors*STOREY_METRES;
-}
-
-const landscape = [
+export const landscape = [
   [[226,133],[843,172],[821,302],[757,490],[725,600],[650,641],[492,654],[431,681],[413,744],[247,777],[138,743],[70,680],[115,609],[178,507],[211,390]],
   [[451,674],[623,640],[731,631],[678,698],[579,721],[433,737]],
   [[109,853],[293,878],[434,843],[514,858],[542,934],[162,990],[0,960],[0,902]],
   [[0,59],[166,110],[152,248],[84,422],[0,560]],
 ];
-const estateRoads = [
+export const estateRoads = [
   {w:25,p:[[0,714],[91,783],[183,819],[293,829],[439,801],[566,781],[697,750],[779,678],[844,557],[923,311],[966,198],[972,100],[956,58]]},
   {w:16,p:[[0,616],[63,560],[114,496],[153,417],[183,310],[204,177],[213,83],[185,0]]},
 ];
 // Main pedestrian links traced from the precinct site plan.
-const estatePaths = [
+export const estatePaths = [
   {w:9,p:[[141,336],[230,351],[336,359],[377,326],[412,305],[449,297],[589,302],[649,308]]},
   {w:8,p:[[490,304],[480,350],[489,401],[507,448]]},
   {w:10,p:[[148,573],[297,583],[431,594],[552,608],[635,602],[672,567]]},
   {w:8,p:[[349,730],[380,687],[395,638],[407,600],[392,563],[387,542]]},
   {w:7,p:[[437,685],[469,653],[525,631],[591,628],[628,614],[647,565],[655,501]]},
 ];
-const treeRows = [
+export const treeRows = [
   [[237,141],[805,179],38],[[221,231],[197,381],35],[[186,433],[152,513],26],
   [[120,562],[83,644],29],[[84,687],[235,765],32],[[264,759],[411,734],33],
   [[432,676],[633,636],32],[[651,636],[729,600],25],[[747,541],[812,343],33],
   [[349,346],[413,321],23],[[474,454],[437,523],30],[[569,586],[633,562],22],
 ];
+
+export function stacksForBlock(blockId){
+  return [...placements].filter(([,placement])=>placement.block.id===blockId)
+    .map(([stack,{x,y,kind}])=>({stack,x,y,kind})).sort((a,b)=>Number(a.stack)-Number(b.stack));
+}
 
 export function unitSite(stack, centre=[3.135,4.845]) {
   const {block,x,y} = placements.get(stack);
@@ -90,7 +91,7 @@ export function unitSite(stack, centre=[3.135,4.845]) {
   const floors = Array.from({length:maxFloor-1}, (_,i)=>i+2).filter(floor=>!block.skips.includes(floor));
   const carPark=buildings.find(building=>building.id==='201');
   const gardenPlanting=[[728,295],[723,327],[716,358],[708,389],[701,420],[700,455]].map(toRoom);
-  const reflections=buildings.filter(building=>building.kind==='landmark'&&building.floors>=24);
+  const reflections=buildings.filter(isReflectionsTower);
   const closest=buildings.filter(building=>building.kind==='tower'&&!building.id.startsWith(block.id)).sort((a,b)=>{
     const range=building=>Math.hypot(...mean(building.polygon).map((value,i)=>value-centre[i]));
     return range(a)-range(b);
@@ -239,36 +240,12 @@ export function drawNeighbourhood(site, elevation, solar, draw, simplified=false
     for(let j=0;j<count;j++)draw(canopy[j],canopy[(j+1)%count],top,top,'treeLight',light*.99);
   }
 
-  // The three paired towers have skybridges. Footprints and tower heights
-  // come from the site model. Bridge levels and cross-sections are indicative.
-  for (const [a,b] of [[23,25],[27,29],[31,33]]) {
-    const pair=[a,b].map(id=>site.buildings.find(building=>building.id==='reflections-'+id));
-    const [start,end]=pair.map(building=>mean(building.polygon));
-    const lower=ground+78, upper=lower+3.4;
-    const span=Math.hypot(end[0]-start[0],end[1]-start[1]);
-    const nx=(end[1]-start[1])*1.9/span,nz=(start[0]-end[0])*1.9/span;
-    const base=[
-      [start[0]+nx,lower,start[1]+nz],[end[0]+nx,lower,end[1]+nz],
-      [end[0]-nx,lower,end[1]-nz],[start[0]-nx,lower,start[1]-nz],
-    ];
-    const top=base.map(([x,,z])=>[x,upper,z]);
-    draw(...top,'roofGarden',light);
-    for(let i=0;i<4;i++){
-      const j=(i+1)%4;
-      draw(base[i],base[j],top[j],top[i],'facadeGlass',light*.91);
-    }
-  }
+  drawReflectionsBridges(site.buildings,ground,light,draw);
   for (const building of site.buildings) {
     const {polygon,hole,kind,floors}=building;
     const height=ground+elevationFor(building), risePerStorey=(height-ground)/floors;
-    const curved=kind==='landmark'&&floors>=24;
-    const [midX]=mean(polygon);
-    const lean=Number(building.id.match(/\d+$/)?.[0]??0)%4===1?1:-1;
-    const shape=([x,y,z])=>{
-      if(!curved)return [x,y,z];
-      const fraction=Math.max(0,Math.min(1,(y-ground)/(height-ground)));
-      return [x+lean*8*fraction*fraction,y+(x-midX)*.42*fraction**6,z-4*fraction*fraction];
-    };
+    const curved=isReflectionsTower(building);
+    const shape=buildingProfile(building,polygon,ground);
     const rings=hole?[polygon,hole]:[polygon];
     // In canvas mode, Telok Blangah's far-side skyline belongs behind the
     // viaduct deck. WebGL resolves this using depth instead.
