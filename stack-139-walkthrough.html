@@ -18,11 +18,11 @@
 .tour-controls{padding:7px;background:#18272cf5;border-radius:10px}.tour-controls progress{width:clamp(66px,19vw,175px);accent-color:#b8d8c4}.tour-fade{position:absolute;inset:0;pointer-events:none;background:#171c1e;opacity:0}
 .scene.outside .actions,.scene.touring .actions,.scene.touring .map,.scene.outside .map{display:none}.scene.touring .viewlabel,.scene.outside .viewlabel{display:block}.scene.immersive .viewlabel{max-width:calc(100% - 180px)}.viewlabel{z-index:1}.scene.immersive .exit{z-index:3}
 </style>
-<main><header><div><small id="layout-title">Berlayar Rise</small><h1 id="stack-title">Stack 139</h1></div><div><button id="walk" aria-pressed="true">Walk inside</button> <button id="overview" aria-pressed="false">3D overview</button> <button id="outlook" aria-pressed="false">Outlook</button> <button id="focus" aria-pressed="false">Immersive view</button> <button id="play-tour" class="tour-button" aria-controls="tour-controls">Play Tour</button></div></header>
+<main><header><div><small id="layout-title">Berlayar Rise</small><h1 id="stack-title">Stack 139</h1></div><div><button id="walk" aria-pressed="true">Walk inside</button> <button id="overview" aria-pressed="false">3D overview</button> <button id="outlook" aria-pressed="false">Outlook</button> <button id="explore-outside" aria-pressed="false">Explore outside</button> <button id="focus" aria-pressed="false">Immersive view</button> <button id="play-tour" class="tour-button" aria-controls="tour-controls">Play Tour</button></div></header>
 <div class="conditions" aria-label="Window view and daylight settings">
 <label>View floor <select id="view-floor"></select></label>
 <label>Sun date <input id="sun-date" type="date" value="2031-12-21"></label>
-<label>Time (SGT) <input id="sun-time" type="time" value="16:00"></label>
+<label>Time (SGT) <input id="sun-time" type="time" value="16:00"></label><label id="flight-height-wrap" hidden>Camera height <input id="flight-height" type="range" min="2" max="160" step="1" value="60"><output id="flight-height-label">60 m</output></label>
 </div>
 <section class="scene" aria-label="Interactive 3D apartment"><canvas id="world" aria-label="Apartment model, drag to look" tabindex="0"></canvas><div class="viewlabel" id="label">3D overview</div><div class="map"><canvas id="map" width="150" height="190" aria-label="Floor plan and position"></canvas></div>
 <div class="pad hide" id="pad" aria-label="Movement controls"><button data-m="w" aria-label="Forward">↑</button><button data-m="a" aria-label="Strafe left">←</button><button data-m="s" aria-label="Backward">↓</button><button data-m="d" aria-label="Strafe right">→</button></div><span class="reticle" id="reticle" aria-hidden="true"></span><button class="exit hide" id="exit">Exit immersive view</button><div class="actions"><button id="use" class="hide"></button><button id="window-controls" aria-expanded="false" aria-controls="window-panel">Windows</button>
@@ -211,6 +211,7 @@ const furniture=(template?.furniture??[
 const keys=new Set(), player={x:X(rooms[0][1]),z:Z(rooms[0][2]),yaw:rooms[0][3],pitch:0};let overview=false, furnished=true, outside=false, orbit=.56, tilt=.97, dirty=true;
 let tour=null,activeLandmark='Window outlook';
 const lookout={x:0,z:0,yaw:0,pitch:-.12};
+let outdoorFlight=false, flightElevation=1.58, outdoorSpeed=0;
 let verts=[], faces=[], glassFaces=[], layer=2, count=0, glassCount=0;
 let exterior=null, exteriorFaces=[], exteriorKey='', exteriorCount=0;
 let gpuExterior=null, gpuBytes=0;
@@ -591,11 +592,13 @@ function setMode(value,outlook=false){
  dirty=true;
  scene.classList.toggle('outside',outside);
  const exploring=!overview&&!outside&&!tour;
+ $('explore-outside').setAttribute('aria-pressed',outdoorFlight);
+ $('flight-height-wrap').hidden=!outdoorFlight;
  $('reticle').classList.toggle('hide',!exploring);
  $('overview').setAttribute('aria-pressed',overview&&!tour);
  $('outlook').setAttribute('aria-pressed',outside&&!tour);
  $('walk').setAttribute('aria-pressed',exploring);
- $('pad').classList.toggle('hide',!exploring);
+ $('pad').classList.toggle('hide',!exploring&&!outdoorFlight);
  $('landmarks').classList.toggle('hide',!outside||!!tour);
  $('help').textContent=tour?'The tour moves between furnished rooms. Use Pause tour or End tour at any time.'
   :outside?'Drag to pan from the living-room windows. Dimmed landmarks are outside this facing. Change View floor to compare sightlines.'
@@ -612,6 +615,7 @@ function stopTour(returnToWalk=true){
  if(returnToWalk)jump(rooms[1]);
 }
 function jump(room){
+ outdoorFlight=false;
  const [name,x,z,yaw,pitch=0]=room;
  stopTour(false);
  keys.clear();
@@ -725,6 +729,7 @@ function principalOutlook(){
  return {point:[X(a)+dx*.46,Z(b)+dz*.46],yaw:Math.atan2(dx,dz)};
 }
 $('outlook').onclick=()=>{
+ outdoorFlight=false;
  stopTour(false);showWindows(false);keys.clear();
  [lookout.x,lookout.z]=principalOutlook().point;
  for(const [name,button] of landmarkButtons){
@@ -734,7 +739,20 @@ $('outlook').onclick=()=>{
  setMode(false,true);
  aimAt('Window outlook');
 };
-$('play-tour').onclick=()=>{
+$('explore-outside').onclick=()=>{
+ stopTour(false);showWindows(false);keys.clear();
+ if(!outdoorFlight){
+  const origin=principalOutlook();
+  [lookout.x,lookout.z]=[origin.point[0]+Math.sin(origin.yaw)*2,origin.point[1]+Math.cos(origin.yaw)*2];
+  lookout.yaw=origin.yaw;lookout.pitch=-.13;
+  flightElevation=floorElevation(floor)+1.58;
+  $('flight-height').value=String(Math.round(Math.max(2,Math.min(160,flightElevation))));
+  $('flight-height-label').textContent=Math.round(flightElevation)+' m';
+  outdoorFlight=true;setMode(false,true);$('landmarks').classList.add('hide');$('label').textContent='Explore outside · WASD / arrows to move';
+ }else{$('outlook').click()}
+};
+$('flight-height').oninput=e=>{flightElevation=Number(e.target.value);$('flight-height-label').textContent=flightElevation+' m';dirty=true};
+$('play-tour').onclick=()=>{outdoorFlight=false;
  if(tour){stopTour();return}
  showWindows(false);
  showFurniture(true);
@@ -776,7 +794,7 @@ function advanceTour(dt){
  $('tour-progress').value=tour.elapsed/tour.total;
 }
 const keymap={arrowup:'w',arrowdown:'s',arrowleft:'a',arrowright:'d',w:'w',a:'a',s:'s',d:'d'};
-addEventListener('keydown',e=>{if(overview||outside||tour||e.target instanceof HTMLInputElement||e.target instanceof HTMLSelectElement)return;const k=e.key.toLowerCase();if(keymap[k]){e.preventDefault();keys.add(keymap[k])}if(k==='e'&&!e.repeat)interact()});
+addEventListener('keydown',e=>{if(overview||(outside&&!outdoorFlight)||tour||e.target instanceof HTMLInputElement||e.target instanceof HTMLSelectElement)return;const k=e.key.toLowerCase();if(keymap[k]){e.preventDefault();keys.add(keymap[k])}if(k==='e'&&!e.repeat)interact()});
 addEventListener('keyup',e=>keys.delete(keymap[e.key.toLowerCase()]));addEventListener('blur',()=>keys.clear());
 document.querySelectorAll('[data-m]').forEach(b=>{b.onpointerdown=e=>{b.setPointerCapture(e.pointerId);keys.add(b.dataset.m)};b.onlostpointercapture=()=>keys.delete(b.dataset.m)});
 let drag=null;
@@ -784,12 +802,12 @@ canvas.onpointerdown=e=>{if(drag||tour)return;canvas.setPointerCapture(e.pointer
 canvas.onlostpointercapture=()=>drag=null;
 canvas.onpointermove=e=>{if(!drag||drag[0]!==e.pointerId)return;const dx=e.clientX-drag[1],dy=e.clientY-drag[2];drag=[e.pointerId,e.clientX,e.clientY];if(overview){orbit+=dx*.009;tilt=Math.max(.32,Math.min(1.45,tilt+dy*.009))}else{const camera=outside?lookout:player,sensitivity=touch?.0048:.006;
  camera.yaw+=dx*sensitivity;
- if(outside){
+ if(outside&&!outdoorFlight){
   const bearing=Math.max(-outlookHalfAngle,Math.min(outlookHalfAngle,relativeBearing(camera.yaw)));
   camera.yaw=Math.atan2(...mainWindow.out)+bearing;
  }
  camera.pitch=Math.max(-1.15,Math.min(1.15,camera.pitch+dy*sensitivity));
- if(outside&&activeLandmark){
+ if(outside&&!outdoorFlight&&activeLandmark){
   landmarkButtons.get(activeLandmark).setAttribute('aria-pressed',false);
   activeLandmark=null;
   $('label').textContent='Window outlook';
@@ -828,6 +846,14 @@ function frame(t){
   const dx=Math.abs(speedX)>.005?speedX*pace*dt:0,dz=Math.abs(speedZ)>.005?speedZ*pace*dt:0;
   if(dx&&clear(player.x+dx,player.z))player.x+=dx;if(dz&&clear(player.x,player.z+dz))player.z+=dz;
   const near=nearest();$('use').classList.toggle('hide',!near);if(near){const label=(near.open?'Close ':'Open ')+near.name.toLowerCase();if($('use').textContent!==label)$('use').textContent=label}
+ }else if(outdoorFlight&&!tour){
+  const f=+keys.has('w')-keys.has('s'),r=+keys.has('d')-keys.has('a');
+  const pace=touch?Math.max(2,flightElevation*.12):Math.max(3,flightElevation*.15);
+  const norm=Math.hypot(f,r)||1;
+  lookout.x+=(Math.sin(lookout.yaw)*f-Math.cos(lookout.yaw)*r)*pace*dt/norm;
+  lookout.z+=(Math.cos(lookout.yaw)*f+Math.sin(lookout.yaw)*r)*pace*dt/norm;
+  lookout.x=Math.max(-400,Math.min(400,lookout.x));lookout.z=Math.max(-400,Math.min(400,lookout.z));
+  $('use').classList.add('hide');
  }else $('use').classList.add('hide');
  const ratio=Math.min(devicePixelRatio||1,gl?1.75:1.2),w=Math.round(canvas.clientWidth*ratio),h=Math.round(canvas.clientHeight*ratio);
  if(canvas.width!==w||canvas.height!==h){canvas.width=w;canvas.height=h}
@@ -848,7 +874,7 @@ function frame(t){
  if(dirty)build();
  const camera=outside?lookout:player;
  const b=overview?basis(orbit,-tilt):basis(camera.yaw,camera.pitch);
- const target=template?[site.centre[0],0,site.centre[1]]:[3.22,0,4.86],eye=overview?target.map((n,i)=>n-12*b[0][i]):[camera.x,1.58,camera.z];
+ const target=template?[site.centre[0],0,site.centre[1]]:[3.22,0,4.86],eye=overview?target.map((n,i)=>n-12*b[0][i]):[camera.x,outdoorFlight?flightElevation-floorElevation(floor):1.58,camera.z];
  const aspect=w/Math.max(h,1);
  const planSize=template?Math.max(site.centre[1],site.centre[0]/Math.max(aspect,.1))*1.38:0;
  const zoom=Math.max(5,5.5/Math.max(aspect,.1),planSize);
@@ -883,5 +909,6 @@ showFurniture(true);
 jump(rooms[1]);
 player.pitch=-.15;
 if(params.get('view')==='outlook')$('outlook').click();
+if(params.get('view')==='exterior')$('explore-outside').click();
 requestAnimationFrame(frame);
 </script></html>
