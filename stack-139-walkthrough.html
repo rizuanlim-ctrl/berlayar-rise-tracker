@@ -653,7 +653,7 @@ for(const opening of windows){
  syncWindow(opening);
 }
 $('window-controls').onclick=()=>showWindows($('window-panel').classList.contains('hide'));
-$('overview').onclick=()=>{stopTour(false);setMode(true);$('label').textContent='3D overview'};
+$('overview').onclick=()=>{outdoorFlight=false;stopTour(false);setMode(true);$('label').textContent='3D overview'};
 $('walk').onclick=()=>jump(rooms[0]);$('use').onclick=interact;
 function immersive(value){
  scene.classList.toggle('immersive',value);
