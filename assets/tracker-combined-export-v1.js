@@ -379,7 +379,7 @@ function UnitWalkthrough({stack,floor}){
     (0,LocalizedJSX.jsx)("h2",{id:"unit-walkthrough-title",children:title}),
     (0,LocalizedJSX.jsx)("button",{type:"button",autoFocus:true,onClick:()=>dialog.current.close(),children:"Close walkthrough"})
    ]}),
-   open&&(0,LocalizedJSX.jsx)("iframe",{src:`/stack-139-walkthrough.html?embedded=1&stack=${stack}&floor=${floor}&v=7`,title})
+   open&&(0,LocalizedJSX.jsx)("iframe",{src:`/stack-139-walkthrough.html?embedded=1&stack=${stack}&floor=${floor}&v=8`,title})
   ]})
  ]});
 }
