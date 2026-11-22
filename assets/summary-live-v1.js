@@ -58,7 +58,31 @@ document.addEventListener('keydown',e=>{if(e.key==='Escape'&&opened)modal.queryS
 function fitGrid(){if(!opened)return;modal.querySelectorAll('.bs-grid').forEach(grid=>{const count=Number(grid.dataset.rows),cols=Number(grid.dataset.cols);const row=Math.max(1,Math.floor((grid.clientHeight-2)/count));const cellWidth=Math.max(1,(grid.clientWidth-21)/cols);grid.style.setProperty('--fit-row',row+'px');grid.style.setProperty('--fit-font',Math.max(3,Math.min(12,row-2,cellWidth/4.1))+'px');});}
 new ResizeObserver(fitGrid).observe(modal);
 function showUnitInfo(){const target=modal.querySelector('.bs-unit-info');if(!target)return;const u=selectedUnit&&effective(snapshot.state).find(u=>u.id===selectedUnit);target.textContent=u?'Block '+u.block+' · #'+u.unit+' · '+u.status+' · $'+Number(u.price).toLocaleString('en-SG'):'Tap a unit for its price and status.';}
-function mountButton(){const current=document.getElementById('berlayar-summary-open');const counter=document.getElementById('counter-tab-trigger');if(current){if(counter){let group=counter.closest('.tracker-overview-actions');if(!group){group=document.createElement('div');group.className='tracker-overview-actions';counter.before(group);group.append(counter);}if(current.parentElement!==group||current.previousElementSibling!==counter)group.append(current);}return;}const target=document.querySelector('.app .roomtabs')||document.querySelector('.app .roomrow')||document.querySelector('.app');if(!target)return;const btn=document.createElement('button');btn.id='berlayar-summary-open';btn.type='button';btn.textContent='Summary';btn.onclick=()=>{opened=true;modal.hidden=false;document.body.style.overflow='hidden';render();refresh(true)};if(counter&&counter.parentElement){counter.insertAdjacentElement('afterend',btn)}else{const row=document.querySelector('.app .roomrow');if(row)row.appendChild(btn);else document.body.append(btn)}}
+function mountButton(){
+ // Keep the original summary trigger for existing ?summary= deep links.
+ let summary=document.getElementById('berlayar-summary-open');
+ const counter=document.getElementById('counter-tab-trigger');
+ if(!summary){
+  const target=document.querySelector('.app .roomrow');if(!target)return;
+  summary=document.createElement('button');summary.id='berlayar-summary-open';summary.type='button';
+  summary.textContent='Summary';target.appendChild(summary);
+ }
+ summary.hidden=true;summary.style.setProperty('display','none','important');
+ summary.onclick=()=>{opened=true;modal.hidden=false;document.body.style.overflow='hidden';render();refresh(true)};
+ let explorer=document.getElementById('unit-3d-explorer-open');
+ if(!explorer){
+  explorer=document.createElement('button');explorer.id='unit-3d-explorer-open';explorer.type='button';
+  explorer.textContent='Unit 3D Explorer';
+  explorer.onclick=()=>{window.location.href='/berlayar-3d.html'};
+ }
+ if(counter){
+  let group=counter.closest('.tracker-overview-actions');
+  if(!group){group=document.createElement('div');group.className='tracker-overview-actions';counter.before(group);group.append(counter)}
+  if(explorer.parentElement!==group||explorer.previousElementSibling!==counter)counter.insertAdjacentElement('afterend',explorer);
+ }else{
+  const row=document.querySelector('.app .roomrow');if(row&&explorer.parentElement!==row)row.appendChild(explorer);
+ }
+}
 
 function render(){if(!opened)return;const body=modal.querySelector('.bs-body');if(!snapshot){body.textContent='Loading live records…';return;}
 const all=effective(snapshot.state),group=all.filter(u=>u.room===activeRoom),blocks=[...new Set(group.map(u=>u.block))].sort(),taken=group.filter(u=>u.status==='Taken').length,maxFloor=Math.max(...group.map(u=>u.floor)),minFloor=Math.min(...group.map(u=>u.floor)),floors=Array.from({length:maxFloor-minFloor+1},(_,i)=>maxFloor-i);
