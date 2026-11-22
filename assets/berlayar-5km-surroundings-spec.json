@@ -1,0 +1,368 @@
+{
+  "title": "Berlayar Rise — 5 km surroundings reference and 3D detail specification",
+  "centre": {
+    "latitude": 1.26925,
+    "longitude": 103.8091,
+    "source": "https://mapcarta.com/W1423013740",
+    "accuracy": "Indicative centre of project site"
+  },
+  "radiusMetres": 5000,
+  "sources": [
+    {
+      "name": "SLA OneMap",
+      "url": "https://www.onemap.gov.sg/home/index.html"
+    },
+    {
+      "name": "HDB Berlayar estate masterplan",
+      "url": "https://www.hdb.gov.sg/hdb-pulse/news/2025/hdb-unveils-masterplan-for-berlayar-estate"
+    },
+    {
+      "name": "HDB Berlayar Residences brochure",
+      "url": "https://assets.hdb.gov.sg/residential/buying-a-flat/finding-a-flat/sales-brochure/25OCTBTO_pdf_selection/berlayar_residences.pdf"
+    },
+    {
+      "name": "NParks Southern Ridges",
+      "url": "https://www.nparks.gov.sg/visit/when-visiting-parks/about-parks-nature-reserves-pcns/nature-park-networks-areas"
+    },
+    {
+      "name": "OpenStreetMap site reference",
+      "url": "https://mapcarta.com/W1423013740"
+    }
+  ],
+  "priorityTiers": {
+    "0-1": {
+      "render": "Detailed geometry",
+      "features": [
+        "building outlines",
+        "rooflines",
+        "floor heights",
+        "major roads",
+        "trees",
+        "terrain",
+        "bridges",
+        "parks",
+        "coastline"
+      ],
+      "target": "unit view fidelity"
+    },
+    "1-3": {
+      "render": "Simplified geometry",
+      "features": [
+        "principal landmark silhouettes",
+        "key roads",
+        "waterfront",
+        "ridge terrain"
+      ],
+      "target": "meaningful skyline at medium distance"
+    },
+    "3-5": {
+      "render": "Low-detail context",
+      "features": [
+        "terrain ridgeline",
+        "regional skyline",
+        "major road corridors",
+        "large water bodies"
+      ],
+      "target": "distance context without heavy meshes"
+    }
+  },
+  "modellingRules": [
+    "Do not invent building elevations, exact façade appearance, future road alignment or completed development status.",
+    "Measure each future coordinate and distance using authoritative GIS before adding an object to its final 3D position.",
+    "Keep forecast or future land uses opt-in and visually differentiated from existing buildings.",
+    "Preserve close-up HDB floor/stack alignment, window outlook, highway structure, and sun simulation.",
+    "Defer imagery reuse until license/attribution is checked; do not hotlink satellite imagery without permission.",
+    "Use lazy loading / chunking, camera distance LOD and frustum culling; prefer <3000 visible draw calls on capable desktop and substantially less on mobile.",
+    "For old and new maps maintain geodetic longitude/latitude to site pixel mapping in one module; never visually tune place coordinates independently."
+  ],
+  "landmarks": [
+    {
+      "name": "Berlayar Rise",
+      "category": "project",
+      "priorityTier": "0-1",
+      "role": "HDB project",
+      "status": "Existing model",
+      "coordinateStatus": "Needs authoritative POI geometry verification",
+      "distanceStatus": "Tier is approximate planning priority, not measured distance"
+    },
+    {
+      "name": "Berlayar Residences",
+      "category": "housing",
+      "priorityTier": "0-1",
+      "role": "HDB planned development",
+      "status": "Proposed / under construction",
+      "coordinateStatus": "Needs authoritative POI geometry verification",
+      "distanceStatus": "Tier is approximate planning priority, not measured distance"
+    },
+    {
+      "name": "Telok Blangah MRT",
+      "category": "transport",
+      "priorityTier": "0-1",
+      "role": "Existing Circle Line station",
+      "status": "Existing",
+      "coordinateStatus": "Needs authoritative POI geometry verification",
+      "distanceStatus": "Tier is approximate planning priority, not measured distance"
+    },
+    {
+      "name": "Labrador Park MRT",
+      "category": "transport",
+      "priorityTier": "0-1",
+      "role": "Existing Circle Line station",
+      "status": "Existing",
+      "coordinateStatus": "Needs authoritative POI geometry verification",
+      "distanceStatus": "Tier is approximate planning priority, not measured distance"
+    },
+    {
+      "name": "Reflections at Keppel Bay",
+      "category": "housing",
+      "priorityTier": "0-1",
+      "role": "Distinctive towers near southern waterfront",
+      "status": "Existing",
+      "coordinateStatus": "Needs authoritative POI geometry verification",
+      "distanceStatus": "Tier is approximate planning priority, not measured distance"
+    },
+    {
+      "name": "West Coast Highway",
+      "category": "roads",
+      "priorityTier": "0-1",
+      "role": "Elevated highway and ground-level roads",
+      "status": "Existing",
+      "coordinateStatus": "Needs authoritative POI geometry verification",
+      "distanceStatus": "Tier is approximate planning priority, not measured distance"
+    },
+    {
+      "name": "Telok Blangah Road",
+      "category": "roads",
+      "priorityTier": "0-1",
+      "role": "Primary road corridor",
+      "status": "Existing",
+      "coordinateStatus": "Needs authoritative POI geometry verification",
+      "distanceStatus": "Tier is approximate planning priority, not measured distance"
+    },
+    {
+      "name": "Berlayar Creek",
+      "category": "nature",
+      "priorityTier": "0-1",
+      "role": "Coastal creek and mangrove environment",
+      "status": "Existing / future park works",
+      "coordinateStatus": "Needs authoritative POI geometry verification",
+      "distanceStatus": "Tier is approximate planning priority, not measured distance"
+    },
+    {
+      "name": "Labrador Nature Reserve",
+      "category": "nature",
+      "priorityTier": "0-1",
+      "role": "Coastal forest and heritage area",
+      "status": "Existing",
+      "coordinateStatus": "Needs authoritative POI geometry verification",
+      "distanceStatus": "Tier is approximate planning priority, not measured distance"
+    },
+    {
+      "name": "Bukit Chermin",
+      "category": "nature",
+      "priorityTier": "0-1",
+      "role": "Coastal headland",
+      "status": "Existing",
+      "coordinateStatus": "Needs authoritative POI geometry verification",
+      "distanceStatus": "Tier is approximate planning priority, not measured distance"
+    },
+    {
+      "name": "Telok Blangah Hill Park",
+      "category": "nature",
+      "priorityTier": "1-3",
+      "role": "Hillside nature and viewpoints",
+      "status": "Existing",
+      "coordinateStatus": "Needs authoritative POI geometry verification",
+      "distanceStatus": "Tier is approximate planning priority, not measured distance"
+    },
+    {
+      "name": "Henderson Waves",
+      "category": "nature",
+      "priorityTier": "1-3",
+      "role": "Pedestrian bridge in Southern Ridges",
+      "status": "Existing",
+      "coordinateStatus": "Needs authoritative POI geometry verification",
+      "distanceStatus": "Tier is approximate planning priority, not measured distance"
+    },
+    {
+      "name": "Mount Faber Park",
+      "category": "nature",
+      "priorityTier": "1-3",
+      "role": "Hilltop park and views",
+      "status": "Existing",
+      "coordinateStatus": "Needs authoritative POI geometry verification",
+      "distanceStatus": "Tier is approximate planning priority, not measured distance"
+    },
+    {
+      "name": "HarbourFront MRT",
+      "category": "transport",
+      "priorityTier": "1-3",
+      "role": "Circle and North East Lines",
+      "status": "Existing",
+      "coordinateStatus": "Needs authoritative POI geometry verification",
+      "distanceStatus": "Tier is approximate planning priority, not measured distance"
+    },
+    {
+      "name": "VivoCity",
+      "category": "amenities",
+      "priorityTier": "1-3",
+      "role": "Shopping and waterfront destination",
+      "status": "Existing",
+      "coordinateStatus": "Needs authoritative POI geometry verification",
+      "distanceStatus": "Tier is approximate planning priority, not measured distance"
+    },
+    {
+      "name": "HarbourFront Centre",
+      "category": "amenities",
+      "priorityTier": "1-3",
+      "role": "Transport and commercial complex",
+      "status": "Existing",
+      "coordinateStatus": "Needs authoritative POI geometry verification",
+      "distanceStatus": "Tier is approximate planning priority, not measured distance"
+    },
+    {
+      "name": "Library@Harbourfront",
+      "category": "amenities",
+      "priorityTier": "1-3",
+      "role": "Public library",
+      "status": "Existing",
+      "coordinateStatus": "Needs authoritative POI geometry verification",
+      "distanceStatus": "Tier is approximate planning priority, not measured distance"
+    },
+    {
+      "name": "Marina at Keppel Bay",
+      "category": "waterfront",
+      "priorityTier": "1-3",
+      "role": "Marina and waterfront",
+      "status": "Existing",
+      "coordinateStatus": "Needs authoritative POI geometry verification",
+      "distanceStatus": "Tier is approximate planning priority, not measured distance"
+    },
+    {
+      "name": "Keppel Bay",
+      "category": "waterfront",
+      "priorityTier": "1-3",
+      "role": "Harbour and waterfront context",
+      "status": "Existing",
+      "coordinateStatus": "Needs authoritative POI geometry verification",
+      "distanceStatus": "Tier is approximate planning priority, not measured distance"
+    },
+    {
+      "name": "HortPark",
+      "category": "nature",
+      "priorityTier": "1-3",
+      "role": "Southern Ridges garden park",
+      "status": "Existing",
+      "coordinateStatus": "Needs authoritative POI geometry verification",
+      "distanceStatus": "Tier is approximate planning priority, not measured distance"
+    },
+    {
+      "name": "Gillman Barracks",
+      "category": "culture",
+      "priorityTier": "1-3",
+      "role": "Arts and heritage area",
+      "status": "Existing",
+      "coordinateStatus": "Needs authoritative POI geometry verification",
+      "distanceStatus": "Tier is approximate planning priority, not measured distance"
+    },
+    {
+      "name": "Kent Ridge Park",
+      "category": "nature",
+      "priorityTier": "3-5",
+      "role": "Elevated green ridge",
+      "status": "Existing",
+      "coordinateStatus": "Needs authoritative POI geometry verification",
+      "distanceStatus": "Tier is approximate planning priority, not measured distance"
+    },
+    {
+      "name": "Queenstown",
+      "category": "housing",
+      "priorityTier": "3-5",
+      "role": "Town skyline context",
+      "status": "Existing",
+      "coordinateStatus": "Needs authoritative POI geometry verification",
+      "distanceStatus": "Tier is approximate planning priority, not measured distance"
+    },
+    {
+      "name": "Tiong Bahru",
+      "category": "housing",
+      "priorityTier": "3-5",
+      "role": "Town and heritage district",
+      "status": "Existing",
+      "coordinateStatus": "Needs authoritative POI geometry verification",
+      "distanceStatus": "Tier is approximate planning priority, not measured distance"
+    },
+    {
+      "name": "Outram Park MRT",
+      "category": "transport",
+      "priorityTier": "3-5",
+      "role": "Major interchange",
+      "status": "Existing",
+      "coordinateStatus": "Needs authoritative POI geometry verification",
+      "distanceStatus": "Tier is approximate planning priority, not measured distance"
+    },
+    {
+      "name": "Sentosa",
+      "category": "waterfront",
+      "priorityTier": "3-5",
+      "role": "Southern island skyline",
+      "status": "Existing",
+      "coordinateStatus": "Needs authoritative POI geometry verification",
+      "distanceStatus": "Tier is approximate planning priority, not measured distance"
+    },
+    {
+      "name": "Mount Faber cable car",
+      "category": "transport",
+      "priorityTier": "1-3",
+      "role": "Cable car skyline feature",
+      "status": "Existing",
+      "coordinateStatus": "Needs authoritative POI geometry verification",
+      "distanceStatus": "Tier is approximate planning priority, not measured distance"
+    },
+    {
+      "name": "Future Berlayar corridors",
+      "category": "future",
+      "priorityTier": "0-1",
+      "role": "Ecological and walking connections",
+      "status": "Proposed",
+      "coordinateStatus": "Needs authoritative POI geometry verification",
+      "distanceStatus": "Tier is approximate planning priority, not measured distance"
+    },
+    {
+      "name": "Keppel MRT",
+      "category": "future",
+      "priorityTier": "1-3",
+      "role": "Circle Line 6 station under construction",
+      "status": "Under construction",
+      "coordinateStatus": "Needs authoritative POI geometry verification",
+      "distanceStatus": "Tier is approximate planning priority, not measured distance"
+    },
+    {
+      "name": "Cantonment MRT",
+      "category": "future",
+      "priorityTier": "3-5",
+      "role": "Circle Line 6 station under construction",
+      "status": "Under construction",
+      "coordinateStatus": "Needs authoritative POI geometry verification",
+      "distanceStatus": "Tier is approximate planning priority, not measured distance"
+    },
+    {
+      "name": "Berlayar Drive GLS",
+      "category": "future",
+      "priorityTier": "0-1",
+      "role": "Future private residential parcel",
+      "status": "Future / subject to approval",
+      "coordinateStatus": "Needs authoritative POI geometry verification",
+      "distanceStatus": "Tier is approximate planning priority, not measured distance"
+    },
+    {
+      "name": "West Coast Park",
+      "category": "nature",
+      "priorityTier": "3-5",
+      "role": "Coastal park context — verify precise cutoff",
+      "status": "Existing",
+      "coordinateStatus": "Needs authoritative POI geometry verification",
+      "distanceStatus": "Tier is approximate planning priority, not measured distance"
+    }
+  ]
+}
