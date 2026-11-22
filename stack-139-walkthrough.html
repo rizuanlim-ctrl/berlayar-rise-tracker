@@ -57,6 +57,9 @@ let floor=site.floors.includes(selectedFloor)?selectedFloor:site.floors[0];
 for(const level of site.floors)$('view-floor').add(new Option(String(level),String(level)));
 $('view-floor').value=String(floor);
 const solarDate=$('sun-date'), solarTime=$('sun-time');
+// Keep the precinct sun setting when moving into a unit.
+if(/^\d{4}-\d{2}-\d{2}$/.test(params.get('sunDate')||'')) solarDate.value=params.get('sunDate');
+if(/^([01]\d|2[0-3]):[0-5]\d$/.test(params.get('sunTime')||'')) solarTime.value=params.get('sunTime');
 function readSolar(){
  const [year,month,day]=solarDate.value.split('-').map(Number);
  const [hour,minute]=solarTime.value.split(':').map(Number);
