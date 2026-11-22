@@ -42,14 +42,14 @@ function open(){
  const title=shell.querySelector('.tour-title');
  title.replaceChildren();
  const main=document.createElement('strong');main.textContent='Berlayar Rise · #'+String(level).padStart(2,'0')+'-'+unit;
- const sub=document.createElement('small');sub.textContent='3D precinct → floor outlook → interior';
+ const sub=document.createElement('small');sub.textContent='3D precinct → same-scene exterior flight → interior';
  title.append(main,sub);
  portalOrigin();const src=snapshot();portalImage.src=src||'';
  portal.style.opacity='1';portal.classList.remove('is-hidden','is-entering');
  veil.classList.remove('active');
  caption.textContent='Approaching #'+String(level).padStart(2,'0')+'-'+unit;caption.classList.add('visible');
  shell.dataset.open='true';document.body.classList.add('tour-open');phase='entering';back.focus({preventScroll:true});
- const params=new URLSearchParams({embedded:'1',stack:unit,floor:String(level),view:'outlook',v:'fused-20261122'});
+ const params=new URLSearchParams({embedded:'1',stack:unit,floor:String(level),view:'exterior',v:'fused-20261122'});
  try{
   params.set('sunDate',canonicalDate(state.sunYear,state.sunMonth,state.sunDay));
   params.set('sunTime',time(state.sunHour));
@@ -64,7 +64,7 @@ function open(){
  };
  frame.addEventListener('load',reveal,{once:true});
  // If a browser blocks or stalls the iframe, do not leave the site unusable.
- frame.addEventListener('error',()=>{if(token===closeToken){caption.textContent='Interior could not load. Return to the site and try again.';}},{once:true});
+ frame.addEventListener('error',()=>{if(token===closeToken){caption.textContent='3D environment could not load. Return to the site and try again.';}},{once:true});
 }
 function close(){
  if(phase==='outside')return;
