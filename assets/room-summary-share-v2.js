@@ -10,17 +10,23 @@ const getModal=()=>$('#berlayar-summary-modal');
 const getActive=()=>getModal()?.querySelector('.bs-room-tabs button[aria-pressed="true"]')?.dataset.room||'2R';
 const url=room=>location.origin+location.pathname+'?summary='+encodeURIComponent(room);
 const sheet=document.createElement('style');
-sheet.textContent='.bs-share-actions{display:flex;gap:8px;align-items:center;flex-wrap:wrap}.bs-share-actions button{min-height:40px;padding:7px 11px;border-radius:8px;border:1px solid #749984;background:#fff;color:#17452f;font:inherit;font-size:13px;cursor:pointer;white-space:normal}.bs-share-actions button:disabled{opacity:.6;cursor:wait}.bs-share-actions .bs-share-notice{font-size:12px;color:#236444;max-width:170px;line-height:1.3}.room-summary-toolbar{display:flex;flex-wrap:wrap;gap:10px;margin:12px 0;padding:12px;border:1px solid #8ca797;border-radius:10px;background:#edf4ef;color:#173e2c;align-items:center}.room-summary-toolbar label{font-weight:700}.room-summary-toolbar select,.room-summary-toolbar button,.room-summary-toolbar a{font:inherit;min-height:40px;border:1px solid #66917c;border-radius:7px;padding:7px 10px;background:#fff;color:#174b35;text-decoration:none}.bs-share-actions button:focus-visible,.room-summary-toolbar button:focus-visible{outline:3px solid #be6c23;outline-offset:2px}@media(max-width:750px){#berlayar-summary-modal .bs-head{flex-wrap:wrap}.bs-share-actions{width:100%}.bs-share-actions button{flex:1}.bs-share-actions .bs-share-notice{flex:1 0 100%;max-width:100%}}';
+sheet.textContent='.bs-share-actions{display:flex;gap:8px;align-items:center;flex-wrap:wrap}.bs-share-actions button{min-height:40px;padding:7px 11px;border-radius:8px;border:1px solid #749984;background:#fff;color:#17452f;font:inherit;font-size:13px;cursor:pointer;white-space:normal}.bs-share-actions button:disabled{opacity:.6;cursor:wait}.bs-share-actions .bs-share-notice{font-size:12px;color:#236444;max-width:170px;line-height:1.3}.room-summary-toolbar{display:flex;flex-wrap:wrap;gap:10px;margin:12px 0;padding:12px;border:1px solid #8ca797;border-radius:10px;background:#edf4ef;color:#173e2c;align-items:center}.room-summary-toolbar{flex-direction:column;align-items:stretch}.room-summary-heading{font-weight:800;font-size:20px}.room-summary-room-buttons{display:flex;flex-wrap:wrap;gap:8px}.room-summary-room-buttons button{flex:1 1 140px}.room-summary-toolbar button,.room-summary-toolbar a{font:inherit;min-height:40px;border:1px solid #66917c;border-radius:7px;padding:7px 10px;background:#fff;color:#174b35;text-decoration:none;cursor:pointer}.room-summary-toolbar .room-summary-room-buttons button[aria-pressed=true]{background:#1d513a;color:#fff;border-color:#1d513a}.room-summary-actions{display:flex;gap:8px;flex-wrap:wrap}.room-summary-actions>*{flex:1 1 150px;text-align:center}html[data-tracker-theme=dark] .room-summary-toolbar{background:#20372a;color:#e2eee6}html[data-tracker-theme=dark] .room-summary-toolbar button,html[data-tracker-theme=dark] .room-summary-toolbar a{background:#243e30;color:#e2eee6}.bs-share-actions button:focus-visible,.room-summary-toolbar button:focus-visible{outline:3px solid #be6c23;outline-offset:2px}@media(max-width:750px){#berlayar-summary-modal .bs-head{flex-wrap:wrap}.bs-share-actions{width:100%}.bs-share-actions button{flex:1}.bs-share-actions .bs-share-notice{flex:1 0 100%;max-width:100%}}';
 document.head.append(sheet);
-const pop=(room)=>{const input=$('#room-summary-choice');if(input)input.value=room};
+let chosenRoom=requested||'2R';
+function chooseRoom(room){
+ if(!Object.hasOwn(rooms,room))return;
+ chosenRoom=room;
+ document.querySelectorAll('.room-summary-room-buttons button').forEach(button=>button.setAttribute('aria-pressed',String(button.dataset.room===room)));
+ const link=$('#room-summary-open-link');if(link)link.href=url(room);
+}
 function addToolbar(){
  if($('.room-summary-toolbar')||!$('#root .roomrow'))return;
- const bar=document.createElement('div');bar.className='room-summary-toolbar';
- bar.innerHTML='<label for="room-summary-choice">Share room summary</label><select id="room-summary-choice"><option value="2R">2-Room Flexi (Type 1 + Type 2)</option><option value="3R">3-Room</option><option value="4R">4-Room</option></select><a id="room-summary-open-link" href="'+url('2R')+'">Open full summary</a><button type="button" id="room-summary-copy-link">Copy link</button>';
+ const bar=document.createElement('section');bar.className='room-summary-toolbar';bar.setAttribute('aria-label','Room Summary');
+ bar.innerHTML='<div class="room-summary-heading">Room Summary</div><div class="room-summary-room-buttons" role="group" aria-label="Choose room type"><button type="button" data-room="2R">2-Room Flexi</button><button type="button" data-room="3R">3-Room</button><button type="button" data-room="4R">4-Room</button></div><div class="room-summary-actions"><a id="room-summary-open-link" href="'+url(chosenRoom)+'">Open full summary</a><button type="button" id="room-summary-copy-link">Copy link</button></div>';
  $('#root .roomrow').insertAdjacentElement('afterend',bar);
- const input=$('#room-summary-choice');
- input.onchange=()=>$('#room-summary-open-link').href=url(input.value);
- $('#room-summary-copy-link').onclick=()=>copy(input.value,$('#room-summary-copy-link'));
+ bar.querySelector('.room-summary-room-buttons').addEventListener('click',e=>{const button=e.target.closest('button[data-room]');if(button)chooseRoom(button.dataset.room)});
+ $('#room-summary-copy-link').onclick=()=>copy(chosenRoom,$('#room-summary-copy-link'));
+ chooseRoom(chosenRoom);
 }
 async function copy(room,button){
  const value=url(room);
