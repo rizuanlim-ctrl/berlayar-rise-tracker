@@ -73,7 +73,7 @@ function mountButton(){
  if(!explorer){
   explorer=document.createElement('button');explorer.id='unit-3d-explorer-open';explorer.type='button';
   explorer.textContent='Unit 3D Explorer';
-  explorer.onclick=()=>{window.location.href='/berlayar-3d.html'};
+  explorer.onclick=()=>{window.location.href='/unit-3d-explorer.html'};
  }
  if(counter){
   let group=counter.closest('.tracker-overview-actions');
