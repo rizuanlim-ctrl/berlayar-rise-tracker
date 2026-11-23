@@ -231,6 +231,16 @@ html[data-tracker-theme="dark"] .unit-walkthrough-dialog header button:hover{bac
 <script id="quota-source-note-cleanup">
 (function(){
   const noteText = "Remaining quotas are updated from the latest supplied end-of-selection-day HDB screenshots.";
+  const sourcePrefix = "Source: community-provided remaining quota report";
+  function removeSourceBanner(){
+    document.querySelectorAll('.quotaview p, .quotaview aside, .quotaview div').forEach(function(el){
+      const text = (el.textContent || '').trim();
+      if(!text.startsWith(sourcePrefix) || text.length > 450) return;
+      if(Array.from(el.children).some(child => (child.textContent || '').trim().startsWith(sourcePrefix) && (child.textContent || '').trim().length <= 450)) return;
+      el.hidden = true;
+      el.style.setProperty('display','none','important');
+    });
+  }
   function cleanQuotaNotes(){
     document.querySelectorAll('.quotaview .quotacard p, .quotacard p').forEach(function(el){
       if(el.textContent.trim() === noteText) el.hidden = true;
@@ -238,7 +248,8 @@ html[data-tracker-theme="dark"] .unit-walkthrough-dialog header button:hover{bac
   }
   document.addEventListener('DOMContentLoaded', function(){
     cleanQuotaNotes();
-    new MutationObserver(cleanQuotaNotes).observe(document.body,{childList:true,subtree:true});
+    removeSourceBanner();
+    new MutationObserver(function(){cleanQuotaNotes();removeSourceBanner();}).observe(document.body,{childList:true,subtree:true});
   });
 })();
 </script>
