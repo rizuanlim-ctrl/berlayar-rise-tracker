@@ -80,6 +80,7 @@ html[data-finance-theme="light"] #cashlarge{color:#245c40!important}
 <label class="field">Monthly other loan commitments (S$)<input type="number" id="monthlyDebts" value="0" min="0"></label>
 <label class="field">Household living expenses / month (S$)<input type="number" id="livingExpense" value="0" min="0"></label>
 <label class="field">Monthly cash savings planned (S$)<input type="number" id="cashSavings" value="0" min="0"></label>
+<label class="field">Actual monthly take-home income (S$; optional)<input type="number" id="netIncome" value="" min="0"></label>
 <label class="field">Housing loan assessment rate (%)<input type="number" id="assessmentRate" value="3" min="0" step=".1"></label>
 </div><div class="grid triple" style="margin-top:14px">
 <div class="inner metric"><div class="label">Mortgage servicing ratio (MSR)</div><strong id="msrResult">—</strong></div>
@@ -224,14 +225,125 @@ function compute(price,scenario={}){
  const cashLater=financeN('spDeposit')+financeN('hpsPremium')+financeN('handoverOther')+financeN('handoverMoving');
  const cashKey=cashKeyHDB+cashLater,feesKeys=hdbFees+fire+levy+cashLater;
  const totalCash=bookingCash+cashAFL+cashKey;
- const effectiveTenure=Math.max(1,financeN('tenure')),rate=financeN('mortRate')+Math.max(0,scenario.rateIncrease||0);
+ const baseTenure=Math.max(1,financeN('tenure'));const birth=financeDate(financeV('birthDate')),birth2=financeDate(financeV('partnerDob'));let ageAtBooking=birth?Math.max(0,financeYears(birth,booking)):null;if(birth2&&ageAtBooking!==null)ageAtBooking=(ageAtBooking+Math.max(0,financeYears(birth2,booking)))/2;const hdbMaxYears=ageAtBooking===null?25:Math.max(1,Math.min(25,65-ageAtBooking));const effectiveTenure=provider==='hdb'?Math.min(baseTenure,hdbMaxYears):provider==='bank'?Math.min(baseTenure,30):baseTenure;const rate=financeN('mortRate')+Math.max(0,scenario.rateIncrease||0);
  const install=financeInstall(loan,rate,effectiveTenure*12);
  const monthlyCPF=financeN('monthlyOA')*Math.pow(1+financeN('raise')/100,Math.max(0,key.getFullYear()-oaDate.getFullYear()));
  const monthCash=Math.max(0,install-monthlyCPF);
- return{price:amount,bookingCash,aflPrice,aflFees,bsd,needAFL,cpfAFL,cashAFL,oaEarly,oaAfterAFL,beforeKeys,balancePrice,loan,cpfKey,cpfKeyFees,cashKey,cashKeyHDB,cashLater,cashKeyPrice,totalCash,install,monthlyCPF,monthCash,afterKeys,feesKeys,grant,dp,early:pre,later,booking,afl,key,oaDate,raTransfer:pre.raTransfer+later.raTransfer,raUnknown:pre.raUnknown||later.raUnknown,bankCashAtAFL,hdbFees,fire,levy,provider,shortLease,effectiveTenure,mortRate:rate,grantAFL,grantKey}
+ return{price:amount,bookingCash,aflPrice,aflFees,bsd,needAFL,cpfAFL,cashAFL,oaEarly,oaAfterAFL,beforeKeys,balancePrice,loan,cpfKey,cpfKeyFees,cashKey,cashKeyHDB,cashLater,cashKeyPrice,totalCash,install,monthlyCPF,monthCash,afterKeys,feesKeys,grant,dp,early:pre,later,booking,afl,key,oaDate,raTransfer:pre.raTransfer+later.raTransfer,raUnknown:pre.raUnknown||later.raUnknown,bankCashAtAFL,hdbFees,fire,levy,provider,shortLease,effectiveTenure,mortRate:rate,grantAFL,grantKey,hdbMaxYears,ageAtBooking}
 }
 function rows(r){const stages=[['Booking',r.bookingCash,0,0,r.bookingCash],['Agreement for Lease',r.needAFL,r.cpfAFL,0,r.cashAFL],['HDB key collection',r.balancePrice+r.hdbFees+r.fire+r.levy,r.cpfKey+r.cpfKeyFees,r.loan,r.cashKeyHDB],['Later setup / utilities',r.cashLater,0,0,r.cashLater]];return stages.map(a=>'<tr>'+a.map((v,i)=>'<td>'+(i?money(v):v)+'</td>').join('')+'</tr>').join('')}
 function drawChart(r){let series=[...r.early.series,{date:r.afl,oa:r.oaAfterAFL},...r.later.series,{date:r.key,oa:r.afterKeys}].sort((a,b)=>a.date-b.date),max=Math.max(1,...series.map(s=>s.oa))*1.1,minTime=Math.min(...series.map(s=>s.date.getTime())),maxTime=Math.max(...series.map(s=>s.date.getTime()));let x=d=>44+760*(d.getTime()-minTime)/(maxTime-minTime||1),y=v=>195-165*v/max,points=series.map(s=>x(s.date)+','+y(s.oa)).join(' ');$('cpfchart').innerHTML=[0,.25,.5,.75,1].map(q=>`<line x1="44" y1="${195-165*q}" x2="816" y2="${195-165*q}" stroke="#355065" stroke-width="1"/><text x="2" y="${199-165*q}">${Math.round(max*q/1000)}k</text>`).join('')+`<polyline points="${points}" fill="none" stroke="#55c5df" stroke-width="3"/>`+[['AFL',r.afl],['Keys',r.key]].map(v=>`<line x1="${x(v[1])}" y1="28" x2="${x(v[1])}" y2="195" stroke="#f4ba86" stroke-dasharray="4,5"/><text x="${Math.max(45,Math.min(780,x(v[1])+4))}" y="20">${v[0]}</text>`).join('')+`<text x="45" y="217">${r.oaDate.getFullYear()}</text><text x="784" y="217">${r.key.getFullYear()}</text>`}
+
+function financeDateStatus(){
+ const dates=['oadate','bookDate','aflDate','keyDate'].map(k=>financeDate(financeV(k)));
+ if(dates.some(d=>!d||Number.isNaN(d.getTime())))return 'Enter all required dates to continue.';
+ const [oa,booking,afl,key]=dates;
+ if(!(booking<=afl&&afl<=key))return 'Invalid dates: estimated booking must be on or before Agreement for Lease, which must be before key collection.';
+ if(!(oa<=afl))return 'Invalid CPF reference date: it must be on or before the Agreement for Lease date.';
+ return '';
+}
+function financeMortgageProjection(r,rateOverride){
+ const months=Math.max(0,Math.round(r.effectiveTenure*12)),loanRate=rateOverride??r.mortRate;
+ const instalment=financeInstall(r.loan,loanRate,months);
+ const birth=financeDate(financeV('birthDate')),at55=financeBirth55();
+ let outstanding=r.loan,oa=r.afterKeys,cpfSpent=0,cashSpent=0,interestSpent=0,raTransfer=0,raUnknown=false;
+ let yearly=[],history=[{date:new Date(r.key),balance:outstanding,oa,cumulativeCPF:cpfSpent,cumulativeCash:cashSpent}];
+ const retireAge=financeN('retireAge')||65;
+ let retirementBalance=null,retireCashMonthly=0;
+ const mortgageCPFEvents=[];
+ for(let i=1;i<=months;i++){
+  if(outstanding<.005)break;
+  const date=new Date(r.key.getFullYear(),r.key.getMonth()+i,1,12);
+  const age=birth?financeYears(birth,date):null;
+  let growth=Math.max(0,date.getFullYear()-r.oaDate.getFullYear());
+  const baseAfter55=financeV('oaAfter55')!==''?financeN('oaAfter55'):financeN('monthlyOA')*Math.pow(1+financeN('raise')/100,growth);
+  let monthlyIncomeCPF=(at55&&date>=at55)?baseAfter55:financeN('monthlyOA')*Math.pow(1+financeN('raise')/100,growth);
+  if(age!==null&&age>=retireAge)monthlyIncomeCPF=0;
+  oa=oa*(1+financeN('interest')/1200)+monthlyIncomeCPF;
+  const ra=financeRAEvent(oa,date);oa=ra.oa;raTransfer+=ra.transfer;if(ra.triggered&&!ra.known)raUnknown=true;
+  const interest=outstanding*loanRate/1200;interestSpent+=interest;
+  const due=Math.min(outstanding+interest,instalment),cpfPay=Math.min(oa,due);
+  oa-=cpfPay;cpfSpent+=cpfPay;
+  const cashPay=due-cpfPay;cashSpent+=cashPay;
+  if(cpfPay>0)mortgageCPFEvents.push({date,amount:cpfPay});
+  outstanding=Math.max(0,outstanding+interest-due);
+  if(age!==null&&age>=retireAge&&retirementBalance===null){retirementBalance=outstanding;retireCashMonthly=cashPay}
+  const snapshot={date,balance:outstanding,oa,cumulativeCPF:cpfSpent,cumulativeCash:cashSpent};
+  if(i%12===0||i===months||outstanding<.005)history.push(snapshot);
+ }
+ if(retirementBalance===null)retirementBalance=outstanding===0?0:outstanding;
+ return{history,outstanding,cpfSpent,cashSpent,interestSpent,raTransfer,raUnknown,retirementBalance,retireCashMonthly,instalment,mortgageCPFEvents};
+}
+function financeModelResale(r,mortgage){
+ const saleYears=financeN('saleYears'),shortLease=r.shortLease;
+ const saleDate=new Date(r.key);saleDate.setFullYear(saleDate.getFullYear()+saleYears);
+ const salePrice=financeN('futureSalePrice'),valuation=financeN('futureValuation'),recovery=.14*Math.max(salePrice,valuation);
+ const monthly=r.mortRate/1200,months=Math.min(r.effectiveTenure*12,Math.max(0,Math.round(saleYears*12)));
+ let outstanding=r.loan;
+ for(let i=0;i<months;i++){let due=Math.min(outstanding*(1+monthly),r.install);outstanding=Math.max(0,outstanding*(1+monthly)-due)}
+ const accrued=(principal,from)=>principal*Math.pow(1+financeN('interest')/100,Math.max(0,financeYears(from,saleDate)));
+ let cpfRefund=accrued(r.cpfAFL,r.afl)+accrued(r.cpfKey+r.cpfKeyFees,r.key);
+ for(const evt of mortgage.mortgageCPFEvents){if(evt.date>saleDate)break;cpfRefund+=accrued(evt.amount,evt.date)}
+ const afterRecovery=salePrice-recovery-financeN('saleFees')-outstanding;
+ return{saleYears,salePrice,recovery,outstanding,cpfRefund,cashProceeds:afterRecovery-cpfRefund,eligible:!shortLease&&saleYears>=10,shortLease};
+}
+function financeMoney(v){return money(Number.isFinite(v)?v:0)}
+function renderFinanceEnhancements(r){
+ const gross=financeN('income1')+financeN('income2'),otherDebt=financeN('monthlyDebts');
+ const stressRate=financeN('assessmentRate'),testedInstall=financeInstall(r.loan,Math.max(r.mortRate,stressRate),r.effectiveTenure*12);
+ const msr=gross>0?testedInstall/gross:null,tdsr=gross>0?(testedInstall+otherDebt)/gross:null;
+ const cashTakeHome=financeV('netIncome')!==''?financeN('netIncome'):null;
+ const propTax=financeOwnerTax(financeN('annualValue'));
+ const ownMonthly=propTax/12+financeN('scc')+financeN('utilities')+financeN('annualMaintenance')/12;
+ const remaining=cashTakeHome===null?null:cashTakeHome-financeN('livingExpense')-otherDebt-ownMonthly-r.monthCash-financeN('cashSavings');
+ $('msrResult').textContent=msr===null?'—':(msr*100).toFixed(1)+'%';
+ $('tdsrResult').textContent=tdsr===null?'—':(tdsr*100).toFixed(1)+'%';
+ $('leftoverCash').textContent=remaining===null?'—':financeMoney(remaining);
+ $('propertyTaxResult').textContent=financeMoney(propTax);
+ $('ownershipMonthly').textContent=financeMoney(ownMonthly);
+ let profileWarn=[];
+ if(r.shortLease){profileWarn.push('Short-lease 2-Room Flexi flats cannot be financed with a housing loan or sold on the open market. The displayed saved unit price is a 99-year price; enter the official short-lease price before using this scenario.');if(activeRoom!=='2R')profileWarn.push('Short-lease purchase applies only to 2-Room Flexi, not this selected room category.')}
+ if(financeV('buyerProfile')==='single'&&activeRoom!=='2R')profileWarn.push('Single applicants generally cannot buy a new 3-/4-Room BTO under the ordinary singles scheme. Check your precise HFE eligibility.');
+ if(financeV('buyerProfile')==='second'&&financeN('resaleLevy')===0)profileWarn.push('Second-timer buyers may have a resale levy or other amounts payable. Enter the applicable figure if required.');
+ if(financeV('paymentScheme')==='staggered'||financeV('paymentScheme')==='deferred')profileWarn.push('This downpayment scheme must be approved by HDB and is not automatic.');
+ if(financeV('grantAt')==='afl')profileWarn.push('The model assumes the entered CPF grants are available at AFL; confirm the actual credit and permitted uses with HDB.');
+ if(financeV('birthDate')==='')profileWarn.push('No date of birth: age-dependent loan limits and CPF RA transfer are not fully assessed.');
+ if(r.provider==='hdb'&&financeN('tenure')>r.effectiveTenure+.01)profileWarn.push('Requested HDB loan tenure exceeds the modeled age/25-year ceiling and has been capped to '+r.effectiveTenure.toFixed(1)+' years for instalment estimates.');
+ if(r.provider==='hdb'&&financeN('loan')>0&&!Number.isFinite(r.ageAtBooking))profileWarn.push('Loan age-based tenure cannot be checked without date of birth.');
+ $('profileWarnings').innerHTML=profileWarn.map(w=>'<div class="alert">⚠ '+w+'</div>').join('');
+ let notes=[];
+ if(gross===0)notes.push('Enter gross income to assess MSR and debt burden.');
+ else {if(msr>.30)notes.push('Indicative assessed mortgage instalment exceeds 30% MSR. Your HFE or lender assessment is authoritative.');if(tdsr>.55)notes.push('Indicative debt burden exceeds a 55% TDSR benchmark (primarily applicable to FI loans).')}
+ if(cashTakeHome===null)notes.push('Enter actual monthly household take-home income to see disposable cash flow; gross pay is not used as take-home pay.');
+ $('affordabilityNotes').textContent=notes.join(' ')||'All ratios are illustrative and do not replace HFE or lender approval.';
+ const mortgage=financeMortgageProjection(r);
+ $('loanAtRetirement').textContent=financeMoney(mortgage.retirementBalance);
+ $('lifetimeCashMortgage').textContent=financeMoney(mortgage.cashSpent);
+ const raTransfer=r.raTransfer+mortgage.raTransfer;
+ $('estimatedRaTransfer').textContent=financeV('frs55')===''||financeV('sa55')===''?'Not assessed':financeMoney(raTransfer);
+ let schedule=['<table><thead><tr><th>Year</th><th>Loan balance</th><th>OA balance</th><th>Mortgage CPF used</th><th>Mortgage cash used</th></tr></thead><tbody>'];
+ for(const snap of mortgage.history)schedule.push('<tr><td>'+snap.date.getFullYear()+'</td><td>'+financeMoney(snap.balance)+'</td><td>'+financeMoney(snap.oa)+'</td><td>'+financeMoney(snap.cumulativeCPF)+'</td><td>'+financeMoney(snap.cumulativeCash)+'</td></tr>');
+ schedule.push('</tbody></table>');
+ $('mortgageSchedule').innerHTML=schedule.join('');
+ const resale=financeModelResale(r,mortgage);
+ $('primeRecovery').textContent=resale.eligible?financeMoney(resale.recovery):'N/A';
+ const resaleAlert=!resale.eligible?(resale.shortLease?'Short-lease flats cannot be sold on the open market.':'Prime resale modeled only after 10 years MOP; choose 10 or more years.'):saleDateText(resale,r);
+ $('resaleResults').textContent=resaleAlert;
+ const scenario={loanCut:financeN('scenarioLoanCut'),delay:financeN('scenarioDelay'),rateIncrease:financeN('scenarioRateIncrease')};
+ const stressed=compute(r.price,scenario);
+ const scenarioIncome=gross*(1-financeN('scenarioIncomeCut')/100);
+ const stressedMSR=scenarioIncome>0?100*financeInstall(stressed.loan,Math.max(financeN('assessmentRate'),stressed.mortRate),stressed.effectiveTenure*12)/scenarioIncome:null;
+ $('scenarioResults').textContent='Baseline estimated purchase cash: '+financeMoney(r.totalCash)+'; scenario estimated cash: '+financeMoney(stressed.totalCash)+'; change: '+financeMoney(stressed.totalCash-r.totalCash)+'. Scenario mortgage: '+financeMoney(stressed.install)+'/month. Scenario MSR: '+(stressedMSR===null?'not assessed':stressedMSR.toFixed(1)+'%')+'. Delayed keys and financing reductions are illustrative, not HDB-approved changes.';
+ const additions=[];
+ if(r.raUnknown||mortgage.raUnknown)additions.push('Age-55 RA transfer not calculated: enter projected SA at 55 and applicable FRS; OA and mortgage forecasts may be overstated.');
+ if(r.provider==='hdb'&&gross>0&&msr>.30)additions.push('Assessed HDB mortgage MSR exceeds 30% of stated gross income; verify affordability with HFE.');
+ if(r.shortLease&&r.loan>0)additions.push('Short-lease flat loan must be zero.');
+ if(r.cashKeyPrice>0)additions.push('Cash shortfall remains on the purchase price at key collection.');
+ if(additions.length)$('warnings').insertAdjacentHTML('beforeend',additions.map(x=>'<div class="alert">⚠ '+x+'</div>').join(''));
+ // Expose detailed metrics to Save to Excel without storing personal inputs.
+ window.berlayarFinanceMetrics={msr:msr===null?'Not assessed':(100*msr).toFixed(1)+'%',tdsr:tdsr===null?'Not assessed':(100*tdsr).toFixed(1)+'%',propertyTax:propTax,ownershipMonthly:ownMonthly,raTransfer:financeV('frs55')===''?'Not assessed':raTransfer,loanAtRetirement:mortgage.retirementBalance,lifeCashMortgage:mortgage.cashSpent,primeRecovery:resale.eligible?resale.recovery:'Not eligible',resaleCash:resale.eligible?resale.cashProceeds:'Not eligible',cpfRefund:resale.eligible?resale.cpfRefund:'Not eligible',keyHDB:r.cashKeyHDB,later:r.cashLater,scenarioCash:stressed.totalCash,scenarioPayment:stressed.install};
+}
+function saleDateText(resale,r){return 'Indicative sale price '+financeMoney(resale.salePrice)+'; Prime recovery (14% of higher price/valuation) '+financeMoney(resale.recovery)+'; outstanding loan '+financeMoney(resale.outstanding)+'; CPF principal plus accrued interest refund '+financeMoney(resale.cpfRefund)+'; selling fees '+financeMoney(financeN('saleFees'))+'; indicative cash proceeds '+financeMoney(resale.cashProceeds)+'. CPF refund and proceeds depend on actual balances, transaction and valuation.'}
 function recalc(){if(!selected)return;
 const required=['oa','oadate','monthlyOA','loan','tenure','grant','reserve','bookDate','aflDate'];
 const missing=required.filter(id=>$(id).value==='');
