@@ -254,6 +254,39 @@ html[data-tracker-theme="dark"] .unit-walkthrough-dialog header button:hover{bac
 })();
 </script>
 <style>.quotacard p[hidden]{display:none!important}</style>
+<style id="berlayar-finance-and-3d-actions-v1">
+.app .roomrow #financial-planning-open{
+ box-sizing:border-box!important;display:inline-flex!important;align-items:center!important;justify-content:center!important;
+ min-height:52px!important;height:52px!important;padding:10px 16px!important;font-family:inherit!important;
+ font-size:1.3rem!important;font-weight:800!important;line-height:1.25!important;border:1px solid #8ea999!important;
+ border-radius:8px!important;background:var(--surface,transparent)!important;color:inherit!important;white-space:nowrap!important;cursor:pointer!important;
+}
+.app .project-map-launcher.berlayar-map-sibling{
+ box-sizing:border-box!important;display:inline-flex!important;width:calc(50% - 8px)!important;
+ vertical-align:middle!important;min-height:82px!important;margin:0 8px 10px 0!important;
+}
+.app #unit-3d-explorer-open{
+ box-sizing:border-box!important;display:inline-flex!important;align-items:center!important;justify-content:space-between!important;
+ width:calc(50% - 8px)!important;vertical-align:middle!important;min-height:82px!important;margin:0 0 10px 8px!important;
+ padding:16px 20px!important;border:1px solid #cbdace!important;border-radius:12px!important;
+ font-family:inherit!important;font-size:16px!important;font-weight:800!important;line-height:1.4!important;
+ background:#edf3ee!important;color:#125c3c!important;cursor:pointer!important;text-align:left!important;
+}
+.app #unit-3d-explorer-open:hover,.app .project-map-launcher:hover{border-color:#5b8c69!important}
+html[data-tracker-theme="dark"] .app #unit-3d-explorer-open{
+ background:#21392b!important;border-color:#55745e!important;color:#e1eee6!important;
+}
+html[data-tracker-theme="dark"] .app .roomrow #financial-planning-open{
+ background:#243e2d!important;border-color:#789984!important;color:#e1eee6!important;
+}
+@media(max-width:700px){
+ .app .roomrow #financial-planning-open{font-size:clamp(12px,3.25vw,16px)!important;height:46px!important;min-height:46px!important;padding:8px 10px!important;flex:1 1 0!important;min-width:0!important}
+ .app .tracker-overview-actions{flex-wrap:wrap!important}
+ .app .project-map-launcher.berlayar-map-sibling,.app #unit-3d-explorer-open{
+  display:flex!important;width:100%!important;min-height:64px!important;margin:0 0 10px!important;
+ }
+}
+</style>
 </head><body><a class="skip-link" href="#unit-explorer">Skip to unit search</a><details class="community-notice"><summary>Independent community tracker · update confirmed bookings only</summary><p>This independent tracker is maintained through community reports and is not an official HDB service. Record a selection only after the actual booking has been confirmed. “Available” means no booking is recorded here; HDB remains the source for current availability and eligibility.</p><p>Unconfirmed official quotas are left blank. Separate 3-room and 4-room planning estimates are labelled. Queue projections and the 3D surroundings are planning aids, not guaranteed outcomes or views.</p></details>
 <style id="font-reduction-10">/* Reduce non-header fonts by 10%, retaining breakpoints and touch target sizes. */
 @layer components;@layer utilities{.text-\[0\.8rem\]:where(:not(.topbar, .topbar *, .pageheading, .pageheading *)){font-size:calc((.8rem) * 0.9);}}
@@ -693,4 +726,4 @@ html.tracker-large-text .app .listtable .quick-choice-field.ethnicity{min-width:
 html.tracker-large-text .app .unit-quick-cell{min-width:560px}
 </style>
 
-<script src="/visitor-counter.js?v=1" defer></script><script type="module" src="/assets/summary-live-v1.js?v=4r-20261120"></script><script defer src="/assets/room-summary-share-v2.js?v=20261122-grid"></script><script defer src="/assets/geo-reference-v1.js?v=20261123"></script></body></html>
+<script src="/visitor-counter.js?v=1" defer></script><script type="module" src="/assets/summary-live-v1.js?v=finance-20261124"></script><script defer src="/assets/room-summary-share-v2.js?v=20261122-grid"></script><script defer src="/assets/geo-reference-v1.js?v=20261123"></script></body></html>
