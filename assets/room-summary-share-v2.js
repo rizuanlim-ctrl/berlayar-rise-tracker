@@ -38,26 +38,75 @@ function save(blob,filename){
  a.href=objectUrl;a.download=filename;document.body.append(a);a.click();a.remove();
  setTimeout(()=>URL.revokeObjectURL(objectUrl),2500);
 }
-function makeMobileSummary(){
- const modal=getModal(),body=modal?.querySelector('.bs-body'),stats=body?.querySelector('.bs-stats'),blocks=[...(body?.querySelectorAll('.bs-block-panel')||[])];
- if(!stats||!blocks.length)throw Error('Summary is still loading. Please retry.');
- const room=getActive(),doc=document.implementation.createHTMLDocument('Berlayar Rise · '+rooms[room]+' Summary');
- const meta=doc.createElement('meta');meta.name='viewport';meta.content='width=device-width, initial-scale=1';doc.head.append(meta);
- const charset=doc.createElement('meta');charset.setAttribute('charset','utf-8');doc.head.prepend(charset);
- const style=doc.createElement('style');style.textContent=`*{box-sizing:border-box}body{margin:0;background:#f6f8f5;color:#173b29;font:15px system-ui,sans-serif}header{background:#1d513a;color:white;padding:20px}h1{font-size:24px;margin:5px 0}main{max-width:1100px;margin:auto;padding:12px}.metrics{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:12px}.metrics span{background:#e4eee6;padding:9px;border-radius:8px;font-weight:700}.blocks{display:grid;grid-template-columns:minmax(0,1fr);gap:14px}@media(min-width:650px){.blocks{grid-template-columns:repeat(2,minmax(0,1fr))}}section{background:white;border:1px solid #a9c2b3;border-radius:12px;padding:12px;min-width:0;break-inside:avoid}h2{margin:0 0 5px;font-size:20px}.quota{display:flex;flex-wrap:wrap;gap:6px;margin:8px 0}.quota span{padding:5px 8px;border-radius:5px;font-weight:700;background:#e4eee6}.quota .bs-ethnic-m{background:#dff3e6;color:#11834c}.quota .bs-ethnic-c{background:#fce6e6;color:#a52b33}.quota .bs-ethnic-io{background:#ffefc8;color:#925c00}.table-wrap{overflow-x:auto}table{border-collapse:collapse;width:100%;font-size:clamp(10px,2.8vw,14px);text-align:center}td,th{border:1px solid #a9c2b3;padding:7px 3px;white-space:nowrap;background:#e5eee7}td.available{background:#9cddba;color:#0b4930}td.taken{background:#f0a4c4;color:#651b3c}td.unverified{background:#cbd2dc;color:#293547}td.bs-gap{background:#e6eae7}footer{padding:15px 0;line-height:1.6}a{color:#176542}button{font:inherit;padding:10px;border:1px solid #749984;border-radius:8px;background:white;color:#17452f} @media print{button{display:none}body{background:white}.blocks{display:block}section{margin-bottom:12px}*{print-color-adjust:exact;-webkit-print-color-adjust:exact}}`;doc.head.append(style);
- const add=(parent,tag,value,cls)=>{const el=doc.createElement(tag);if(value!==undefined)el.textContent=value;if(cls)el.className=cls;parent.append(el);return el};
- const header=add(doc.body,'header');add(header,'div','BERLAYAR RISE · SELECTION SUMMARY');add(header,'h1',rooms[room]+' · All Blocks');add(header,'div','Snapshot: '+new Intl.DateTimeFormat('en-SG',{dateStyle:'medium',timeStyle:'short',timeZone:'Asia/Singapore'}).format(new Date())+' SGT');
- const main=add(doc.body,'main'),metrics=add(main,'div',undefined,'metrics');for(const chip of stats.querySelectorAll('span'))add(metrics,'span',chip.textContent.trim());
- const legend=add(main,'p','Available = green · Taken = pink · Unverified = grey. M / C / I/O = remaining ethnic quota.');
- const grid=add(main,'div',undefined,'blocks');
- for(const block of blocks){const panel=add(grid,'section');add(panel,'h2',block.querySelector('h3')?.textContent.trim()||'');add(panel,'div',block.querySelector('.bs-block-count')?.textContent.trim()||'');const quota=add(panel,'div',undefined,'quota');for(const badge of block.querySelectorAll('.bs-ethnic-badge'))add(quota,'span',badge.textContent.trim(),badge.className);const wrap=add(panel,'div',undefined,'table-wrap'),table=add(wrap,'table');for(const group of ['thead','tbody']){const target=add(table,group);for(const row of block.querySelectorAll(group+' tr')){const tr=add(target,'tr');for(const cell of row.children)add(tr,cell.tagName.toLowerCase(),cell.textContent.trim(),cell.className)}}}
- const footer=add(main,'footer','Community-recorded snapshot. Verify official availability with HDB. ');const link=add(footer,'a','Open live room summary');link.href=url(room);
- return {blob:new Blob(['<!doctype html>\n'+doc.documentElement.outerHTML],{type:'text/html;charset=utf-8'}),room};
+function rounded(ctx,x,y,w,h,r,fill,stroke){
+ ctx.beginPath();ctx.roundRect(x,y,w,h,r);
+ if(fill){ctx.fillStyle=fill;ctx.fill()}if(stroke){ctx.strokeStyle=stroke;ctx.lineWidth=1.5;ctx.stroke()}
+}
+function drawText(ctx,s,x,y,max,size=18,color='#173b29',weight=500,align='left'){
+ ctx.fillStyle=color;ctx.font=String(weight)+' '+size+'px Arial, sans-serif';ctx.textAlign=align;ctx.textBaseline='middle';
+ ctx.fillText(s,x,y,max);
+}
+function makeCanvasFromSummary(){
+ const modal=getModal(),body=modal?.querySelector('.bs-body');
+ const stats=body?.querySelector('.bs-stats'),blocks=[...(body?.querySelectorAll('.bs-block-panel')||[])];
+ if(!stats||!blocks.length)throw Error('Summary grid is still loading. Please retry after the unit tables appear.');
+ const room=getActive(),cols=blocks.length,W=2048,pad=32,gap=12,gridW=W-pad*2,blockW=(gridW-gap*(cols-1))/cols;
+ const maxRows=Math.max(...blocks.map(b=>b.querySelectorAll('tbody tr').length));
+ const rowH=30,headH=130,metricsH=90,blockTop=headH+metricsH+6,tableTop=blockTop+132;
+ const footerY=tableTop+(maxRows+1)*rowH+30,H=footerY+110;
+ const canvas=document.createElement('canvas');canvas.width=W;canvas.height=H;
+ const ctx=canvas.getContext('2d');if(!ctx)throw Error('PNG rendering is unsupported on this device.');
+ ctx.fillStyle='#f6f8f5';ctx.fillRect(0,0,W,H);
+ ctx.fillStyle='#1d513a';ctx.fillRect(0,0,W,headH);
+ drawText(ctx,'BERLAYAR RISE · SELECTION SUMMARY',pad,39,W-2*pad,24,'#d8efe0',700);
+ drawText(ctx,rooms[room]+' · All Blocks',pad,90,W-2*pad,44,'#ffffff',800);
+ const chips=[...stats.querySelectorAll('span')].map(e=>e.textContent.trim());
+ let x=pad;for(const chip of chips){
+  ctx.font='700 24px Arial';const w=Math.min(620,ctx.measureText(chip).width+42);
+  rounded(ctx,x,headH+19,w,54,10,'#e4eee6');drawText(ctx,chip,x+20,headH+47,w-36,24,'#234b35',700);x+=w+13;
+ }
+ for(let i=0;i<cols;i++){
+  const el=blocks[i],left=pad+i*(blockW+gap),centre=left+blockW/2;
+  drawText(ctx,el.querySelector('h3')?.textContent.trim()||'',centre,blockTop+20,blockW-5,Math.min(27,20+cols), '#173b29',800,'center');
+  drawText(ctx,el.querySelector('.bs-block-count')?.textContent.trim()||'',centre,blockTop+52,blockW-5,20,'#476150',500,'center');
+  const badges=[...el.querySelectorAll('.bs-ethnic-badge')],badgeSize=badges.length,quotaSize=Math.min(20,Math.max(14,blockW/(badgeSize*4.5)));
+  badges.forEach((badge,j)=>{
+   const text=badge.textContent.trim(),cx=centre+(j-(badgeSize-1)/2)*(blockW/badgeSize*.94);
+   const color=badge.classList.contains('bs-ethnic-m')?'#11834c':badge.classList.contains('bs-ethnic-c')?'#bd3037':'#925c00';
+   const fill=badge.classList.contains('bs-ethnic-m')?'#dff3e6':badge.classList.contains('bs-ethnic-c')?'#fce6e6':'#ffefc8';
+   let bw=blockW/badgeSize*.88;
+   rounded(ctx,cx-bw/2,blockTop+77,bw,31,5,fill);
+   drawText(ctx,text,cx,blockTop+92,bw-7,quotaSize,color,800,'center');
+  });
+  const table=el.querySelector('table'),headers=[...table.querySelectorAll('thead th')].map(h=>h.textContent.trim());
+  const tcols=headers.length,cellW=blockW/tcols,size=Math.max(8,Math.min(15,cellW/3.8));
+  const cells=[headers,...[...table.querySelectorAll('tbody tr')].map(tr=>[...tr.children].map(td=>({text:td.textContent.trim(),cls:td.className})))];
+  cells.forEach((row,j)=>row.forEach((c,k)=>{
+   const cell=typeof c==='string'?{text:c,cls:'header'}:c;
+   const bg=cell.cls.includes('taken')?'#f0a4c4':cell.cls.includes('available')?'#9cddba':cell.cls.includes('unverified')?'#cbd2dc':cell.cls.includes('bs-gap')?'#e6eae7':'#e5eee7';
+   ctx.fillStyle=bg;ctx.fillRect(left+k*cellW,tableTop+j*rowH,cellW,rowH);
+   ctx.strokeStyle='#a9c2b3';ctx.lineWidth=.7;ctx.strokeRect(left+k*cellW,tableTop+j*rowH,cellW,rowH);
+   const tone=cell.cls.includes('taken')?'#651b3c':'#0b4930';
+   drawText(ctx,cell.text, left+(k+.5)*cellW,tableTop+(j+.5)*rowH,cellW-3,k===0?Math.max(9,size-1):size,tone,k===0?800:700,'center');
+  }));
+ }
+ drawText(ctx,'Tap a unit on the live tracker for price and status.',pad,footerY,W-pad*2,23,'#35543f',500);
+ rounded(ctx,pad,footerY+27,25,23,0,'#9cddba','#6d9e86');drawText(ctx,'Available',pad+36,footerY+40,180,21,'#35543f');
+ rounded(ctx,pad+220,footerY+27,25,23,0,'#f0a4c4','#8f6980');drawText(ctx,'Taken',pad+256,footerY+40,150,21,'#35543f');
+ drawText(ctx,'M / C / I/O = ethnic quota remaining',pad+420,footerY+40,W-pad-430,21,'#35543f');
+ drawText(ctx,'Community-recorded data · Verify official availability with HDB · berlayar-rise-tracker.vercel.app',pad,footerY+79,W-2*pad,16,'#5b715f');
+ return {canvas,room};
 }
 async function download(button){
  button.disabled=true;const original=button.textContent;button.textContent='Preparing summary…';
- try{const {blob,room}=makeMobileSummary();const filename='Berlayar-Rise-'+room+'-Mobile-Summary.html';const file=new File([blob],filename,{type:'text/html'});if(navigator.canShare?.({files:[file]})){try{await navigator.share({files:[file],title:'Berlayar Rise '+rooms[room]+' Summary'});return}catch(e){if(e.name==='AbortError')return}}save(blob,filename)}
- catch(e){window.alert(e.message||'Could not export summary. Please retry.')}
+ try{
+  const {canvas,room}=makeCanvasFromSummary();
+  const blob=await new Promise((resolve,reject)=>canvas.toBlob(b=>b?resolve(b):reject(Error('Image export failed')),'image/png'));
+  const filename='Berlayar-Rise-'+room+'-Full-Unit-Summary.png';
+  const file=new File([blob],filename,{type:'image/png'});
+  if(navigator.canShare?.({files:[file]})){try{await navigator.share({files:[file],title:'Berlayar Rise '+rooms[room]+' Summary'});return}catch(e){if(e.name==='AbortError')return}}
+  save(blob,filename);
+ }catch(e){window.alert(e.message||'Could not export summary. Please retry.')}
  finally{button.disabled=false;button.textContent=original}
 }
 function addModalActions(){
