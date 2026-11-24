@@ -339,7 +339,7 @@ function renderFinanceEnhancements(r){
  if(r.provider==='hdb'&&gross>0&&msr>.30)additions.push('Assessed HDB mortgage MSR exceeds 30% of stated gross income; verify affordability with HFE.');
  if(r.shortLease&&r.loan>0)additions.push('Short-lease flat loan must be zero.');
  if(r.cashKeyPrice>0)additions.push('Cash shortfall remains on the purchase price at key collection.');
- if(additions.length)$('warnings').insertAdjacentHTML('beforeend',additions.map(x=>'<div class="alert">⚠ '+x+'</div>').join(''));
+ if(additions.length)$('warnings').insertAdjacentHTML('beforeend',additions.map(x=>'<div class="alert">⚠ '+x+'</div>').join(''));if(additions.length||profileWarn.length){$('statuspill').textContent='Review assumptions';$('statuspill').className='pill error';const ok=$('warnings').querySelector('.okalert');if(ok)ok.remove();}
  // Expose detailed metrics to Save to Excel without storing personal inputs.
  window.berlayarFinanceMetrics={msr:msr===null?'Not assessed':(100*msr).toFixed(1)+'%',tdsr:tdsr===null?'Not assessed':(100*tdsr).toFixed(1)+'%',propertyTax:propTax,ownershipMonthly:ownMonthly,raTransfer:financeV('frs55')===''?'Not assessed':raTransfer,loanAtRetirement:mortgage.retirementBalance,lifeCashMortgage:mortgage.cashSpent,retireNetCash:retirementCashNet,primeRecovery:resale.eligible?resale.recovery:'Not eligible',resaleCash:resale.eligible?resale.cashProceeds:'Not eligible',cpfRefund:resale.eligible?resale.cpfRefund:'Not eligible',keyHDB:r.cashKeyHDB,later:r.cashLater,scenarioCash:stressed.totalCash,scenarioPayment:stressed.install};
 }
