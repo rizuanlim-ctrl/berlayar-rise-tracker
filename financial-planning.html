@@ -150,9 +150,87 @@ function setOptions(id,values,desired,fmt=x=>x){let e=$(id),v=desired??e.value;e
 function cascade(){let type=$('flatType').value;let list=UNITS.filter(u=>u.room===activeRoom&&u.type===type);setOptions('block',[...new Set(list.map(u=>u.block))].sort(),selected?.type===type?selected.block:null);list=list.filter(u=>u.block===$('block').value);setOptions('stack',[...new Set(list.map(u=>u.stack))].sort(),selected?.type===type&&selected.block===$('block').value?selected.stack:null);list=list.filter(u=>u.stack===$('stack').value).sort((a,b)=>b.floor-a.floor);setOptions('flat',list.map(u=>u.floor),selected?.type===type&&selected.block===$('block').value&&selected.stack===$('stack').value?selected.floor:null,x=>'#'+String(x).padStart(2,'0'));selected=list.find(u=>u.floor===Number($('flat').value))||list[0];if($('custom').value==='0')$('price').value=selected.price;recalc()}
 function pickCascade(level){let list=UNITS.filter(u=>u.room===activeRoom&&u.type===$('flatType').value);if(level==='type'){selected=null;setOptions('block',[...new Set(list.map(u=>u.block))].sort())}else if(level==='block'){selected=null}let b=$('block').value;list=list.filter(u=>u.block===b);if(level!=='floor'){setOptions('stack',[...new Set(list.map(u=>u.stack))].sort())}let stack=$('stack').value;list=list.filter(u=>u.stack===stack).sort((a,b)=>b.floor-a.floor);if(level!=='floor')setOptions('flat',list.map(u=>u.floor),null,x=>'#'+x);selected=list.find(u=>u.floor===Number($('flat').value))||list[0];$('custom').value='0';$('price').value=selected.price;recalc()}
 function calcBSD(p){return Math.min(p,180000)*.01+Math.max(0,Math.min(p-180000,180000))*.02+Math.max(0,Math.min(p-360000,640000))*.03+Math.max(0,Math.min(p-1000000,500000))*.04+Math.max(0,Math.min(p-1500000,1500000))*.05+Math.max(0,p-3000000)*.06}
-function projectOA(initial,start,end,monthly,raise,bonus,interest){let cur=new Date(start),target=new Date(end);let value=initial,series=[{date:new Date(cur),oa:value}];if(target<cur)return{oa:value,series};cur.setDate(1);cur.setMonth(cur.getMonth()+1);let n=0;while(cur<=target&&n<400){let yr=cur.getFullYear()-start.getFullYear();let contrib=monthly*Math.pow(1+raise/100,Math.max(0,yr));value=value*(1+interest/1200)+contrib+(cur.getMonth()===11?bonus*Math.pow(1+raise/100,Math.max(0,yr)):0);if(cur.getMonth()%3===0)series.push({date:new Date(cur),oa:value});cur.setMonth(cur.getMonth()+1);n++}return{oa:value,series}}
-function compute(price){let booking=dt('bookDate'),afl=dt('aflDate'),key=dt('keyDate'),oaDate=dt('oadate');let grant=nv('grant')+nv('otherGrant'),bookingCash=nv('optionFee'),dp=Math.max(0,price*nv('down')/100),bsd=calcBSD(price),aflPrice=Math.max(0,dp-bookingCash),aflFees=bsd+nv('legalAFL');let early=projectOA(nv('oa'),oaDate,afl,nv('monthlyOA'),nv('raise'),nv('bonus'),nv('interest'));let oaEarly=early.oa+grant,needAFL=aflPrice+aflFees,cpfAFL=Math.min(oaEarly,needAFL),cashAFL=Math.max(0,needAFL-cpfAFL),oaAfterAFL=oaEarly-cpfAFL;let later=projectOA(oaAfterAFL,afl,key,nv('monthlyOA')*Math.pow(1+nv('raise')/100,Math.max(0,afl.getFullYear()-oaDate.getFullYear())),nv('raise'),nv('bonus'),nv('interest'));let beforeKeys=later.oa;let balancePrice=Math.max(0,price-dp),loan=Math.min(nv('loan'),price*.75,balancePrice),cpfKey=Math.min(Math.max(0,beforeKeys-nv('reserve')),Math.max(0,balancePrice-loan)),cashKeyPrice=Math.max(0,balancePrice-loan-cpfKey),feesKeys=nv('feesKey')+nv('ocs')+nv('fireInsurance')+nv('spDeposit')+nv('hpsPremium')+nv('handoverOther')+nv('handoverMoving'),cashKey=cashKeyPrice+feesKeys;let totalCash=bookingCash+cashAFL+cashKey;let r=nv('mortRate')/1200,n=nv('tenure')*12,install=loan?(r?loan*r/(1-Math.pow(1+r,-n)):loan/n):0;let monthlyCPF=nv('monthlyOA')*Math.pow(1+nv('raise')/100,Math.max(0,key.getFullYear()-oaDate.getFullYear()));let monthCash=Math.max(0,install-monthlyCPF);return{price,bookingCash,aflPrice,aflFees,bsd,needAFL,cpfAFL,cashAFL,oaEarly,oaAfterAFL,beforeKeys,balancePrice,loan,cpfKey,cashKey,cashKeyPrice,totalCash,install,monthlyCPF,monthCash,afterKeys:beforeKeys-cpfKey,feesKeys,grant,dp,early,later,booking,afl,key,oaDate}}
-function rows(r){let stages=[['Booking',r.bookingCash,0,0,r.bookingCash],['Agreement for Lease',r.needAFL,r.cpfAFL,0,r.cashAFL],['Key collection',r.balancePrice+r.feesKeys,r.cpfKey,r.loan,r.cashKey]];return stages.map(a=>'<tr>'+a.map((v,i)=>`<td>${i?money(v):v}</td>`).join('')+'</tr>').join('')}
+
+function financeN(id){let v=Number(document.getElementById(id)?.value);return Number.isFinite(v)?Math.max(0,v):0}
+function financeV(id){return document.getElementById(id)?.value||''}
+function financeDate(v){return v?new Date(v+'T12:00:00'):null}
+function financeBirth55(){const d=financeDate(financeV('birthDate'));if(!d)return null;const b=new Date(d);b.setFullYear(b.getFullYear()+55);return b}
+function financeYears(a,b){return (b.getTime()-a.getTime())/31557600000}
+function financeMonths(a,b){return Math.max(0,Math.round((b.getFullYear()-a.getFullYear())*12+b.getMonth()-a.getMonth()))}
+function financeSchedule(){let scheme=financeV('paymentScheme'),provider=financeV('loanType');if(scheme==='custom')return financeN('down')/100;if(scheme==='deferred')return 0;if(scheme==='staggered')return provider==='bank'?.10:.05;return provider==='bank'?.20:.10}
+function financeInstall(loan,rate,months){if(loan<=0||months<=0)return 0;const r=rate/1200;return r>0?loan*r/(1-Math.pow(1+r,-months)):loan/months}
+function financeRAEvent(oa,when){
+ const birth55=financeBirth55();
+ if(!birth55||when.getFullYear()!==birth55.getFullYear()||when.getMonth()!==birth55.getMonth())return{oa,transfer:0,triggered:false,known:true};
+ const frs=financeV('frs55'),sa=financeV('sa55');
+ if(frs===''||sa==='')return{oa,transfer:0,triggered:true,known:false};
+ const balanceNeeded=Math.max(0,Number(frs)-Number(sa));
+ const reserved=Math.min(oa,financeN('oaReserved55'));
+ const transfer=Math.min(Math.max(0,oa-reserved),balanceNeeded);
+ return{oa:oa-transfer,transfer,triggered:true,known:true};
+}
+function financeOA(initial,start,end,monthly,raise,bonus,interest,after55Input){
+ if(!(start instanceof Date)||!(end instanceof Date)||!Number.isFinite(start.getTime())||!Number.isFinite(end.getTime()))return{oa:Math.max(0,initial),series:[],raTransfer:0,raUnknown:false};
+ let val=Math.max(0,initial),series=[{date:new Date(start),oa:val}],raTransfer=0,raUnknown=false;
+ if(end<start)return{oa:val,series,raTransfer,raUnknown};
+ const at55=financeBirth55();
+ let cur=new Date(start.getFullYear(),start.getMonth()+1,1,12);
+ let n=0;
+ while(cur<=end&&n<600){
+  const yearGrowth=Math.max(0,cur.getFullYear()-start.getFullYear());
+  const after55=at55&&cur>=at55;
+  const base=after55&&financeV('oaAfter55')!==''?financeN('oaAfter55'):monthly*Math.pow(1+raise/100,yearGrowth);
+  val=val*(1+interest/1200)+base+(cur.getMonth()===11?bonus*Math.pow(1+raise/100,yearGrowth):0);
+  const ra=financeRAEvent(val,cur);val=ra.oa;raTransfer+=ra.transfer;if(ra.triggered&&!ra.known)raUnknown=true;
+  if(n%3===0||ra.triggered)series.push({date:new Date(cur),oa:val});
+  cur.setMonth(cur.getMonth()+1);n++;
+ }
+ series.push({date:new Date(end),oa:val});
+ return{oa:val,series,raTransfer,raUnknown};
+}
+function projectOA(initial,start,end,monthly,raise,bonus,interest){return financeOA(initial,start,end,monthly,raise,bonus,interest)}
+function financeOwnerTax(av){const tiers=[[12000,0],[28000,.04],[10000,.06],[25000,.10],[10000,.14],[15000,.20],[40000,.26],[Infinity,.32]];let remain=Math.max(0,av),total=0;for(const [width,rate] of tiers){let tranche=Math.min(remain,width);total+=tranche*rate;remain-=tranche;if(remain<=0)break}return total}
+function compute(price,scenario={}){
+ const booking=dt('bookDate'),afl=dt('aflDate'),originalKey=dt('keyDate'),oaDate=dt('oadate');
+ const key=new Date(originalKey);key.setMonth(key.getMonth()+Math.max(0,scenario.delay||0));
+ const amount=Math.max(0,price),grant=financeN('grant')+financeN('otherGrant'),grantTiming=financeV('grantAt');
+ const provider=financeV('loanType'),shortLease=financeV('leaseCategory')==='short';
+ const bookingCash=Math.min(amount,financeN('optionFee'));
+ const rateAFL=financeSchedule(),dp=Math.min(amount,Math.max(bookingCash,amount*rateAFL));
+ const aflPrice=Math.max(0,dp-bookingCash),bsd=calcBSD(amount);
+ const aflFees=bsd+financeN('legalAFL'),needAFL=aflPrice+aflFees;
+ const pre=financeOA(financeN('oa'),oaDate,afl,financeN('monthlyOA'),financeN('raise'),financeN('bonus'),financeN('interest'));
+ const grantAFL=grantTiming==='afl'?grant:0,grantKey=grantTiming==='key'?grant:0;
+ const oaEarly=pre.oa+grantAFL;
+ const minimumBankCash=provider==='bank'?amount*.05:0;
+ const bankCashAtAFL=Math.max(0,minimumBankCash-bookingCash);
+ const cpfAFL=Math.max(0,Math.min(oaEarly,Math.max(0,needAFL-bankCashAtAFL)));
+ const cashAFL=needAFL-cpfAFL,oaAfterAFL=oaEarly-cpfAFL;
+ const later=financeOA(oaAfterAFL,afl,key,financeN('monthlyOA')*Math.pow(1+financeN('raise')/100,Math.max(0,afl.getFullYear()-oaDate.getFullYear())),financeN('raise'),financeN('bonus'),financeN('interest'));
+ const beforeKeys=later.oa+grantKey;
+ const balancePrice=Math.max(0,amount-dp);
+ const hfe=financeN('loan')*(1-Math.max(0,Math.min(100,scenario.loanCut||0))/100);
+ const ltv=shortLease||provider==='none'?0:Math.min(.75,Math.max(0,hfe/Math.max(1,amount)));
+ const loan=shortLease||provider==='none'?0:Math.min(hfe,amount*ltv,balancePrice);
+ const availableCPF=Math.max(0,beforeKeys-financeN('reserve'));
+ const cpfKey=Math.min(availableCPF,Math.max(0,balancePrice-loan));
+ const cashKeyPrice=Math.max(0,balancePrice-loan-cpfKey);
+ const eligibleFees=Math.max(0,financeN('feesKey')+financeN('ocs'));
+ const cpfKeyFees=Math.min(Math.max(0,availableCPF-cpfKey),eligibleFees,financeN('keyCpfFees'));
+ const afterKeys=Math.max(0,beforeKeys-cpfKey-cpfKeyFees);
+ const hdbFees=Math.max(0,financeN('feesKey')+financeN('ocs')-cpfKeyFees);
+ const fire=financeN('fireInsurance'),levy=financeN('resaleLevy');
+ const cashKeyHDB=cashKeyPrice+hdbFees+fire+levy;
+ const cashLater=financeN('spDeposit')+financeN('hpsPremium')+financeN('handoverOther')+financeN('handoverMoving');
+ const cashKey=cashKeyHDB+cashLater,feesKeys=hdbFees+fire+levy+cashLater;
+ const totalCash=bookingCash+cashAFL+cashKey;
+ const effectiveTenure=Math.max(1,financeN('tenure')),rate=financeN('mortRate')+Math.max(0,scenario.rateIncrease||0);
+ const install=financeInstall(loan,rate,effectiveTenure*12);
+ const monthlyCPF=financeN('monthlyOA')*Math.pow(1+financeN('raise')/100,Math.max(0,key.getFullYear()-oaDate.getFullYear()));
+ const monthCash=Math.max(0,install-monthlyCPF);
+ return{price:amount,bookingCash,aflPrice,aflFees,bsd,needAFL,cpfAFL,cashAFL,oaEarly,oaAfterAFL,beforeKeys,balancePrice,loan,cpfKey,cpfKeyFees,cashKey,cashKeyHDB,cashLater,cashKeyPrice,totalCash,install,monthlyCPF,monthCash,afterKeys,feesKeys,grant,dp,early:pre,later,booking,afl,key,oaDate,raTransfer:pre.raTransfer+later.raTransfer,raUnknown:pre.raUnknown||later.raUnknown,bankCashAtAFL,hdbFees,fire,levy,provider,shortLease,effectiveTenure,mortRate:rate,grantAFL,grantKey}
+}
+function rows(r){const stages=[['Booking',r.bookingCash,0,0,r.bookingCash],['Agreement for Lease',r.needAFL,r.cpfAFL,0,r.cashAFL],['HDB key collection',r.balancePrice+r.hdbFees+r.fire+r.levy,r.cpfKey+r.cpfKeyFees,r.loan,r.cashKeyHDB],['Later setup / utilities',r.cashLater,0,0,r.cashLater]];return stages.map(a=>'<tr>'+a.map((v,i)=>'<td>'+(i?money(v):v)+'</td>').join('')+'</tr>').join('')}
 function drawChart(r){let series=[...r.early.series,{date:r.afl,oa:r.oaAfterAFL},...r.later.series,{date:r.key,oa:r.afterKeys}].sort((a,b)=>a.date-b.date),max=Math.max(1,...series.map(s=>s.oa))*1.1,minTime=Math.min(...series.map(s=>s.date.getTime())),maxTime=Math.max(...series.map(s=>s.date.getTime()));let x=d=>44+760*(d.getTime()-minTime)/(maxTime-minTime||1),y=v=>195-165*v/max,points=series.map(s=>x(s.date)+','+y(s.oa)).join(' ');$('cpfchart').innerHTML=[0,.25,.5,.75,1].map(q=>`<line x1="44" y1="${195-165*q}" x2="816" y2="${195-165*q}" stroke="#355065" stroke-width="1"/><text x="2" y="${199-165*q}">${Math.round(max*q/1000)}k</text>`).join('')+`<polyline points="${points}" fill="none" stroke="#55c5df" stroke-width="3"/>`+[['AFL',r.afl],['Keys',r.key]].map(v=>`<line x1="${x(v[1])}" y1="28" x2="${x(v[1])}" y2="195" stroke="#f4ba86" stroke-dasharray="4,5"/><text x="${Math.max(45,Math.min(780,x(v[1])+4))}" y="20">${v[0]}</text>`).join('')+`<text x="45" y="217">${r.oaDate.getFullYear()}</text><text x="784" y="217">${r.key.getFullYear()}</text>`}
 function recalc(){if(!selected)return;
 const required=['oa','oadate','monthlyOA','loan','tenure','grant','reserve','bookDate','aflDate'];
