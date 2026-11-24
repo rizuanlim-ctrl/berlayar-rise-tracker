@@ -78,10 +78,16 @@ function mountButton(){
  if(counter){
   let group=counter.closest('.tracker-overview-actions');
   if(!group){group=document.createElement('div');group.className='tracker-overview-actions';counter.before(group);group.append(counter)}
-  if(explorer.parentElement!==group||explorer.previousElementSibling!==counter)counter.insertAdjacentElement('afterend',explorer);
- }else{
-  const row=document.querySelector('.app .roomrow');if(row&&explorer.parentElement!==row)row.appendChild(explorer);
+  let finance=document.getElementById('financial-planning-open');
+  if(!finance){finance=document.createElement('button');finance.id='financial-planning-open';finance.type='button';finance.textContent='Financial Planning';finance.onclick=()=>{window.location.href='/financial-planning.html'};}
+  if(finance.parentElement!==group||finance.previousElementSibling!==counter)counter.insertAdjacentElement('afterend',finance);
  }
+ const siteButton=document.querySelector('.app .project-map-launcher');
+ if(siteButton){
+  if(explorer.parentElement!==siteButton.parentElement||explorer.previousElementSibling!==siteButton)siteButton.insertAdjacentElement('afterend',explorer);
+  siteButton.classList.add('berlayar-map-sibling');
+ }
+
 }
 
 function render(){if(!opened)return;const body=modal.querySelector('.bs-body');if(!snapshot){body.textContent='Loading live records…';return;}
