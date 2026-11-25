@@ -1,0 +1,914 @@
+<!doctype html>
+<html lang="en"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><title>Berlayar Rise · Stack 139</title>
+<style>
+*{box-sizing:border-box}body{margin:0;background:#17191b;color:#f5f4ed;font:16px system-ui,sans-serif}main{max-width:1480px;margin:auto;padding:clamp(12px,3vw,38px)}header{display:flex;justify-content:space-between;align-items:end;gap:12px;flex-wrap:wrap;margin-bottom:18px}small{color:#b8cec3}h1{font-size:clamp(29px,5vw,52px);line-height:1;margin:6px 0 0;letter-spacing:-.055em}button{cursor:pointer;background:#273137;color:#edf3ee;border:1px solid #53605e;border-radius:9px;padding:9px 12px;font:inherit;font-size:14px;touch-action:none}button[aria-pressed=true]{background:#f0eee9;color:#182822;border-color:#f0eee9}button:focus-visible{outline:3px solid #f0be83}.scene{position:relative;height:clamp(375px,72svh,800px);border:1px solid #566765;border-radius:17px;overflow:hidden;background:#29363c}#world{width:100%;height:100%;display:block;touch-action:none;cursor:grab}.map{position:absolute;right:12px;top:12px;width:clamp(80px,16vw,145px);background:#152126e8;border:1px solid #748883;border-radius:10px;padding:5px;pointer-events:none}.map canvas{display:block;width:100%;height:auto}.viewlabel{position:absolute;top:12px;left:12px;background:#152126e8;padding:8px 11px;border-radius:9px;font-size:14px;pointer-events:none}.pad{position:absolute;bottom:12px;left:12px;display:grid;grid-template-columns:repeat(3,40px);gap:3px}.pad button{padding:8px 0;background:#172329e8}.pad button:first-child{grid-column:2}.pad button:nth-child(2){grid-column:1}.actions{position:absolute;bottom:12px;right:12px;display:grid;gap:4px;text-align:right}.actions button{background:#172329e8;color:#edf3ee}.actions button[aria-pressed=true]{background:#f0eee9;color:#182822}.bar{margin-top:12px;display:flex;gap:6px;flex-wrap:wrap}.note{color:#c7d3cb;font-size:14px;margin-bottom:0}.error{padding:24px}.hide{display:none!important}
+.scene.immersive{position:fixed;inset:0;height:100dvh;border:0;border-radius:0;z-index:5}.scene.immersive .map,.scene.immersive .viewlabel,.scene.immersive #furn{display:none}.exit{position:absolute;top:12px;right:12px;background:#1c2024e8}.reticle{position:absolute;left:50%;top:50%;width:4px;height:4px;border-radius:50%;background:#fff8;box-shadow:0 0 2px #0008;pointer-events:none}.scene.immersive .pad{bottom:max(16px,env(safe-area-inset-bottom))}@media(pointer:coarse){.pad{grid-template-columns:repeat(3,46px)}.pad button{min-height:42px}}html.embedded main{padding:12px}html.embedded header small,html.embedded header h1{display:none}html.embedded header{margin-bottom:10px}html.embedded .scene{height:clamp(300px,65svh,760px)}html.embedded .scene.immersive{height:100dvh}
+.conditions{display:flex;gap:8px 14px;flex-wrap:wrap;align-items:end;margin-bottom:10px}
+.conditions label{display:grid;gap:4px;color:#b8cec3;font-size:13px}
+.conditions select,.conditions input{min-height:40px;max-width:100%;border:1px solid #53605e;border-radius:8px;padding:6px 9px;background:#222c30;color:#edf3ee;color-scheme:dark;font:inherit;font-size:14px}
+.conditions select:focus-visible,.conditions input:focus-visible{outline:3px solid #f0be83}
+.scene>:focus-visible{outline-offset:-3px}
+#light-status{min-height:1.3em;margin-top:5px}
+@media(max-width:520px){.conditions{gap:6px 9px}.conditions input,.conditions select{padding-inline:6px}.viewlabel{max-width:calc(100% - 114px);font-size:12px}}
+.tour-button{background:#dbe8de;color:#173529;border-color:#c6dbcc;font-weight:650}
+.actions{z-index:2}
+.window-panel{position:absolute;right:0;bottom:calc(100% + 8px);width:min(315px,calc(100vw - 48px));max-height:min(46vh,380px);overflow:auto;padding:10px 12px;text-align:left;background:#18272cf7;border:1px solid #6c7f79;border-radius:12px}
+.window-panel h2{font-size:16px;margin:0 0 7px}.window-row{display:grid;grid-template-columns:1fr auto auto;gap:5px;align-items:center;border-top:1px solid #61716d;padding:6px 0}.window-row button{padding:6px 8px;min-height:36px}.window-state{display:block;color:#c5d8d0;font-size:12px}
+.landmarks,.tour-controls{position:absolute;bottom:max(12px,env(safe-area-inset-bottom));left:50%;transform:translateX(-50%);z-index:2;width:max-content;max-width:calc(100% - 20px);display:flex;justify-content:center;align-items:center;gap:6px;flex-wrap:wrap}.landmarks button,.tour-controls button{background:#18272cf5}.landmarks button:disabled{opacity:.48;cursor:default}.landmarks button[aria-pressed=true]{background:#f0eee9;color:#182822}
+.tour-controls{padding:7px;background:#18272cf5;border-radius:10px}.tour-controls progress{width:clamp(66px,19vw,175px);accent-color:#b8d8c4}.tour-fade{position:absolute;inset:0;pointer-events:none;background:#171c1e;opacity:0}
+.scene.outside .actions,.scene.touring .actions,.scene.touring .map,.scene.outside .map{display:none}.scene.touring .viewlabel,.scene.outside .viewlabel{display:block}.scene.immersive .viewlabel{max-width:calc(100% - 180px)}.viewlabel{z-index:1}.scene.immersive .exit{z-index:3}
+</style>
+<main><header><div><small id="layout-title">Berlayar Rise</small><h1 id="stack-title">Stack 139</h1></div><div><button id="walk" aria-pressed="true">Walk inside</button> <button id="overview" aria-pressed="false">3D overview</button> <button id="outlook" aria-pressed="false">Outlook</button> <button id="explore-outside" aria-pressed="false">Explore outside</button> <button id="focus" aria-pressed="false">Immersive view</button> <button id="play-tour" class="tour-button" aria-controls="tour-controls">Play Tour</button></div></header>
+<div class="conditions" aria-label="Window view and daylight settings">
+<label>View floor <select id="view-floor"></select></label>
+<label>Sun date <input id="sun-date" type="date" value="2031-12-21"></label>
+<label>Time (SGT) <input id="sun-time" type="time" value="16:00"></label><label id="flight-height-wrap" hidden>Camera height <input id="flight-height" type="range" min="2" max="160" step="1" value="60"><output id="flight-height-label">60 m</output></label>
+</div>
+<section class="scene" aria-label="Interactive 3D apartment"><canvas id="world" aria-label="Apartment model, drag to look" tabindex="0"></canvas><div class="viewlabel" id="label">3D overview</div><div class="map"><canvas id="map" width="150" height="190" aria-label="Floor plan and position"></canvas></div>
+<div class="pad hide" id="pad" aria-label="Movement controls"><button data-m="w" aria-label="Forward">↑</button><button data-m="a" aria-label="Strafe left">←</button><button data-m="s" aria-label="Backward">↓</button><button data-m="d" aria-label="Strafe right">→</button></div><span class="reticle" id="reticle" aria-hidden="true"></span><button class="exit hide" id="exit">Exit immersive view</button><div class="actions"><button id="use" class="hide"></button><button id="window-controls" aria-expanded="false" aria-controls="window-panel">Windows</button>
+<section class="window-panel hide" id="window-panel" aria-labelledby="window-title"><h2 id="window-title">Windows</h2><div id="window-rows"></div></section><button id="furn" aria-pressed="false">Furniture off</button></div>
+<div class="tour-fade" id="tour-fade" aria-hidden="true"></div>
+<nav class="landmarks hide" id="landmarks" aria-label="Outlook landmarks"></nav>
+<div class="tour-controls hide" id="tour-controls" aria-label="Guided tour controls">
+ <progress id="tour-progress" aria-label="Tour progress" value="0" max="1"></progress>
+ <button id="tour-pause">Pause tour</button><button id="tour-stop">End tour</button>
+</div></section>
+<nav class="bar" id="rooms" aria-label="Jump to room"></nav>
+<p class="note" id="help">Drag to orbit. Choose a room to jump inside.</p>
+<p class="note" id="light-status" aria-live="polite"></p>
+<p class="note">Layouts and nearby blocks follow HDB plans. Coastline, woodland and marina details are based on <a style="color:inherit" href="https://www.arcgis.com/home/item.html?id=10df2279f9684e4a9f6a7f08febac2a9" target="_blank" rel="noopener noreferrer">Esri World Imagery</a> and maps. The elevated West Coast Highway and the surface roads use approximate dimensions and road markings. Finishes, terrain heights and sightlines are approximate. Future buildings on reserved sites may change the view. Nearby map features and coastline © <a style="color:inherit" href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener noreferrer">OpenStreetMap contributors</a>.</p></main>
+<script type="module">
+import {walkthroughLayouts as layouts, layoutLabels, unitTemplates} from "./assets/walkthrough-layouts.js?v=3";
+import {solarPosition} from "./assets/berlayar-site-model.js?v=1";
+import {unitSite, floorElevation, sunBlocked, drawNeighbourhood} from "./assets/type-2-walkthrough-site-mobile.js?v=1";
+import {roomSpot, buildTour, tourFrame, loungeFurniture, tableFurniture} from "./assets/walkthrough-presentation.js?v=1";
+const $=id=>document.getElementById(id);
+const params=new URLSearchParams(location.search);
+const stack=layouts.has(params.get('stack'))?params.get('stack'):'139';
+const {kind,flips:[flipX,flipZ]}=layouts.get(stack);
+const template=unitTemplates[kind];
+const meter=.0095, X=n=>(n-180)*meter,Z=n=>(n-90)*meter;
+const [left,back,right,front]=template?.bounds??[0,0,1031,1195];
+const cropScale=2.63;
+const site=unitSite(stack,template?[(right-left)*cropScale*meter/2,(front-back)*cropScale*meter/2]:undefined);
+const selectedFloor=Number(params.get('floor'));
+const renderUnit=floor=>String(floor).padStart(2,'0')+'-'+stack;
+let floor=site.floors.includes(selectedFloor)?selectedFloor:site.floors[0];
+for(const level of site.floors)$('view-floor').add(new Option(String(level),String(level)));
+$('view-floor').value=String(floor);
+const solarDate=$('sun-date'), solarTime=$('sun-time');
+// Keep the precinct sun setting when moving into a unit.
+if(/^\d{4}-\d{2}-\d{2}$/.test(params.get('sunDate')||'')) solarDate.value=params.get('sunDate');
+if(/^([01]\d|2[0-3]):[0-5]\d$/.test(params.get('sunTime')||'')) solarTime.value=params.get('sunTime');
+function readSolar(){
+ const [year,month,day]=solarDate.value.split('-').map(Number);
+ const [hour,minute]=solarTime.value.split(':').map(Number);
+ return year&&month&&day&&Number.isFinite(minute)?solarPosition(month,day,hour+minute/60,year):null;
+}
+let solar=readSolar();
+const updateSolar=()=>{
+ const position=readSolar();
+ if(position){solar=position;dirty=true}
+};
+solarDate.addEventListener('input',updateSolar);
+solarTime.addEventListener('input',updateSolar);
+$('view-floor').addEventListener('change',()=>{
+ floor=Number($('view-floor').value);
+ $('stack-title').textContent='Unit #'+renderUnit(floor);
+ document.title='Berlayar Rise · #'+renderUnit(floor);
+ if(outside&&!tour&&activeLandmark)aimAt(activeLandmark);
+ dirty=true;
+});
+// The same floor plan can be mirrored on either axis in the brochure.
+function planPoint([x,z]){
+ const u=flipX===1?x:left+right-x, v=flipZ===1?z:back+front-z;
+ return template?[180+(u-left)*cropScale,90+(v-back)*cropScale]:[u,v];
+}
+function planRect([x,z,u,v,...rest]){
+ const [a,b]=planPoint([x,z]),[c,d]=planPoint([u,v]);
+ return [Math.min(a,c),Math.min(b,d),Math.max(a,c),Math.max(b,d),...rest];
+}
+function planOpening(opening){
+ const {out,room}=opening;
+ return {...opening,a:planPoint(opening.a),b:planPoint(opening.b),turn:opening.turn*flipX*flipZ,
+  out:out&&[out[0]*flipX,out[1]*flipZ],room:room&&planRect(room)};
+}
+$('stack-title').textContent='Unit #'+renderUnit(floor);
+$('layout-title').textContent='Berlayar Rise · Block '+site.block+' · '+layoutLabels[kind];
+document.title='Berlayar Rise · #'+renderUnit(floor);
+const embedded=window.parent!==window&&params.has('embedded');
+document.documentElement.classList.toggle('embedded',embedded);
+const canvas=$('world'), gl=canvas.getContext('webgl',{antialias:true,alpha:true});
+const flat=gl?null:canvas.getContext('2d');
+let uniforms;
+if(gl){
+const vertex=`
+attribute vec3 point; attribute vec3 rgb; attribute float finish;
+varying mediump vec3 color; varying mediump vec3 world; varying mediump float material;
+uniform vec3 eye; uniform vec3 front; uniform vec3 right; uniform vec3 up;
+uniform float aspect; uniform float ortho; uniform float zoom; uniform float focal;
+void main(){
+ vec3 p=point-eye; vec3 q=vec3(dot(p,right),dot(p,up),dot(p,front));
+ color=rgb; world=point; material=finish;
+ if(ortho>0.5){gl_Position=vec4(q.x/(zoom*aspect),q.y/zoom,q.z/30.0,1.0);}
+ else{gl_Position=vec4(q.x*focal/aspect,q.y*focal,1.00009*q.z-0.100005,q.z);}
+}`;
+const fragment=`
+precision mediump float;
+varying mediump vec3 color; varying mediump vec3 world; varying mediump float material;
+uniform float opacity;
+float grain(vec2 p){
+ vec3 q=fract(p.xyx*vec3(.1031,.11369,.13787));
+ q+=dot(q,q.yzx+11.73);
+ return fract((q.x+q.y)*q.z);
+}
+void main(){
+ vec3 finish=color;
+ if(material>.5&&material<1.5){
+  float grainLine=grain(floor(world.xz*vec2(6.0,82.0)));
+  float fineGrain=grain(floor(world.xz*vec2(38.0,143.0)));
+  finish*=.956+grainLine*.055+fineGrain*.024;
+ }
+ if(material>1.5&&material<2.5&&opacity>.9){
+  float paintGrain=grain(floor(world.xz*57.0+vec2(world.y*91.0,world.y*76.0)));
+  finish*=.89+.10*smoothstep(0.0,.36,world.y)+.025*paintGrain;
+ }
+ if(material>2.5&&material<3.5){
+  float ripples=sin(world.x*.34+world.z*.71)*sin(world.x*.57-world.z*.12);
+  float broad=sin(world.x*.061+world.z*.027);
+  finish*=.992+.020*ripples+.032*broad;
+ }
+ if(material>3.5){
+  float weave=grain(floor(world.xz*95.0+world.y*vec2(33.0,41.0)));
+  finish*=.947+.086*weave;
+ }
+ gl_FragColor=vec4(finish,opacity);
+}`;
+function shader(type,source){const s=gl.createShader(type);gl.shaderSource(s,source);gl.compileShader(s);if(!gl.getShaderParameter(s,gl.COMPILE_STATUS))throw Error(gl.getShaderInfoLog(s));return s}
+const program=gl.createProgram();gl.attachShader(program,shader(gl.VERTEX_SHADER,vertex));gl.attachShader(program,shader(gl.FRAGMENT_SHADER,fragment));gl.linkProgram(program);if(!gl.getProgramParameter(program,gl.LINK_STATUS))throw Error(gl.getProgramInfoLog(program));gl.useProgram(program);gl.enable(gl.DEPTH_TEST);
+const buffer=gl.createBuffer();gl.bindBuffer(gl.ARRAY_BUFFER,buffer);
+for(const [name,size,offset] of [['point',3,0],['rgb',3,12],['finish',1,24]]){
+ const loc=gl.getAttribLocation(program,name);gl.enableVertexAttribArray(loc);gl.vertexAttribPointer(loc,size,gl.FLOAT,false,28,offset);
+}
+uniforms=Object.fromEntries(['eye','front','right','up','aspect','ortho','zoom','focal','opacity'].map(k=>[k,gl.getUniformLocation(program,k)]));
+}
+const colors={
+ wall:'#edece6', ceiling:'#f4f2ec', structure:'#dddcd2', trim:'#c3bcb0', edge:'#8d8275',
+ floor:'#a3866a', plankLight:'#a98e73', plankDark:'#9c7e63', seam:'#806650',
+ tile:'#898b88', grout:'#777a77', tiledWall:'#a4a7a3', shelter:'#838583',
+ frame:'#30363a', frameEdge:'#41494d', glass:'#c8deec', light:'#d6b990', penumbra:'#b09778',
+ terrain:'#9ba68b', landscape:'#839870', road:'#858781', kerb:'#cbc5b6', path:'#b9a88d',
+ surfaceAsphalt:'#5d615e', surfaceEdge:'#eee9d8', highwayMedian:'#918b7d',
+ highwayAsphalt:'#414b50', highwayStripe:'#f2efe0', highwaySoffit:'#777e7b',
+ highwayFascia:'#a2a6a1', highwayRail:'#c3c5bd', railCap:'#e2e1d8', highwayPier:'#a3a49a',
+ tree:'#587746', treeLight:'#698650', bark:'#706052',
+ facade:'#e3e0d5', facadeAccent:'#b9bdb2', facility:'#c9cbc1', facadeGlass:'#6c8992', remoteFacade:'#becbd0',
+ deckVoid:'#4a5553', facadeLedge:'#eeece5', windowReveal:'#b2bebd', roof:'#d4d3c7', roofGarden:'#759264',
+ water:'#497e89', grove:'#536a40', pontoon:'#d1cdbe',
+ door:'#876f59', metal:'#c4c6c2', wood:'#ac8c6e', sage:'#687e75',
+ upholstery:'#82958c',accent:'#668395',rug:'#b4a896',lamp:'#f6ecd4',
+ cream:'#e4d7be', linen:'#e7e3d9', dark:'#34444a'
+};
+const rooms=(template?.rooms??[
+ ['Entrance',592,264,0],['Living / dining',604,600,.25],['Bedroom',438,836,-.40],
+ ['Kitchen',430,278,-1.1],['Bath / WC',425,502,-1.1],['Household shelter',778,337,-1.45]
+]).map(([name,x,z,yaw])=>[name,...planPoint([x,z]),Math.atan2(flipX*Math.sin(yaw),flipZ*Math.cos(yaw))]);
+const floors=(template?.floors??[
+ [185,106,486,350,'tile'],[486,234,680,385,'floor'],[520,385,680,479,'floor'],
+ [260,385,520,582,'tile'],[715,235,846,444,'shelter'],[189,582,520,765,'floor'],
+ [520,479,844,927,'floor'],[189,765,519,1082,'floor']
+]).map(planRect);
+const walls=(template?.walls??[
+ [184,108,522,108],[503,108,503,232],[522,231,539,231],[678,225,863,225],
+ [863,225,863,944],[698,461,863,461],[698,225,698,299],[698,380,698,461],
+ [186,364,518,364],[255,374,255,582],[255,582,517,582],[516,374,516,454],
+ [516,565,516,582],[170,548,255,548],[168,548,168,1087],[168,1087,238,1087],
+ [437,1087,510,1087],[510,930,510,1087],[510,934,583,934],[782,934,863,934],
+ [179,761,394,761],[394,761,394,695],[394,695,514,695],[513,798,513,934]
+]).map(([x,z,u,v,finished])=>{
+ const tiled=template?finished:z===108||z===364||x===255||z===582||x===516;
+ return [...planPoint([x,z]),...planPoint([u,v]),tiled];
+});
+const windows=(template?.windows??[
+ {a:[238,1087],b:[437,1087],turn:1,out:[0,1],room:[189,765,519,1082],name:'Bedroom window'},
+ {a:[583,934],b:[782,934],turn:1,out:[0,1],room:[520,479,844,927],name:'Living room window'},
+ {a:[185,110],b:[185,350],turn:-1,out:[-1,0],name:'Kitchen window'}
+]).map(planOpening);
+const doors=(template?.doors??[
+ {a:[675,225],b:[540,225],turn:-1,name:'Front door'},
+ {a:[516,565],b:[516,454],turn:-1,name:'Bathroom door'},
+ {a:[698,380],b:[698,299],turn:1,name:'Shelter door'}
+]).map(planOpening);
+const furniture=(template?.furniture??[
+ [733,553,821,718,.73,'sage'],[733,553,755,718,.93,'sage'],[733,553,821,573,.86,'sage'],[733,698,821,718,.86,'sage'],
+ [637,592,705,660,.38,'wood'],[538,620,556,717,.48,'wood'],[550,627,557,709,.82,'dark'],
+ [230,619,355,703,.74,'wood'],[250,591,296,609,.54,'sage'],[250,713,296,737,.54,'sage'],
+ [205,837,415,992,.43,'wood'],[210,841,412,989,.58,'cream'],[201,837,218,992,.84,'wood'],
+ [220,852,267,907,.64,'linen'],[220,925,267,979,.64,'linen'],[276,843,413,987,.61,'sage'],[198,771,366,816,2.03,'wood'],
+ [270,120,481,179,.89,'sage'],[269,119,482,180,.93,'cream'],[353,136,400,166,.95,'dark'],
+ [265,391,362,449,.84,'cream'],[267,504,318,555,.48,'wall']
+]).map(planRect);
+const keys=new Set(), player={x:X(rooms[0][1]),z:Z(rooms[0][2]),yaw:rooms[0][3],pitch:0};let overview=false, furnished=true, outside=false, orbit=.56, tilt=.97, dirty=true;
+let tour=null,activeLandmark='Window outlook';
+const lookout={x:0,z:0,yaw:0,pitch:-.12};
+let outdoorFlight=false, flightElevation=1.58, outdoorSpeed=0;
+let verts=[], faces=[], glassFaces=[], layer=2, count=0, glassCount=0;
+let exterior=null, exteriorFaces=[], exteriorKey='', exteriorCount=0;
+let gpuExterior=null, gpuBytes=0;
+let speedX=0,speedZ=0;
+const palette=Object.fromEntries(Object.entries(colors).map(([key,hex])=>
+ [key,hex.slice(1).match(/../g).map(value=>parseInt(value,16)/255)]));
+function rgb(key,light){return palette[key].map(channel=>channel*light)}
+const cssColor=color=>'rgb('+color.map(v=>Math.round(v*255)).join(',')+')';
+const softMaterials=new Set(['wall','ceiling','structure','floor','plankLight','plankDark','seam','trim','tiledWall','tile','grout','rug']);
+const apertureCentres=windows.map(o=>[
+ X((o.a[0]+o.b[0])/2),Z((o.a[1]+o.b[1])/2),
+ Math.hypot(o.a[0]-o.b[0],o.a[1]-o.b[1])*meter,
+]);
+const furnitureFootprints=furniture.filter(([, , , ,h])=>h>=.32).map(([x,z,u,v,h])=>[
+ X(x),Z(z),X(u),Z(v), h<.8?.13:.23,
+]);
+function roomLight([x,y,z],ground=false){
+ let daylight=0;
+ for(const [u,v,width] of apertureCentres){
+  const dx=x-u,dz=z-v;
+  daylight=Math.max(daylight,Math.min(1,width/1.9)/(1+.19*(dx*dx+dz*dz)));
+ }
+ const skyLight=Math.max(.12,Math.min(1,.62+solar.altitude/72));
+ let occlusion=0;
+ if(ground&&furnished){
+  for(const [a,b,c,d,weight] of furnitureFootprints){
+   const du=Math.max(a-x,x-c,0),dv=Math.max(b-z,z-d,0);
+   occlusion=Math.max(occlusion,Math.max(0,1-(du*du+dv*dv)*11)*weight);
+  }
+ }
+ const edge=!ground&&y>=0 ? .05*Math.max(0,1-Math.min(y,2.62-y)*7) : 0;
+ return Math.min(1.07,.86+.21*daylight*skyLight-occlusion-edge);
+}
+function quad(a,b,c,d,key,light=1){
+ const color=rgb(key,light), soft=softMaterials.has(key)&&!overview;
+ const finish=key==='floor'||key.startsWith('plank')?1:key==='wall'||key==='tiledWall'?2:
+  key==='upholstery'||key==='rug'||key==='linen'||key==='accent'?4:0;
+ const ground=a[1]===b[1]&&a[1]===c[1]&&a[1]===d[1]&&a[1]<.01;
+ if(gl){
+  for(const p of [a,b,c,a,c,d]){
+   const brightness=soft?roomLight(p,ground):1;
+   verts.push(...p,...color.map(channel=>channel*brightness),finish);
+  }
+  return;
+ }
+ const mix=(p,q,t)=>p.map((v,i)=>v+(q[i]-v)*t);
+ const segments=(p,q)=>Math.ceil(Math.hypot(...p.map((v,i)=>v-q[i]))/.76)||1;
+ const cols=segments(a,b), rows=segments(a,d);
+ const fill=cssColor(color);
+ for(let j=0;j<rows;j++)for(let i=0;i<cols;i++){
+  const p=mix(a,d,j/rows),q=mix(b,c,j/rows),r=mix(a,d,(j+1)/rows),s=mix(b,c,(j+1)/rows);
+  const points=[mix(p,q,i/cols),mix(p,q,(i+1)/cols),mix(r,s,(i+1)/cols),mix(r,s,i/cols)];
+  const centre=mix(points[0],points[2],.5);
+  faces.push({points,fill:soft?cssColor(color.map(channel=>channel*roomLight(centre,ground))):fill,layer});
+ }
+}
+const outsideLayers={terrain:-7,water:-6,landscape:-5,kerb:-4,road:-3,path:-3,pontoon:-3,
+ surfaceAsphalt:-2.95,highwayMedian:-2.93,surfaceEdge:-2.91,highwayPier:-2.75,
+ highwaySoffit:-2.72,highwayFascia:-2.71,highwayAsphalt:-2.70,highwayStripe:-2.69,
+ highwayRail:-2.68,railCap:-2.67};
+function outdoorQuad(a,b,c,d,key,light,paintOrder){
+ const points=[a,b,c,d];
+ const x=(a[0]+b[0]+c[0]+d[0])/4,z=(a[2]+b[2]+c[2]+d[2])/4;
+ const distance=Math.hypot(x-site.centre[0],z-site.centre[1]);
+ const haze=key==='water'?.23:key==='terrain'?.24:Math.min(.83,1-Math.exp(-Math.max(0,distance-32)/625));
+ const sky=solar.altitude>0?[.80,.855,.87]:[.28,.36,.45];
+ const color=rgb(key,light).map((channel,i)=>channel*(1-haze)+sky[i]*haze);
+ if(gl){for(const p of [a,b,c,a,c,d])verts.push(...p,...color,key==='water'?3:0);return}
+ const radius=Math.max(...points.map(p=>Math.hypot(p[0]-x,p[1]-(a[1]+c[1])/2,p[2]-z)));
+ exteriorFaces.push({points,fill:cssColor(color),layer:paintOrder??outsideLayers[key]??-2,centre:[x,(a[1]+c[1])/2,z],radius});
+}
+function paint(w,h,eye,[front,right,up],zoom,focal){
+ flat.clearRect(0,0,w,h);
+ const polygons=[];
+ const glass=glassFaces.map(points=>({points,fill:'rgba(196,221,236,.075)',layer:-1}));
+ for(const collection of [overview?[]:exteriorFaces,glass,faces])for(const face of collection){
+  if(face.centre){
+   const dx=face.centre[0]-eye[0],dy=face.centre[1]-eye[1],dz=face.centre[2]-eye[2];
+   const depth=dx*front[0]+dy*front[1]+dz*front[2];
+   if(depth < -face.radius)continue;
+   const sideways=Math.abs(dx*right[0]+dy*right[1]+dz*right[2]);
+   if(sideways > (depth+face.radius)*(w/Math.max(h,1))*2/focal+face.radius)continue;
+  }
+  const projected=face.points.map(p=>{
+   const dx=p[0]-eye[0],dy=p[1]-eye[1],dz=p[2]-eye[2];
+   return [dx*right[0]+dy*right[1]+dz*right[2],dx*up[0]+dy*up[1]+dz*up[2],dx*front[0]+dy*front[1]+dz*front[2]];
+  });
+  const clipped=[];
+  for(let i=0;i<4;i++){
+   const a=projected[i],b=projected[(i+1)%4];
+   if(a[2]>=.05)clipped.push(a);
+   if((a[2]>=.05)!==(b[2]>=.05)){const t=(.05-a[2])/(b[2]-a[2]);clipped.push(a.map((n,j)=>n+(b[j]-n)*t))}
+  }
+  if(clipped.length<3)continue;
+  const screen=clipped.map(([x,y,z])=>{const scale=overview?h/(2*zoom):h*focal/(2*z);return [w/2+x*scale,h/2-y*scale]});
+  if(screen.every(p=>p[0]<0)||screen.every(p=>p[0]>w)||screen.every(p=>p[1]<0)||screen.every(p=>p[1]>h))continue;
+  polygons.push({screen,depth:clipped.reduce((v,p)=>v+p[2],0)/clipped.length,fill:face.fill,layer:face.layer});
+ }
+ polygons.sort((a,b)=>a.layer-b.layer||b.depth-a.depth);
+ for(const {screen,fill,layer} of polygons){
+  flat.beginPath();flat.moveTo(...screen[0]);for(const p of screen.slice(1))flat.lineTo(...p);
+  flat.closePath();flat.fillStyle=flat.strokeStyle=fill;flat.fill();
+  if(layer< -1||layer===0||layer>=2){flat.lineWidth=layer>=2?.45:.62;flat.stroke();}
+ }
+}
+function block(a,b,width,y,h,key,outlined=false){
+ const [x,z]=a,[u,v]=b,len=Math.hypot(u-x,v-z);const dx=(v-z)*width/(2*len),dz=(x-u)*width/(2*len);
+ const low=[[x+dx,y,z+dz],[u+dx,y,v+dz],[u-dx,y,v-dz],[x-dx,y,z-dz]];
+ const top=low.map(([px,_,pz])=>[px,h,pz]);
+ quad(...top,key);
+ for(let i=0;i<4;i++){
+  const n=(i+1)%4;
+  quad(low[i],low[n],top[n],top[i],key,[.87,.72,.95,.81][i]);
+  if(!outlined||!overview)continue;
+  // A thin edge on the exposed cap and a vertical seam at each segment end.
+  const inset=.012;
+  const toward=(p,q,amount)=>{
+   const len=Math.hypot(q[0]-p[0],q[2]-p[2]);
+   return p.map((v,j)=>v+(q[j]-v)*amount/len);
+  };
+  const prev=(i+3)%4,next=(n+1)%4;
+  const lift=([px,py,pz])=>[px,py+.001,pz];
+  if(overview)quad(lift(top[i]),lift(top[n]),lift(toward(top[n],top[next],inset)),lift(toward(top[i],top[prev],inset)),'edge');
+  const seam=(p,q,inside)=>toward(toward(p,q,inset),inside,-.002);
+  quad(toward(low[i],low[prev],-.002),seam(low[i],low[n],low[prev]),seam(top[i],top[n],top[prev]),toward(top[i],top[prev],-.002),'edge',.86);
+ }
+}
+function rect(x,z,u,v,y,h,key){block([X(x),Z((z+v)/2)],[X(u),Z((z+v)/2)],Z(v)-Z(z),y,h,key)}
+function wall(a,b,y,h,key='wall',w=.15,outlined=false){block([X(a[0]),Z(a[1])],[X(b[0]),Z(b[1])],w,y,h,key,outlined)}
+function end(o){
+ if(o.b===undefined)return o.a;
+ const [dx,dz]=[o.b[0]-o.a[0],o.b[1]-o.a[1]], t=(o.amount??+!!o.open)*(o.turn??1)*Math.PI*.48;
+ return [o.a[0]+dx*Math.cos(t)-dz*Math.sin(t),o.a[1]+dx*Math.sin(t)+dz*Math.cos(t)];
+}
+function surface(x,z,u,v,y,key){quad([X(x),y,Z(z)],[X(u),y,Z(z)],[X(u),y,Z(v)],[X(x),y,Z(v)],key)}
+function drawFloor(x,z,u,v,material){
+ const boards=material==='floor', step=boards?15:53;
+ for(let row=0,start=z;start<v;row++,start+=step){
+  const offset=boards?(row*39)%124:0, length=boards?124:54;
+  for(let col=0,left=x-offset;left<u;col++,left+=length){
+   const lo=Math.max(left,x), hi=Math.min(left+length,u);
+   const finish=boards?['floor','plankLight','floor','plankDark'][(row*13+col*11+(row>>2))%4]:material;
+   const bottom=Math.min(start+step,v);
+   surface(lo,start,hi,bottom,-.015,boards?'seam':'grout');
+   if(hi-lo>.8&&bottom-start>.8)surface(lo+.38,start+.38,hi-.38,bottom-.38,-.008,finish);
+  }
+ }
+}
+function clipToRoom(polygon,[left,back,right,front]){
+ for(const [axis,limit,side] of [[0,X(left),1],[0,X(right),-1],[2,Z(back),1],[2,Z(front),-1]]){
+  const before=polygon;
+  polygon=[];
+  for(let i=0;i<before.length;i++){
+   const a=before[i],b=before[(i+1)%before.length];
+   const aIn=side*(a[axis]-limit)>=0,bIn=side*(b[axis]-limit)>=0;
+   if(aIn)polygon.push(a);
+   if(aIn!==bIn){
+    const t=(limit-a[axis])/(b[axis]-a[axis]);
+    polygon.push(a.map((value,j)=>value+(b[j]-value)*t));
+   }
+  }
+ }
+ return polygon;
+}
+// HDB legend: W1 is full-height with a 300 mm parapet. W2 has a 550 mm parapet.
+const utilityWindow=opening=>!opening.room;
+const windowSill=opening=>opening.fullHeight ? .30 : opening.room ? .55 :
+ opening.name.startsWith('Kitchen') ? 1.02 : .82;
+function litPatch(polygon,room,outer){
+ layer=outer?1:1.1;
+ const clipped=clipToRoom(polygon,room);
+ for(let i=1;i+1<clipped.length;i++)
+  quad(clipped[0],clipped[i],clipped[i+1],clipped[i+1],outer?'penumbra':'light');
+}
+function daylight(o, at, rows){
+ if(solar.altitude<1)return false;
+ const [sx,sy,sz]=site.sunVector(solar.azimuth,solar.altitude);
+ if(sx*o.out[0]+sz*o.out[1]<=.02)return false;
+ const columns=o.columns??4;
+ const elevation=floorElevation(floor);
+ let reachesWindow=false;
+ layer=1;
+ for(const [bottom,top] of rows)for(let col=0;col<columns;col++){
+  const opening=at((col+.5)/columns), y=(bottom+top)/2;
+  if(sunBlocked(site,[X(opening[0]),y,Z(opening[1])],[sx,sy,sz],elevation))continue;
+  reachesWindow=true;
+  const cast=(t,h)=>{
+   const [x,z]=at(t);
+   return [X(x)-sx*h/sy,.002,Z(z)-sz*h/sy];
+  };
+  const left=col/columns+.012,right=(col+1)/columns-.012;
+  litPatch([cast(left,bottom+.019),cast(right,bottom+.019),cast(right,top-.019),cast(left,top-.019)],o.room,true);
+  const core=[cast(left+.009,bottom+.04),cast(right-.009,bottom+.04),cast(right-.009,top-.04),cast(left+.009,top-.04)];
+  litPatch(core.map(([x,y,z])=>[x,y+.0007,z]),o.room,false);
+ }
+ layer=2;
+ return reachesWindow;
+}
+function glazing(o,top){
+ const columns=o.columns??4, sill=windowSill(o);
+ const at=t=>o.a.map((value,i)=>value+(o.b[i]-value)*t);
+ wall(o.a,o.b,0,overview&&!tour ? .27 : sill,'structure',.23);
+ if(overview){
+  if(tour){
+   for(const y of [sill+.02,top-.024])wall(o.a,o.b,y-.017,y+.017,'frame',.077);
+   for(let i=0;i<=columns;i++){
+    const p=at(i/columns);
+    wall(p,[p[0]+.5,p[1]+.5],sill,top,'frame',.044);
+   }
+  }
+  return false;
+ }
+ const rails=utilityWindow(o)?[sill+.016,1.63,2.11]:[sill+.016,1.13,1.86,2.25];
+ const head=rails.at(-1);
+ const rows=rails.slice(0,-1).map((height,i)=>[height,rails[i+1]]);
+ wall(o.a,o.b,head,top,'wall',.24);
+ wall(o.a,o.b,sill-.027,sill+.006,'structure',.32);
+ for(const y of rails)wall(o.a,o.b,y-.019,y+.019,'frame',.097);
+ if(o.fullHeight)wall(o.a,o.b,1.01,1.048,'frameEdge',.056);
+ for(let i=0;i<=columns;i++){
+  const p=at(i/columns);
+  wall(p,[p[0]+.5,p[1]+.5],sill,head,'frame',.047);
+ }
+ function pane(a,b,low,high,opening,dark){
+  const endPoint=end(opening), point=(p,y)=>[X(p[0]),y,Z(p[1])];
+  glassFaces.push([point(a,low),point(endPoint,low),point(endPoint,high),point(a,high)]);
+  if(!dark)return;
+  for(const y of [low,high])wall(a,endPoint,y-.014,y+.014,'frameEdge',.028);
+  for(const p of [a,endPoint])wall(p,[p[0]+.5,p[1]+.5],low,high,'frame',.034);
+  const handle=a.map((v,i)=>v+(endPoint[i]-v)*.89);
+  wall(handle,[handle[0]+.5,handle[1]+.5],(low+high)/2-.063,(low+high)/2+.063,'metal',.035);
+ }
+ const swing=o.out?Math.sign((o.b[0]-o.a[0])*o.out[1]-(o.b[1]-o.a[1])*o.out[0]):o.turn;
+ const leftLeaf=columns===3?0:1, rightLeaf=2;
+ for(const [row,[low,high]] of rows.entries())for(let col=0;col<columns;col++){
+  const a=at(col/columns+.015),b=at((col+1)/columns-.015);
+  const casement=row===(utilityWindow(o)?0:1)&&(col===leftLeaf||col===rightLeaf);
+  const [start,finish]=col===rightLeaf?[b,a]:[a,b];
+  pane(start,finish,low+.033,high-.033,{a:start,b:finish,amount:casement?(o.amount??0):0,turn:(col===leftLeaf?1:-1)*swing*.74},casement);
+ }
+ return o.room?daylight(o,at,rows):false;
+}
+function build(){
+ verts=[];faces=[];glassFaces=[];const top=overview?(tour?1.50:.68):2.62;
+ if(!overview){
+  const key=[floor,solar.azimuth,solar.altitude].join();
+  if(key!==exteriorKey){
+   exteriorFaces=[];
+   drawNeighbourhood(site,floorElevation(floor),solar,outdoorQuad,!gl);
+   if(gl){exterior=new Float32Array(verts);verts=[];}
+   exteriorKey=key;
+  }
+ }
+ exteriorCount=gl&&!overview?exterior.length/7:0;
+ layer=0;
+ for(const floor of floors)drawFloor(...floor);
+ layer=2;
+ if(!template){
+  rect(...planRect([539,182,677,234,-.14,-.02,'tile']));
+  rect(...planRect([119,386,248,548,-.16,-.04,'structure']));
+ }
+ if(!overview)for(const [x,z,u,v] of floors)rect(x-8,z-8,u+8,v+8,2.605,2.62,'ceiling');
+ for(const [x,z,u,v,tiled] of walls){
+  const a=[x,z],b=[u,v];
+  wall(a,b,-.08,top,tiled?'tiledWall':'wall',.15,true);
+  wall(a,b,0,.066,tiled?'grout':'trim',.175);
+  if(tiled&&!overview)for(let h=.38;h<top-.1;h+=.38)wall(a,b,h,h+.008,'grout',.153);
+ }
+ const sunny=windows.map(opening=>glazing(opening,top));
+ {
+  const litNames=windows.filter((_,index)=>sunny[index]).map(opening=>opening.name.toLowerCase());
+  const status=overview?'Switch to Walk inside to see the window views.':solar.altitude<=0?'Sun below the horizon.':litNames.length?'Direct sun at '+litNames.join(' and ')+'.':'No direct sun at the living or bedroom windows.';
+  if($('light-status').textContent!==status)$('light-status').textContent=status;
+ }
+ for(const o of doors){
+  const b=end(o);
+  wall(o.a,b,.015,overview?(tour?1.35:.47):2.08,'door',.062);
+  if(overview)continue;
+  wall(o.a,o.b,2.12,top);
+  for(const p of [o.a,o.b])wall(p,[p[0]+1,p[1]+1],0,2.13,'frame',.075);
+  const at=t=>o.a.map((a,i)=>a+(b[i]-a)*t);
+  wall(at(.77),at(.91),.98,1.02,'metal',.125);
+ }
+ if(furnished){
+  const [sofa,...items]=furniture;
+  const middle=(a,b)=>(a+b)/2;
+  const rug=items.find(item=>item[4]===.38);
+  if(rug){
+   const [x,z,u,v]=rug;
+   const sat=Math.min((u-x)*.55,(v-z)*.55);
+   const border=[x-sat,z-sat,u+sat,v+sat];
+   const corners=[[border[0],border[1]],[border[2],border[1]],[border[2],border[3]],[border[0],border[3]]];
+   if(corners.every(([a,b])=>inFloor(X(a),Z(b))))rect(...border,.001,.009,'rug');
+  }
+  loungeFurniture(sofa,rooms[1].slice(1,3),rect);
+  for(const item of (template?items:items.slice(3))){
+   const [x,z,u,v,h,k]=item;
+   if((h===.38||h===.74)&&k==='wood'){
+    tableFurniture(item,rect);
+    if(h===.74&&!overview){
+     const a=middle(x,u),b=middle(z,v);
+     rect(a-1,b-1,a+1,b+1,2.0,2.606,'dark');
+     rect(a-12,b-8,a+12,b+8,1.89,2.033,'lamp');
+    }
+   }else if(k==='chair'){
+    const [,tz,,tv]=furniture.find(box=>box[4]===.74)??[x,z,u,v];
+    const back=middle(z,v)>=middle(tz,tv)?v-3:z;
+    rect(x,z,u,v,.41,.47,'upholstery');
+    rect(x,back,u,back+3,.46,.86,'sage');
+    for(const [a,b] of [[x+2,z+2],[u-4,z+2],[x+2,v-4],[u-4,v-4]])rect(a,b,a+2,b+2,0,.42,'wood');
+   }else {
+    rect(x,z,u,v,0,h,k);
+    if(k==='cream'&&h>.91&&h<.98&&(u-x)>52&&(v-z)>12){
+     const a=middle(x,u),b=middle(z,v);
+     rect(a-8,b-4,a+8,b+4,h+.001,h+.008,'metal');
+    }
+   }
+  }
+ }
+ count=verts.length/7;
+ if(gl){
+  for(const points of glassFaces)quad(...points,'glass');
+  const interior=new Float32Array(verts);
+  const exteriorBytes=exteriorCount*7*Float32Array.BYTES_PER_ELEMENT;
+  const activeExterior=exteriorCount?exterior:null;
+  const bytes=exteriorBytes+interior.byteLength;
+  if(activeExterior!==gpuExterior||bytes>gpuBytes){
+   gpuExterior=activeExterior;gpuBytes=bytes+65536;
+   gl.bufferData(gl.ARRAY_BUFFER,gpuBytes,gl.DYNAMIC_DRAW);
+   if(activeExterior)gl.bufferSubData(gl.ARRAY_BUFFER,0,activeExterior);
+  }
+  gl.bufferSubData(gl.ARRAY_BUFFER,exteriorBytes,interior);
+ }
+ glassCount=verts.length/7-count;
+ dirty=false;
+}
+function basis(yaw,pitch){const s=Math.sin(yaw),c=Math.cos(yaw),p=Math.sin(pitch),q=Math.cos(pitch);return [[s*q,p,c*q],[-c,0,s],[-s*p,q,-c*p]]}
+const walkableFloors=template?floors:[...floors,planRect([540,186,677,260])];
+function inFloor(x,z){return walkableFloors.some(([a,b,c,d])=>x>=X(a)-.18&&x<=X(c)+.18&&z>=Z(b)-.18&&z<=Z(d)+.18)}
+function distance(x,z,a,b){const ax=X(a[0]),az=Z(a[1]),dx=X(b[0])-ax,dz=Z(b[1])-az;const t=Math.max(0,Math.min(1,((x-ax)*dx+(z-az)*dz)/(dx*dx+dz*dz)));return Math.hypot(x-ax-t*dx,z-az-t*dz)}
+function clear(x,z){
+ if(!inFloor(x,z))return false;
+ if(walls.some(([a,b,c,d])=>distance(x,z,[a,b],[c,d])<.22))return false;
+ if(windows.some(o=>distance(x,z,o.a,o.b)<.22)||doors.some(o=>distance(x,z,o.a,end(o))<.17))return false;
+ return !furnished||!furniture.some(([a,b,c,d])=>x>X(a)-.13&&x<X(c)+.13&&z>Z(b)-.13&&z<Z(d)+.13);
+}
+function nearest(){let best=.95, result;for(const o of [...doors,...windows]){const d=distance(player.x,player.z,o.a,o.b);if(d<best){best=d;result=o}}return result}
+const reduceMotion=matchMedia('(prefers-reduced-motion: reduce)');
+const scene=document.querySelector('.scene');
+const windowRows=new Map();
+function showWindows(show){
+ $('window-panel').classList.toggle('hide',!show);
+ $('window-controls').setAttribute('aria-expanded',show);
+}
+function syncWindow(opening){
+ const row=windowRows.get(opening);
+ if(!row)return;
+ row.state.textContent=opening.open?'Open':'Closed';
+ row.toggle.textContent=opening.open?'Close':'Open';
+ row.toggle.setAttribute('aria-label',row.toggle.textContent+' '+opening.name.toLowerCase());
+}
+function operate(opening){
+ if(overview||outside||tour||!opening)return;
+ opening.open=!opening.open;
+ if(!windows.includes(opening)&&!clear(player.x,player.z)){opening.open=!opening.open;return}
+ if(windows.includes(opening)){
+  const target=Number(opening.open);
+  opening.animation=reduceMotion.matches?null:{started:performance.now(),from:opening.amount??0,target,step:-1};
+  if(!opening.animation)opening.amount=target;
+  syncWindow(opening);
+ }
+ dirty=true;
+}
+function interact(){operate(nearest())}
+function setMode(value,outlook=false){
+ overview=value;
+ outside=outlook;
+ dirty=true;
+ scene.classList.toggle('outside',outside);
+ const exploring=!overview&&!outside&&!tour;
+ $('explore-outside').setAttribute('aria-pressed',outdoorFlight);
+ $('flight-height-wrap').hidden=!outdoorFlight;
+ $('reticle').classList.toggle('hide',!exploring);
+ $('overview').setAttribute('aria-pressed',overview&&!tour);
+ $('outlook').setAttribute('aria-pressed',outside&&!tour);
+ $('walk').setAttribute('aria-pressed',exploring);
+ $('pad').classList.toggle('hide',!exploring&&!outdoorFlight);
+ $('landmarks').classList.toggle('hide',!outside||!!tour);
+ $('help').textContent=tour?'The tour moves between furnished rooms. Use Pause tour or End tour at any time.'
+  :outside?'Drag to pan from the living-room windows. Dimmed landmarks are outside this facing. Change View floor to compare sightlines.'
+  :overview?'Drag to orbit. Choose a room to jump inside.'
+  :'Drag to look. Use the direction pad or WASD to move. Choose Windows to look through or operate a window.';
+}
+function stopTour(returnToWalk=true){
+ if(!tour)return;
+ tour=null;
+ scene.classList.remove('touring');
+ $('tour-controls').classList.add('hide');
+ $('tour-fade').style.opacity=0;
+ $('play-tour').textContent='Play Tour';
+ if(returnToWalk)jump(rooms[1]);
+}
+function jump(room){
+ outdoorFlight=false;
+ const [name,x,z,yaw,pitch=0]=room;
+ stopTour(false);
+ keys.clear();
+ speedX=speedZ=0;
+ const [wx,wz]=roomSpot(room,(a,b)=>[X(a),Z(b)],clear)??[X(x),Z(z)];
+ Object.assign(player,{x:wx,z:wz,yaw,pitch});
+ setMode(false);
+ $('label').textContent=name;
+}
+function windowView(opening){
+ const [x,z]=opening.a.map((value,i)=>(value+opening.b[i])/2);
+ const [dx,dz]=opening.out;
+ const [a,b,c,d]=opening.room??planBounds;
+ for(const range of [99,80,64,119,151])for(const side of [0,-46,46,-76,76,-108,108]){
+  const u=x-dx*range-dz*side,v=z-dz*range+dx*side;
+  if(u<a||u>c||v<b||v>d||!clear(X(u),Z(v)))continue;
+  return [opening.name,u,v,Math.atan2(x-u,z-v),-.10];
+ }
+ const room=rooms.find(([name])=>name.startsWith(opening.name.split(' ')[0]))??rooms[1];
+ return [opening.name,room[1],room[2],Math.atan2(x-room[1],z-room[2]),-.08];
+}
+for(const opening of windows){
+ const row=document.createElement('div');row.className='window-row';
+ const title=document.createElement('div');title.textContent=opening.name;
+ const state=document.createElement('span');state.className='window-state';state.setAttribute('aria-live','polite');title.append(state);
+ const look=document.createElement('button');look.textContent='Look';look.setAttribute('aria-label','Look through '+opening.name.toLowerCase());
+ look.onclick=()=>{jump(windowView(opening));showWindows(false);$('window-controls').focus()};
+ const toggle=document.createElement('button');toggle.onclick=()=>{
+  if(overview)jump(windowView(opening));
+  operate(opening);
+ };
+ row.append(title,look,toggle);
+ $('window-rows').append(row);
+ windowRows.set(opening,{state,toggle});
+ syncWindow(opening);
+}
+$('window-controls').onclick=()=>showWindows($('window-panel').classList.contains('hide'));
+$('overview').onclick=()=>{outdoorFlight=false;stopTour(false);setMode(true);$('label').textContent='3D overview'};
+$('walk').onclick=()=>jump(rooms[0]);$('use').onclick=interact;
+function immersive(value){
+ scene.classList.toggle('immersive',value);
+ $('focus').setAttribute('aria-pressed',value);
+ $('exit').classList.toggle('hide',!value);
+ (value?$('exit'):$('focus')).focus();
+}
+$('focus').onclick=()=>immersive(true);
+$('exit').onclick=()=>immersive(false);
+addEventListener('keydown',e=>{
+ if(e.key!=='Escape')return;
+ if(!$('window-panel').classList.contains('hide')){showWindows(false);$('window-controls').focus()}
+ else if(tour)stopTour();
+ else if(scene.classList.contains('immersive'))immersive(false);
+ else if(embedded)window.parent.postMessage('close-unit-walkthrough',location.origin);
+});
+function showFurniture(value){
+ furnished=value;
+ $('furn').setAttribute('aria-pressed',furnished);
+ $('furn').textContent=furnished?'Furniture on':'Furniture off';
+ dirty=true;
+}
+$('furn').onclick=()=>{
+ showFurniture(!furnished);
+ if(!overview&&!clear(player.x,player.z))jump(rooms[0]);
+};
+for(const room of rooms){
+ const button=document.createElement('button');
+ button.textContent=room[0];
+ button.onclick=()=>jump(room);
+ $('rooms').append(button);
+}
+const mainWindow=windows.find(opening=>opening.name.startsWith('Living'))??windows[0];
+const landmarks=new Map([['Window outlook',null],...site.landmarks.map(([name,...target])=>[name,target])]);
+const landmarkButtons=new Map();
+const outlookHalfAngle=Math.PI*.42;
+function relativeBearing(yaw){
+ const rotation=yaw-Math.atan2(...mainWindow.out);
+ return Math.atan2(Math.sin(rotation),Math.cos(rotation));
+}
+function landmarkBearing(target){
+ const [[x,z]]=target;
+ return Math.atan2(x-lookout.x,z-lookout.z);
+}
+function aimAt(name){
+ activeLandmark=name;
+ const target=landmarks.get(name);
+ if(target){
+  const [[x,z],height]=target;
+  lookout.yaw=landmarkBearing(target);
+  lookout.pitch=Math.atan2(height-(floorElevation(floor)+1.58),Math.hypot(x-lookout.x,z-lookout.z));
+ }else{
+  lookout.yaw=Math.atan2(...mainWindow.out);
+  const highway=landmarks.get('West Coast Highway');
+  const [[x,z],height]=highway;
+  const nearHighway=Math.hypot(x-lookout.x,z-lookout.z);
+  const facesHighway=nearHighway<170&&Math.abs(relativeBearing(landmarkBearing(highway)))<.55;
+  const depression=Math.atan2(height-floorElevation(floor)-1.58,nearHighway);
+  lookout.pitch=facesHighway ? Math.max(-.58,Math.min(-.14,depression*.70)) : -.14;
+ }
+ $('label').textContent=name;
+ for(const [label,button] of landmarkButtons)button.setAttribute('aria-pressed',label===name);
+}
+for(const name of landmarks.keys()){
+ const button=document.createElement('button');
+ button.textContent=name;button.onclick=()=>aimAt(name);
+ $('landmarks').append(button);
+ landmarkButtons.set(name,button);
+}
+function principalOutlook(){
+ const [a,b]=mainWindow.a.map((value,i)=>(value+mainWindow.b[i])/2);
+ const [dx,dz]=mainWindow.out;
+ return {point:[X(a)+dx*.46,Z(b)+dz*.46],yaw:Math.atan2(dx,dz)};
+}
+$('outlook').onclick=()=>{
+ outdoorFlight=false;
+ stopTour(false);showWindows(false);keys.clear();
+ [lookout.x,lookout.z]=principalOutlook().point;
+ for(const [name,button] of landmarkButtons){
+  const target=landmarks.get(name);
+  button.disabled=!!target&&Math.abs(relativeBearing(landmarkBearing(target)))>outlookHalfAngle;
+ }
+ setMode(false,true);
+ aimAt('Window outlook');
+};
+$('explore-outside').onclick=()=>{
+ stopTour(false);showWindows(false);keys.clear();
+ if(!outdoorFlight){
+  const origin=principalOutlook();
+  [lookout.x,lookout.z]=[origin.point[0]+Math.sin(origin.yaw)*2,origin.point[1]+Math.cos(origin.yaw)*2];
+  lookout.yaw=origin.yaw;lookout.pitch=-.13;
+  flightElevation=floorElevation(floor)+1.58;
+  $('flight-height').value=String(Math.round(Math.max(2,Math.min(160,flightElevation))));
+  $('flight-height-label').textContent=Math.round(flightElevation)+' m';
+  outdoorFlight=true;setMode(false,true);$('landmarks').classList.add('hide');$('label').textContent='Explore outside · WASD / arrows to move';
+ }else{$('outlook').click()}
+};
+$('flight-height').oninput=e=>{flightElevation=Number(e.target.value);$('flight-height-label').textContent=flightElevation+' m';dirty=true};
+$('play-tour').onclick=()=>{outdoorFlight=false;
+ if(tour){stopTour();return}
+ showWindows(false);
+ showFurniture(true);
+ keys.clear();speedX=speedZ=0;
+ const shots=buildTour(rooms,(x,z)=>[X(x),Z(z)],clear,principalOutlook());
+ tour={shots,total:shots.at(-1).end,elapsed:0,index:-1,paused:false};
+ scene.classList.add('touring');
+ $('tour-controls').classList.remove('hide');
+ $('tour-progress').value=0;
+ $('tour-pause').textContent='Pause tour';
+ $('play-tour').textContent='End tour';
+ setMode(true);
+ $('tour-pause').focus();
+};
+$('tour-pause').onclick=()=>{
+ if(!tour)return;
+ tour.paused=!tour.paused;
+ $('tour-pause').textContent=tour.paused?'Resume tour':'Pause tour';
+};
+$('tour-stop').onclick=()=>{stopTour();$('play-tour').focus()};
+function advanceTour(dt){
+ if(!tour||tour.paused)return;
+ tour.elapsed+=dt;
+ if(tour.elapsed>=tour.total){stopTour();return}
+ const index=tour.shots.findIndex(shot=>tour.elapsed<shot.end);
+ const shot=tour.shots[index];
+ if(tour.index!==index){
+  tour.index=index;
+  if(overview!==!!shot.overview||outside!==!!shot.outlook)setMode(!!shot.overview,!!shot.outlook);
+  $('label').textContent=shot.name;
+ }
+ const view=tourFrame(shot,tour.elapsed);
+ if(shot.overview){orbit=view.orbit;tilt=view.tilt}
+ else {
+  const {x,z,yaw,pitch}=view;
+  Object.assign(shot.outlook?lookout:player,{x,z,yaw,pitch});
+ }
+ $('tour-fade').style.opacity=reduceMotion.matches?0:view.fade;
+ $('tour-progress').value=tour.elapsed/tour.total;
+}
+const keymap={arrowup:'w',arrowdown:'s',arrowleft:'a',arrowright:'d',w:'w',a:'a',s:'s',d:'d'};
+addEventListener('keydown',e=>{if(overview||(outside&&!outdoorFlight)||tour||e.target instanceof HTMLInputElement||e.target instanceof HTMLSelectElement)return;const k=e.key.toLowerCase();if(keymap[k]){e.preventDefault();keys.add(keymap[k])}if(k==='e'&&!e.repeat)interact()});
+addEventListener('keyup',e=>keys.delete(keymap[e.key.toLowerCase()]));addEventListener('blur',()=>keys.clear());
+document.querySelectorAll('[data-m]').forEach(b=>{b.onpointerdown=e=>{b.setPointerCapture(e.pointerId);keys.add(b.dataset.m)};b.onlostpointercapture=()=>keys.delete(b.dataset.m)});
+let drag=null;
+canvas.onpointerdown=e=>{if(drag||tour)return;canvas.setPointerCapture(e.pointerId);drag=[e.pointerId,e.clientX,e.clientY]};
+canvas.onlostpointercapture=()=>drag=null;
+canvas.onpointermove=e=>{if(!drag||drag[0]!==e.pointerId)return;const dx=e.clientX-drag[1],dy=e.clientY-drag[2];drag=[e.pointerId,e.clientX,e.clientY];if(overview){orbit+=dx*.009;tilt=Math.max(.32,Math.min(1.45,tilt+dy*.009))}else{const camera=outside?lookout:player,sensitivity=touch?.0048:.006;
+ camera.yaw+=dx*sensitivity;
+ if(outside&&!outdoorFlight){
+  const bearing=Math.max(-outlookHalfAngle,Math.min(outlookHalfAngle,relativeBearing(camera.yaw)));
+  camera.yaw=Math.atan2(...mainWindow.out)+bearing;
+ }
+ camera.pitch=Math.max(-1.15,Math.min(1.15,camera.pitch+dy*sensitivity));
+ if(outside&&!outdoorFlight&&activeLandmark){
+  landmarkButtons.get(activeLandmark).setAttribute('aria-pressed',false);
+  activeLandmark=null;
+  $('label').textContent='Window outlook';
+ }}};
+const map=$('map').getContext('2d');
+const planBounds=[
+ Math.min(...floors.map(f=>f[0])),Math.min(...floors.map(f=>f[1])),
+ Math.max(...floors.map(f=>f[2])),Math.max(...floors.map(f=>f[3])),
+];
+const mapScale=Math.min(133/(planBounds[2]-planBounds[0]),167/(planBounds[3]-planBounds[1]));
+const mx=x=>75+(x-(planBounds[0]+planBounds[2])/2)*mapScale;
+const mz=z=>95+(z-(planBounds[1]+planBounds[3])/2)*mapScale;
+function drawMap(){
+ map.clearRect(0,0,150,190);
+ for(const [x,z,u,v,k] of floors){map.fillStyle=colors[k];map.fillRect(mx(x),mz(z),mx(u)-mx(x),mz(v)-mz(z))}
+ map.strokeStyle='#efeade';map.lineWidth=2;
+ for(const [x,z,u,v] of walls){map.beginPath();map.moveTo(mx(x),mz(z));map.lineTo(mx(u),mz(v));map.stroke()}
+ map.fillStyle='#f6fbf7';map.font='bold 8px system-ui';map.textAlign='center';
+ const labels={'Living / dining':'LIVING','Entrance':'','Household shelter':'SHELTER','Kitchen / utility':'KITCHEN','Bath / WC':'BATH','Common bath / WC':'BATH','Main bath / WC':'BATH','Main bedroom':'MAIN BED','Bedroom 1':'BED 1','Bedroom 2':'BED 2','Service yard':'YARD'};
+ for(const [name,x,z] of rooms)map.fillText(labels[name]??name.toUpperCase(),mx(x),mz(z));
+
+ if(!overview){map.save();map.translate(mx(player.x/meter+180),mz(player.z/meter+90));map.rotate(-player.yaw);map.beginPath();map.moveTo(0,8);map.lineTo(-5,-4);map.lineTo(5,-4);map.closePath();map.fillStyle='#142b27';map.fill();map.strokeStyle='#c8ffdf';map.stroke();map.restore()}
+}
+let prev=0,lastView='';
+const touch=matchMedia('(pointer:coarse)').matches;
+function frame(t){
+ const elapsed=Math.min(.13,(t-prev)/1000);prev=t;
+ const dt=Math.min(.035,elapsed);
+ advanceTour(elapsed);
+ if(!overview&&!outside&&!tour){
+  const f=+keys.has('w')-keys.has('s'), r=+keys.has('d')-keys.has('a');
+  const ease=1-Math.exp(-dt*16);
+  speedX+=((Math.sin(player.yaw)*f-Math.cos(player.yaw)*r)/(Math.hypot(f,r)||1)-speedX)*ease;
+  speedZ+=((Math.cos(player.yaw)*f+Math.sin(player.yaw)*r)/(Math.hypot(f,r)||1)-speedZ)*ease;
+  const pace=touch?1.1:1.40;
+  const dx=Math.abs(speedX)>.005?speedX*pace*dt:0,dz=Math.abs(speedZ)>.005?speedZ*pace*dt:0;
+  if(dx&&clear(player.x+dx,player.z))player.x+=dx;if(dz&&clear(player.x,player.z+dz))player.z+=dz;
+  const near=nearest();$('use').classList.toggle('hide',!near);if(near){const label=(near.open?'Close ':'Open ')+near.name.toLowerCase();if($('use').textContent!==label)$('use').textContent=label}
+ }else if(outdoorFlight&&!tour){
+  const f=+keys.has('w')-keys.has('s'),r=+keys.has('d')-keys.has('a');
+  const pace=touch?Math.max(2,flightElevation*.12):Math.max(3,flightElevation*.15);
+  const norm=Math.hypot(f,r)||1;
+  lookout.x+=(Math.sin(lookout.yaw)*f-Math.cos(lookout.yaw)*r)*pace*dt/norm;
+  lookout.z+=(Math.cos(lookout.yaw)*f+Math.sin(lookout.yaw)*r)*pace*dt/norm;
+  lookout.x=Math.max(-400,Math.min(400,lookout.x));lookout.z=Math.max(-400,Math.min(400,lookout.z));
+  $('use').classList.add('hide');
+ }else $('use').classList.add('hide');
+ const ratio=Math.min(devicePixelRatio||1,gl?1.75:1.2),w=Math.round(canvas.clientWidth*ratio),h=Math.round(canvas.clientHeight*ratio);
+ if(canvas.width!==w||canvas.height!==h){canvas.width=w;canvas.height=h}
+ for(const opening of windows){
+  const animation=opening.animation;
+  if(!animation)continue;
+  const progress=Math.min(1,Math.max(0,(t-animation.started)/255));
+  const step=gl?progress:Math.floor(progress*9)/9;
+  if(step!==animation.step){
+   animation.step=step;
+   const ease=step*step*(3-2*step);
+   opening.amount=animation.from+(animation.target-animation.from)*ease;
+   dirty=true;
+  }
+  if(progress===1)opening.animation=null;
+ }
+ const updated=dirty;
+ if(dirty)build();
+ const camera=outside?lookout:player;
+ const b=overview?basis(orbit,-tilt):basis(camera.yaw,camera.pitch);
+ const target=template?[site.centre[0],0,site.centre[1]]:[3.22,0,4.86],eye=overview?target.map((n,i)=>n-12*b[0][i]):[camera.x,outdoorFlight?flightElevation-floorElevation(floor):1.58,camera.z];
+ const aspect=w/Math.max(h,1);
+ const planSize=template?Math.max(site.centre[1],site.centre[0]/Math.max(aspect,.1))*1.38:0;
+ const zoom=Math.max(5,5.5/Math.max(aspect,.1),planSize);
+ const focal=Math.min(1.45,Math.max(.72,1.85*aspect));
+ const view=[w,h,...eye,...b[0]].join();
+ if(updated||view!==lastView){
+  const horizon=Math.max(6,Math.min(94,50+b[0][1]*70));
+  canvas.style.background=overview?(tour?'linear-gradient(#dee5e4,#9caeaf)':'#29363d'):solar.altitude>0
+   ?`linear-gradient(180deg,#82a9bf18,#d8e6e9cc ${horizon}%,#d3dfe1), url('./assets/walkthrough-daylight.webp') center top / cover`
+   :`linear-gradient(180deg,#252f49,#677f94 ${horizon}%,#667782)`;
+  if(flat)paint(w,h,eye,b,zoom,focal);
+  if(gl){
+   gl.viewport(0,0,w,h);gl.clearColor(0,0,0,0);
+   gl.clear(gl.COLOR_BUFFER_BIT|gl.DEPTH_BUFFER_BIT);
+   for(const [key,value] of Object.entries({eye,front:b[0],right:b[1],up:b[2]}))gl.uniform3fv(uniforms[key],value);
+   gl.uniform1f(uniforms.aspect,aspect);gl.uniform1f(uniforms.ortho,+overview);
+   gl.uniform1f(uniforms.zoom,zoom);gl.uniform1f(uniforms.focal,focal);gl.uniform1f(uniforms.opacity,1);
+   gl.drawArrays(gl.TRIANGLES,0,exteriorCount+count);
+   if(glassCount){
+    gl.enable(gl.BLEND);gl.blendFunc(gl.SRC_ALPHA,gl.ONE_MINUS_SRC_ALPHA);
+    gl.depthMask(false);gl.uniform1f(uniforms.opacity,.085);
+    gl.drawArrays(gl.TRIANGLES,exteriorCount+count,glassCount);
+    gl.depthMask(true);gl.disable(gl.BLEND);
+   }
+  }
+  if(!outside&&!tour)drawMap();
+ }
+ lastView=view;
+ requestAnimationFrame(frame);
+}
+showFurniture(true);
+jump(rooms[1]);
+player.pitch=-.15;
+if(params.get('view')==='outlook')$('outlook').click();
+if(params.get('view')==='exterior')$('explore-outside').click();
+requestAnimationFrame(frame);
+</script></html>
