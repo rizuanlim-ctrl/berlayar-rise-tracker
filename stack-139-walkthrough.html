@@ -127,7 +127,7 @@ const embedded=window.parent!==window&&params.has('embedded');
 document.documentElement.classList.toggle('embedded',embedded);
 const mobileQuality=matchMedia('(pointer:coarse)').matches || /iPad|iPhone|iPod/.test(navigator.userAgent);
 let canvas=$('world'), gl=null, flat=null;
-try { if(!params.has('canvasFallback')) gl=canvas.getContext('webgl',{antialias:!mobileQuality,alpha:true,powerPreference:mobileQuality?'low-power':'default'}); } catch(error){console.warn('WebGL unavailable',error);}
+try { if(!mobileQuality&&!params.has('canvasFallback')) gl=canvas.getContext('webgl',{antialias:!mobileQuality,alpha:true,powerPreference:mobileQuality?'low-power':'default'}); } catch(error){console.warn('WebGL unavailable',error);}
 function useCanvasFallback(){
  if(gl){const replacement=canvas.cloneNode(false);canvas.replaceWith(replacement);canvas=replacement;gl=null;}
  flat=canvas.getContext('2d');
@@ -275,7 +275,7 @@ let gpuExterior=null, gpuBytes=0;
 let speedX=0,speedZ=0;
 const palette=Object.fromEntries(Object.entries(colors).map(([key,hex])=>
  [key,hex.slice(1).match(/../g).map(value=>parseInt(value,16)/255)]));
-function rgb(key,light){return palette[key].map(channel=>channel*light)}
+function rgb(key,light){return (palette[key]||palette.facade).map(channel=>channel*light)}
 const cssColor=color=>'rgb('+color.map(v=>Math.round(v*255)).join(',')+')';
 const softMaterials=new Set(['wall','ceiling','structure','floor','plankLight','plankDark','seam','trim','tiledWall','tile','grout','rug']);
 const apertureCentres=windows.map(o=>[
@@ -316,7 +316,7 @@ function quad(a,b,c,d,key,light=1){
   return;
  }
  const mix=(p,q,t)=>p.map((v,i)=>v+(q[i]-v)*t);
- const segments=(p,q)=>Math.ceil(Math.hypot(...p.map((v,i)=>v-q[i]))/.76)||1;
+ const segments=(p,q)=>Math.min(mobileQuality?12:80,Math.ceil(Math.hypot(...p.map((v,i)=>v-q[i]))/(mobileQuality?1.25:.76))||1);
  const cols=segments(a,b), rows=segments(a,d);
  const fill=cssColor(color);
  for(let j=0;j<rows;j++)for(let i=0;i<cols;i++){
@@ -538,7 +538,7 @@ function build(){
   const key=[floor,solar.azimuth,solar.altitude].join();
   if(key!==exteriorKey){
    exteriorFaces=[];
-   drawNeighbourhood(site,floorElevation(floor),solar,outdoorQuad,!gl||mobileQuality);
+   try { drawNeighbourhood(site,floorElevation(floor),solar,outdoorQuad,!gl||mobileQuality); } catch(error){ console.warn('Exterior scenery failed; continuing with interior',error); verts=[]; exteriorFaces=[]; }
    if(gl){exterior=new Float32Array(verts);verts=[];}
    exteriorKey=key;
   }
@@ -973,6 +973,7 @@ function frame(t){
   if(progress===1)opening.animation=null;
  }
  const updated=dirty;
+ if(!outside&&!tour)drawMap();
  if(dirty)build();
  const camera=outside?lookout:player;
  const b=overview?basis(orbit,-tilt):basis(camera.yaw,camera.pitch);
@@ -1002,10 +1003,17 @@ function frame(t){
     gl.depthMask(true);gl.disable(gl.BLEND);
    }
   }
-  if(!outside&&!tour)drawMap();
+
  }
  lastView=view;
- requestAnimationFrame(frame);
+ requestAnimationFrame(safeFrame);
+}
+function safeFrame(t){
+ try{frame(t);}catch(error){
+  console.error('Walkthrough rendering failed',error);
+  if(gl&&!params.has('canvasFallback')){const url=new URL(location.href);url.searchParams.set('canvasFallback','1');location.replace(url.href);return;}
+  $('light-status').textContent='Unable to render this view: '+(error.message||String(error));
+ }
 }
 showFurniture(true);
 jump(rooms[1]);
@@ -1020,5 +1028,5 @@ if(inUnitExplorer){
 if(params.get('view')==='outlook')$('outlook').click();
 if(params.get('view')==='exterior')$('explore-outside').click();
 canvas.addEventListener('webglcontextlost',event=>{event.preventDefault();const url=new URL(location.href);if(!url.searchParams.has('canvasFallback')){url.searchParams.set('canvasFallback','1');location.replace(url.href);}});
-requestAnimationFrame(frame);
+requestAnimationFrame(safeFrame);
 </script></html>
