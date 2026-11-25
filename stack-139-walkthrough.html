@@ -125,10 +125,17 @@ $('layout-title').textContent='Berlayar Rise · Block '+site.block+' · '+layout
 document.title='Berlayar Rise · #'+renderUnit(floor);
 const embedded=window.parent!==window&&params.has('embedded');
 document.documentElement.classList.toggle('embedded',embedded);
-const canvas=$('world'), gl=canvas.getContext('webgl',{antialias:true,alpha:true});
-const flat=gl?null:canvas.getContext('2d');
+const mobileQuality=matchMedia('(pointer:coarse)').matches || /iPad|iPhone|iPod/.test(navigator.userAgent);
+let canvas=$('world'), gl=null, flat=null;
+try { if(!params.has('canvasFallback')) gl=canvas.getContext('webgl',{antialias:!mobileQuality,alpha:true,powerPreference:mobileQuality?'low-power':'default'}); } catch(error){console.warn('WebGL unavailable',error);}
+function useCanvasFallback(){
+ if(gl){const replacement=canvas.cloneNode(false);canvas.replaceWith(replacement);canvas=replacement;gl=null;}
+ flat=canvas.getContext('2d');
+}
+if(!gl)useCanvasFallback();
 let uniforms;
 if(gl){
+try {
 const vertex=`
 attribute vec3 point; attribute vec3 rgb; attribute float finish;
 varying mediump vec3 color; varying mediump vec3 world; varying mediump float material;
@@ -140,7 +147,7 @@ void main(){
  if(ortho>0.5){gl_Position=vec4(q.x/(zoom*aspect),q.y/zoom,q.z/30.0,1.0);}
  else{gl_Position=vec4(q.x*focal/aspect,q.y*focal,1.00009*q.z-0.100005,q.z);}
 }`;
-const fragment=`
+const fragment=mobileQuality?`precision mediump float; varying mediump vec3 color; uniform float opacity; void main(){gl_FragColor=vec4(color,opacity);}`:`
 #ifdef GL_FRAGMENT_PRECISION_HIGH
 precision highp float;
 #else
@@ -196,9 +203,11 @@ function shader(type,source){const s=gl.createShader(type);gl.shaderSource(s,sou
 const program=gl.createProgram();gl.attachShader(program,shader(gl.VERTEX_SHADER,vertex));gl.attachShader(program,shader(gl.FRAGMENT_SHADER,fragment));gl.linkProgram(program);if(!gl.getProgramParameter(program,gl.LINK_STATUS))throw Error(gl.getProgramInfoLog(program));gl.useProgram(program);gl.enable(gl.DEPTH_TEST);
 const buffer=gl.createBuffer();gl.bindBuffer(gl.ARRAY_BUFFER,buffer);
 for(const [name,size,offset] of [['point',3,0],['rgb',3,12],['finish',1,24]]){
- const loc=gl.getAttribLocation(program,name);gl.enableVertexAttribArray(loc);gl.vertexAttribPointer(loc,size,gl.FLOAT,false,28,offset);
+ const loc=gl.getAttribLocation(program,name);if(loc>=0){gl.enableVertexAttribArray(loc);gl.vertexAttribPointer(loc,size,gl.FLOAT,false,28,offset);}
 }
 uniforms=Object.fromEntries(['eye','front','right','up','aspect','ortho','zoom','focal','opacity'].map(k=>[k,gl.getUniformLocation(program,k)]));
+}
+ catch(error){console.warn('WebGL initialization failed',error);useCanvasFallback();}
 }
 const colors={
  wall:'#edece6', ceiling:'#f4f2ec', structure:'#dddcd2', trim:'#c3bcb0', edge:'#8d8275',
@@ -529,7 +538,7 @@ function build(){
   const key=[floor,solar.azimuth,solar.altitude].join();
   if(key!==exteriorKey){
    exteriorFaces=[];
-   drawNeighbourhood(site,floorElevation(floor),solar,outdoorQuad,!gl);
+   drawNeighbourhood(site,floorElevation(floor),solar,outdoorQuad,!gl||mobileQuality);
    if(gl){exterior=new Float32Array(verts);verts=[];}
    exteriorKey=key;
   }
@@ -948,7 +957,7 @@ function frame(t){
   lookout.x=Math.max(-400,Math.min(400,lookout.x));lookout.z=Math.max(-400,Math.min(400,lookout.z));
   $('use').classList.add('hide');
  }else $('use').classList.add('hide');
- const ratio=Math.min(devicePixelRatio||1,gl?(touch?1.6:2):1.2),w=Math.round(canvas.clientWidth*ratio),h=Math.round(canvas.clientHeight*ratio);
+ const ratio=Math.min(devicePixelRatio||1,gl?(mobileQuality?1:2):1),w=Math.round(canvas.clientWidth*ratio),h=Math.round(canvas.clientHeight*ratio);
  if(canvas.width!==w||canvas.height!==h){canvas.width=w;canvas.height=h}
  for(const opening of windows){
   const animation=opening.animation;
@@ -1004,11 +1013,12 @@ player.pitch=-.15;
 if(inUnitExplorer&&['139','112'].includes(stack))framedWindow();
 if(inUnitExplorer){
  const content=document.querySelector('main');
- new ResizeObserver(()=>{
+ if(typeof ResizeObserver==='function')new ResizeObserver(()=>{
   window.parent.postMessage({type:'unit-explorer-size',height:Math.ceil(content.getBoundingClientRect().height)},location.origin);
  }).observe(content);
 }
 if(params.get('view')==='outlook')$('outlook').click();
 if(params.get('view')==='exterior')$('explore-outside').click();
+canvas.addEventListener('webglcontextlost',event=>{event.preventDefault();const url=new URL(location.href);if(!url.searchParams.has('canvasFallback')){url.searchParams.set('canvasFallback','1');location.replace(url.href);}});
 requestAnimationFrame(frame);
 </script></html>
