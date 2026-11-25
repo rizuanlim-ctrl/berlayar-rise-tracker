@@ -1,0 +1,14 @@
+<!doctype html>
+<html lang="en"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>15 km surroundings · Berlayar Rise</title>
+<link rel="stylesheet" href="https://unpkg.com/maplibre-gl@5.6.1/dist/maplibre-gl.css" integrity="sha384-Nq6PQ+9vJPvw7U/VfDELyrWoGQMsy0gi6QShhaSrGzkpF5KkM40csg2leky+YMTd" crossorigin="anonymous">
+<style>
+*{box-sizing:border-box}body{margin:0;height:100vh;height:100dvh;display:flex;flex-direction:column;background:#e7efea;color:#173c2d;font:15px system-ui,sans-serif}header,nav,footer{padding:10px clamp(12px,3vw,32px)}header{background:#164d37;color:white;display:flex;align-items:center;justify-content:space-between;gap:12px}h1{margin:0;font-size:clamp(17px,3vw,24px)}a{color:inherit}nav{display:flex;align-items:center;gap:8px;flex-wrap:wrap;background:white}button,select{font:inherit;min-height:42px;padding:6px 10px;background:white;color:#164d37;border:1px solid #adc3b7;border-radius:6px;max-width:100%}button{cursor:pointer}main{flex:1;min-height:175px;position:relative}#map{position:absolute;inset:0}footer{font-size:12px;background:#fff}#status{position:absolute;left:12px;bottom:32px;background:#fff;padding:8px 12px;border-radius:6px;max-width:75%}#status:empty{display:none}select{max-width:53vw}
+</style></head><body>
+<header><h1>Berlayar Rise · 15 km surroundings</h1><a href="berlayar-3d.html">Precinct view</a></header>
+<nav aria-label="Map views"><label for="place">Go to</label><select id="place"></select><button id="overview">15 km overview</button><button id="reference">Reference angle</button></nav>
+<main><div id="map" aria-label="Regional 3D map"></div><div role="status" id="status">Loading regional map…</div></main>
+<footer>Zoom in for building footprints and mapped heights. Heights and shapes are approximate. <a href="https://earth.google.com/web/@1.27080123,103.8104835,6.37691082a,2521.68720955d,35y,51.74479245h,60.01280131t,0.00000001r/data=CgRCAggBOgMKATBCAggASg0I____________ARAA" target="_blank" rel="noopener">Open original Google Earth view ↗</a></footer>
+<script src="https://unpkg.com/maplibre-gl@5.6.1/dist/maplibre-gl.js" integrity="sha384-/L1njH4bbgNt9Uk3HwJ272N9fxJzRBQCxhtwGkZiqgl+Nxpq2ETUNZhNMNV1RgyW" crossorigin="anonymous"></script><script type="module" src="assets/regional-3d.js"></script>
+</body></html>
