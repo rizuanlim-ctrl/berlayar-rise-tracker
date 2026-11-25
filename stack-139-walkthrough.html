@@ -17,10 +17,24 @@
 .landmarks,.tour-controls{position:absolute;bottom:max(12px,env(safe-area-inset-bottom));left:50%;transform:translateX(-50%);z-index:2;width:max-content;max-width:calc(100% - 20px);display:flex;justify-content:center;align-items:center;gap:6px;flex-wrap:wrap}.landmarks button,.tour-controls button{background:#18272cf5}.landmarks button:disabled{opacity:.48;cursor:default}.landmarks button[aria-pressed=true]{background:#f0eee9;color:#182822}
 .tour-controls{padding:7px;background:#18272cf5;border-radius:10px}.tour-controls progress{width:clamp(66px,19vw,175px);accent-color:#b8d8c4}.tour-fade{position:absolute;inset:0;pointer-events:none;background:#171c1e;opacity:0}
 .scene.outside .actions,.scene.touring .actions,.scene.touring .map,.scene.outside .map{display:none}.scene.touring .viewlabel,.scene.outside .viewlabel{display:block}.scene.immersive .viewlabel{max-width:calc(100% - 180px)}.viewlabel{z-index:1}.scene.immersive .exit{z-index:3}
+html.unit-explorer #floor-control{display:none}
+html.unit-explorer header{gap:6px}
+html.unit-explorer header button{min-height:40px}
+html.unit-explorer .scene{height:clamp(390px,52vw,650px)}
+html.unit-explorer .scene.immersive{height:100dvh}
+.conditions [hidden]{display:none}
+html.unit-explorer .map{width:clamp(66px,11vw,116px);opacity:.9}
+@media(max-width:520px){
+ html.unit-explorer main{padding:8px}
+ html.unit-explorer header button{font-size:12px;padding:6px 8px;min-height:38px}
+ html.unit-explorer .scene{height:clamp(400px,117vw,480px)}
+ html.unit-explorer .scene.immersive{height:100dvh}
+ html.unit-explorer .conditions{margin-top:10px}
+}
 </style>
-<main><header><div><small id="layout-title">Berlayar Rise</small><h1 id="stack-title">Stack 139</h1></div><div><button id="walk" aria-pressed="true">Walk inside</button> <button id="overview" aria-pressed="false">3D overview</button> <button id="outlook" aria-pressed="false">Outlook</button> <button id="explore-outside" aria-pressed="false">Explore outside</button> <button id="focus" aria-pressed="false">Immersive view</button> <button id="play-tour" class="tour-button" aria-controls="tour-controls">Play Tour</button></div></header>
+<main><header><div><small id="layout-title">Berlayar Rise</small><h1 id="stack-title">Stack 139</h1></div><div><button id="window-view">Living window</button> <button id="walk" aria-pressed="true">Walk inside</button> <button id="overview" aria-pressed="false">3D overview</button> <button id="outlook" aria-pressed="false">Outlook</button> <button id="explore-outside" aria-pressed="false">Explore outside</button> <button id="focus" aria-pressed="false">Immersive view</button> <button id="play-tour" class="tour-button" aria-controls="tour-controls">Play Tour</button></div></header>
 <div class="conditions" aria-label="Window view and daylight settings">
-<label>View floor <select id="view-floor"></select></label>
+<label id="floor-control">View floor <select id="view-floor"></select></label>
 <label>Sun date <input id="sun-date" type="date" value="2031-12-21"></label>
 <label>Time (SGT) <input id="sun-time" type="time" value="16:00"></label><label id="flight-height-wrap" hidden>Camera height <input id="flight-height" type="range" min="2" max="160" step="1" value="60"><output id="flight-height-label">60 m</output></label>
 </div>
@@ -51,6 +65,8 @@ const meter=.0095, X=n=>(n-180)*meter,Z=n=>(n-90)*meter;
 const [left,back,right,front]=template?.bounds??[0,0,1031,1195];
 const cropScale=2.63;
 const site=unitSite(stack,template?[(right-left)*cropScale*meter/2,(front-back)*cropScale*meter/2]:undefined);
+const inUnitExplorer=window.parent!==window&&params.get('explorer')==='1';
+document.documentElement.classList.toggle('unit-explorer',inUnitExplorer);
 const selectedFloor=Number(params.get('floor'));
 const renderUnit=floor=>String(floor).padStart(2,'0')+'-'+stack;
 let floor=site.floors.includes(selectedFloor)?selectedFloor:site.floors[0];
@@ -58,6 +74,10 @@ for(const level of site.floors)$('view-floor').add(new Option(String(level),Stri
 $('view-floor').value=String(floor);
 const solarDate=$('sun-date'), solarTime=$('sun-time');
 // Keep the precinct sun setting when moving into a unit.
+if(inUnitExplorer&&['139','112'].includes(stack)){
+ solarDate.value='2031-06-21';
+ solarTime.value='11:00';
+}
 if(/^\d{4}-\d{2}-\d{2}$/.test(params.get('sunDate')||'')) solarDate.value=params.get('sunDate');
 if(/^([01]\d|2[0-3]):[0-5]\d$/.test(params.get('sunTime')||'')) solarTime.value=params.get('sunTime');
 function readSolar(){
@@ -78,6 +98,13 @@ $('view-floor').addEventListener('change',()=>{
  document.title='Berlayar Rise · #'+renderUnit(floor);
  if(outside&&!tour&&activeLandmark)aimAt(activeLandmark);
  dirty=true;
+});
+if(inUnitExplorer)addEventListener('message',event=>{
+ if(event.origin!==location.origin||event.source!==window.parent||event.data?.type!=='unit-explorer-floor')return;
+ const level=event.data.floor;
+ if(level===floor||!site.floors.includes(level))return;
+ $('view-floor').value=String(level);
+ $('view-floor').dispatchEvent(new Event('change'));
 });
 // The same floor plan can be mirrored on either axis in the brochure.
 function planPoint([x,z]){
@@ -114,7 +141,11 @@ void main(){
  else{gl_Position=vec4(q.x*focal/aspect,q.y*focal,1.00009*q.z-0.100005,q.z);}
 }`;
 const fragment=`
+#ifdef GL_FRAGMENT_PRECISION_HIGH
+precision highp float;
+#else
 precision mediump float;
+#endif
 varying mediump vec3 color; varying mediump vec3 world; varying mediump float material;
 uniform float opacity;
 float grain(vec2 p){
@@ -131,16 +162,33 @@ void main(){
  }
  if(material>1.5&&material<2.5&&opacity>.9){
   float paintGrain=grain(floor(world.xz*57.0+vec2(world.y*91.0,world.y*76.0)));
-  finish*=.89+.10*smoothstep(0.0,.36,world.y)+.025*paintGrain;
+  float wallEdge=smoothstep(.0,.58,world.y)*smoothstep(.0,.23,2.62-world.y);
+  finish*=.92+.069*wallEdge+.019*paintGrain;
  }
  if(material>2.5&&material<3.5){
   float ripples=sin(world.x*.34+world.z*.71)*sin(world.x*.57-world.z*.12);
   float broad=sin(world.x*.061+world.z*.027);
   finish*=.992+.020*ripples+.032*broad;
  }
- if(material>3.5){
+ if(material>3.5&&material<4.5){
   float weave=grain(floor(world.xz*95.0+world.y*vec2(33.0,41.0)));
   finish*=.947+.086*weave;
+ }
+ if(material>4.5&&material<5.5){
+  float woodGrain=sin(world.z*40.0+world.x*55.0+sin(world.y*3.0)*1.5)
+   +.46*sin(world.z*119.0+world.x*167.0+sin(world.y*8.0));
+  finish*=.97+woodGrain*.035;
+ }
+ if(material>5.5&&material<6.5){
+  float broad=sin(world.x*.092+sin(world.z*.034))*sin(world.z*.071);
+  float detail=sin(world.x*1.7+world.z*1.2)*sin(world.z*.91-world.x*.53);
+  float strength=1.0-smoothstep(75.0,680.0,length(world.xz));
+  finish*=1.0+strength*(.064*broad+.016*detail);
+ }
+ if(material>6.5){
+  float weave=grain(floor(world.xz*104.0+world.y*vec2(42.0,53.0)));
+  float folds=sin(world.x*17.0+sin(world.z*7.0)*1.7)*sin(world.z*9.0);
+  finish*=.985+.04*weave+.031*folds;
  }
  gl_FragColor=vec4(finish,opacity);
 }`;
@@ -167,7 +215,7 @@ const colors={
  water:'#497e89', grove:'#536a40', pontoon:'#d1cdbe',
  door:'#876f59', metal:'#c4c6c2', wood:'#ac8c6e', sage:'#687e75',
  upholstery:'#82958c',accent:'#668395',rug:'#b4a896',lamp:'#f6ecd4',
- cream:'#e4d7be', linen:'#e7e3d9', dark:'#34444a'
+ cream:'#e9e2d3', linen:'#f4f0e8', dark:'#34444a', blanket:'#789485'
 };
 const rooms=(template?.rooms??[
  ['Entrance',592,264,0],['Living / dining',604,600,.25],['Bedroom',438,836,-.40],
@@ -243,12 +291,13 @@ function roomLight([x,y,z],ground=false){
   }
  }
  const edge=!ground&&y>=0 ? .05*Math.max(0,1-Math.min(y,2.62-y)*7) : 0;
- return Math.min(1.07,.86+.21*daylight*skyLight-occlusion-edge);
+ return Math.min(1.10,.78+.35*daylight*skyLight-occlusion-edge);
 }
 function quad(a,b,c,d,key,light=1){
  const color=rgb(key,light), soft=softMaterials.has(key)&&!overview;
  const finish=key==='floor'||key.startsWith('plank')?1:key==='wall'||key==='tiledWall'?2:
-  key==='upholstery'||key==='rug'||key==='linen'||key==='accent'?4:0;
+  key==='upholstery'||key==='rug'||key==='accent'?4:
+  key==='wood'?5:key==='linen'||key==='blanket'?7:0;
  const ground=a[1]===b[1]&&a[1]===c[1]&&a[1]===d[1]&&a[1]<.01;
  if(gl){
   for(const p of [a,b,c,a,c,d]){
@@ -276,10 +325,12 @@ function outdoorQuad(a,b,c,d,key,light,paintOrder){
  const points=[a,b,c,d];
  const x=(a[0]+b[0]+c[0]+d[0])/4,z=(a[2]+b[2]+c[2]+d[2])/4;
  const distance=Math.hypot(x-site.centre[0],z-site.centre[1]);
- const haze=key==='water'?.23:key==='terrain'?.24:Math.min(.83,1-Math.exp(-Math.max(0,distance-32)/625));
- const sky=solar.altitude>0?[.80,.855,.87]:[.28,.36,.45];
+ const spread=distance>500?.84:.72;
+ const haze=Math.min(spread,1-Math.exp(-Math.max(0,distance-22)/510));
+ const finish=key==='water'?3:['terrain','landscape','grove','roofGarden'].includes(key)?6:0;
+ const sky=solar.altitude>0?[.73,.82,.86]:[.28,.36,.45];
  const color=rgb(key,light).map((channel,i)=>channel*(1-haze)+sky[i]*haze);
- if(gl){for(const p of [a,b,c,a,c,d])verts.push(...p,...color,key==='water'?3:0);return}
+ if(gl){for(const p of [a,b,c,a,c,d])verts.push(...p,...color,finish);return}
  const radius=Math.max(...points.map(p=>Math.hypot(p[0]-x,p[1]-(a[1]+c[1])/2,p[2]-z)));
  exteriorFaces.push({points,fill:cssColor(color),layer:paintOrder??outsideLayers[key]??-2,centre:[x,(a[1]+c[1])/2,z],radius});
 }
@@ -337,6 +388,20 @@ function block(a,b,width,y,h,key,outlined=false){
   if(overview)quad(lift(top[i]),lift(top[n]),lift(toward(top[n],top[next],inset)),lift(toward(top[i],top[prev],inset)),'edge');
   const seam=(p,q,inside)=>toward(toward(p,q,inset),inside,-.002);
   quad(toward(low[i],low[prev],-.002),seam(low[i],low[n],low[prev]),seam(top[i],top[n],top[prev]),toward(top[i],top[prev],-.002),'edge',.86);
+ }
+}
+function cushion(x,z,u,v,y,h,key){
+ const radius=Math.min(.045,(h-y)*.45,(u-x)*meter*.24,(v-z)*meter*.24);
+ const points=(inset,height)=>[
+  [X(x)+inset,height,Z(z)+inset],[X(u)-inset,height,Z(z)+inset],
+  [X(u)-inset,height,Z(v)-inset],[X(x)+inset,height,Z(v)-inset]
+ ];
+ const lower=points(radius*.45,y), middle=points(0,h-radius), upper=points(radius,h);
+ quad(...upper,key);
+ for(let i=0;i<4;i++){
+  const n=(i+1)%4,shade=[.87,.80,.91,.84][i];
+  quad(lower[i],lower[n],middle[n],middle[i],key,shade);
+  quad(middle[i],middle[n],upper[n],upper[i],key,(1+shade)/2);
  }
 }
 function rect(x,z,u,v,y,h,key){block([X(x),Z((z+v)/2)],[X(u),Z((z+v)/2)],Z(v)-Z(z),y,h,key)}
@@ -428,7 +493,11 @@ function glazing(o,top){
  const head=rails.at(-1);
  const rows=rails.slice(0,-1).map((height,i)=>[height,rails[i+1]]);
  wall(o.a,o.b,head,top,'wall',.24);
- wall(o.a,o.b,sill-.027,sill+.006,'structure',.32);
+ wall(o.a,o.b,sill-.031,sill+.006,'structure',.34);
+ for(const t of [0,1]){
+  const p=at(t), q=[p[0]-o.out[0]*10,p[1]-o.out[1]*10];
+  wall(p,q,sill,head,'structure',.031);
+ }
  for(const y of rails)wall(o.a,o.b,y-.019,y+.019,'frame',.097);
  if(o.fullHeight)wall(o.a,o.b,1.01,1.048,'frameEdge',.056);
  for(let i=0;i<=columns;i++){
@@ -506,7 +575,11 @@ function build(){
    const corners=[[border[0],border[1]],[border[2],border[1]],[border[2],border[3]],[border[0],border[3]]];
    if(corners.every(([a,b])=>inFloor(X(a),Z(b))))rect(...border,.001,.009,'rug');
   }
-  loungeFurniture(sofa,rooms[1].slice(1,3),rect);
+  const upholstered=(x,z,u,v,y,h,key)=>{
+   const draw=['sage','upholstery','cream','accent'].includes(key)&&h-y>.06?cushion:rect;
+   draw(x,z,u,v,y,h,key);
+  };
+  loungeFurniture(sofa,rooms[1].slice(1,3),upholstered);
   for(const item of (template?items:items.slice(3))){
    const [x,z,u,v,h,k]=item;
    if((h===.38||h===.74)&&k==='wood'){
@@ -522,6 +595,12 @@ function build(){
     rect(x,z,u,v,.41,.47,'upholstery');
     rect(x,back,u,back+3,.46,.86,'sage');
     for(const [a,b] of [[x+2,z+2],[u-4,z+2],[x+2,v-4],[u-4,v-4]])rect(a,b,a+2,b+2,0,.42,'wood');
+   }else if(!template&&k==='cream'&&h===.58){
+    cushion(x,z,u,v,.43,h,'linen');
+   }else if(!template&&k==='linen'){
+    cushion(x,z,u,v,.58,h,k);
+   }else if(!template&&k==='sage'&&h===.61){
+    cushion(x,z,u,v,.578,h,'blanket');
    }else {
     rect(x,z,u,v,0,h,k);
     if(k==='cream'&&h>.91&&h<.98&&(u-x)>52&&(v-z)>12){
@@ -601,7 +680,7 @@ function setMode(value,outlook=false){
  $('pad').classList.toggle('hide',!exploring&&!outdoorFlight);
  $('landmarks').classList.toggle('hide',!outside||!!tour);
  $('help').textContent=tour?'The tour moves between furnished rooms. Use Pause tour or End tour at any time.'
-  :outside?'Drag to pan from the living-room windows. Dimmed landmarks are outside this facing. Change View floor to compare sightlines.'
+  :outside?'Drag to pan from the living-room windows. Dimmed landmarks are outside this facing. Change the floor to compare sightlines.'
   :overview?'Drag to orbit. Choose a room to jump inside.'
   :'Drag to look. Use the direction pad or WASD to move. Choose Windows to look through or operate a window.';
 }
@@ -687,6 +766,20 @@ for(const room of rooms){
  $('rooms').append(button);
 }
 const mainWindow=windows.find(opening=>opening.name.startsWith('Living'))??windows[0];
+function framedWindow(){
+ const [x,z]=mainWindow.a.map((value,i)=>(value+mainWindow.b[i])/2);
+ const [dx,dz]=mainWindow.out;
+ const [a,b,c,d]=mainWindow.room??planBounds;
+ // Start far enough back to show the depth of the window reveal and the room.
+ for(const range of [220,190,160])for(const side of [-36,36,0,-68,68]){
+  const u=x-dx*range-dz*side,v=z-dz*range+dx*side;
+  if(u<a||u>c||v<b||v>d||!clear(X(u),Z(v)))continue;
+  jump([mainWindow.name,u,v,Math.atan2(x-u,z-v),-.105]);
+  return;
+ }
+ jump(windowView(mainWindow));
+}
+$('window-view').onclick=framedWindow;
 const landmarks=new Map([['Window outlook',null],...site.landmarks.map(([name,...target])=>[name,target])]);
 const landmarkButtons=new Map();
 const outlookHalfAngle=Math.PI*.42;
@@ -855,7 +948,7 @@ function frame(t){
   lookout.x=Math.max(-400,Math.min(400,lookout.x));lookout.z=Math.max(-400,Math.min(400,lookout.z));
   $('use').classList.add('hide');
  }else $('use').classList.add('hide');
- const ratio=Math.min(devicePixelRatio||1,gl?1.75:1.2),w=Math.round(canvas.clientWidth*ratio),h=Math.round(canvas.clientHeight*ratio);
+ const ratio=Math.min(devicePixelRatio||1,gl?(touch?1.6:2):1.2),w=Math.round(canvas.clientWidth*ratio),h=Math.round(canvas.clientHeight*ratio);
  if(canvas.width!==w||canvas.height!==h){canvas.width=w;canvas.height=h}
  for(const opening of windows){
   const animation=opening.animation;
@@ -883,7 +976,7 @@ function frame(t){
  if(updated||view!==lastView){
   const horizon=Math.max(6,Math.min(94,50+b[0][1]*70));
   canvas.style.background=overview?(tour?'linear-gradient(#dee5e4,#9caeaf)':'#29363d'):solar.altitude>0
-   ?`linear-gradient(180deg,#82a9bf18,#d8e6e9cc ${horizon}%,#d3dfe1), url('./assets/walkthrough-daylight.webp') center top / cover`
+   ?`linear-gradient(180deg,#82a9bf18,#d8e6e9cc ${horizon}%,#d3dfe1), url('./assets/walkthrough-daylight.webp') ${50+Math.sin(camera.yaw)*23}% ${Math.max(0,Math.min(100,horizon*.58))}% / 145% auto`
    :`linear-gradient(180deg,#252f49,#677f94 ${horizon}%,#667782)`;
   if(flat)paint(w,h,eye,b,zoom,focal);
   if(gl){
@@ -908,6 +1001,13 @@ function frame(t){
 showFurniture(true);
 jump(rooms[1]);
 player.pitch=-.15;
+if(inUnitExplorer&&['139','112'].includes(stack))framedWindow();
+if(inUnitExplorer){
+ const content=document.querySelector('main');
+ new ResizeObserver(()=>{
+  window.parent.postMessage({type:'unit-explorer-size',height:Math.ceil(content.getBoundingClientRect().height)},location.origin);
+ }).observe(content);
+}
 if(params.get('view')==='outlook')$('outlook').click();
 if(params.get('view')==='exterior')$('explore-outside').click();
 requestAnimationFrame(frame);

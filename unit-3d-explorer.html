@@ -58,31 +58,54 @@ function options(el,values,preferred){
  el.replaceChildren(...values.map(value=>{const option=document.createElement('option');option.value=value;option.textContent=value;return option}));
  if(values.includes(preferred))el.value=preferred;
 }
-function updateBlocks(preferred){options(block,Object.keys(inventory[room.value]).sort(),preferred);updateStacks(params.get('stack'))}
-function updateStacks(preferred){options(stack,(inventory[room.value][block.value]||[]).filter(x=>walkthroughLayouts.has(x)),preferred);updateFloors()}
+function updateBlocks(preferredBlock,preferredStack,preferredFloor){
+ options(block,Object.keys(inventory[room.value]).sort(),preferredBlock);
+ updateStacks(preferredStack,preferredFloor);
+}
+function updateStacks(preferredStack,preferredFloor){
+ options(stack,(inventory[room.value][block.value]||[]).filter(x=>walkthroughLayouts.has(x)),preferredStack);
+ updateFloors(preferredFloor);
+}
 function updateFloors(preferred){
  const levels=availableFloors[roomCodes[room.value]+'|'+block.value]||[];
- const current=Number(preferred ?? floor.value);
+ const current=Number(preferred ?? (floor.value || 2));
  const chosen=levels.includes(current)?current:levels.reduce((best,n)=>Math.abs(n-(Number.isFinite(current)?current:20))<Math.abs(best-(Number.isFinite(current)?current:20))?n:best,levels[0]);
  options(floor,levels.map(String),chosen===undefined?null:String(chosen));
  floor.disabled=!levels.length;
  updateViewer();
 }
+let renderedStack;
+function syncViewerFloor(){
+ tour.contentWindow.postMessage({type:'unit-explorer-floor',floor:Number(floor.value)},location.origin);
+}
 function updateViewer(){
  if(!stack.value)return;
  const level=Number(floor.value);
  if(!Number.isInteger(level))return;
- const target='/stack-139-walkthrough.html?embedded=1&stack='+encodeURIComponent(stack.value)+'&floor='+level+'&v=8';
- if(tour.getAttribute('src')!==target)tour.src=target;
- const u=new URL(location.href);u.searchParams.set('room',room.value);u.searchParams.set('block',block.value);u.searchParams.set('stack',stack.value);u.searchParams.set('floor',String(level));history.replaceState(null,'',u);
+ if(renderedStack===stack.value)syncViewerFloor();
+ else{
+  renderedStack=stack.value;
+  tour.src='/stack-139-walkthrough.html?'+new URLSearchParams({
+   embedded:'1',explorer:'1',stack:stack.value,floor:String(level),v:'20261125-rendering'
+  });
+ }
+ const url=new URL(location.href);
+ for(const field of [room,block,stack,floor])url.searchParams.set(field.id,field.value);
+ history.replaceState(null,'',url);
 }
+tour.addEventListener('load',syncViewerFloor);
 room.addEventListener('change',()=>updateBlocks());
 block.addEventListener('change',()=>updateStacks());
 stack.addEventListener('change',()=>updateFloors());
 floor.addEventListener('change',updateViewer);
-window.addEventListener('message',event=>{if(event.origin===location.origin&&event.source===tour.contentWindow&&event.data==='close-unit-walkthrough'){document.querySelector('.back').focus();}});
+window.addEventListener('message',event=>{
+ if(event.origin!==location.origin||event.source!==tour.contentWindow)return;
+ if(event.data==='close-unit-walkthrough')document.querySelector('.back').focus();
+ if(event.data?.type==='unit-explorer-size'&&Number.isInteger(event.data.height)){
+  tour.style.height=Math.max(480,Math.min(1300,event.data.height+2))+'px';
+ }
+});
 if(['type1','type2','three','four'].includes(params.get('room')))room.value=params.get('room');
-if(params.has('floor'))floor.value=params.get('floor');
-updateBlocks(params.get('block'));
+updateBlocks(params.get('block'),params.get('stack'),params.get('floor')??undefined);
 </script>
 </body></html>
