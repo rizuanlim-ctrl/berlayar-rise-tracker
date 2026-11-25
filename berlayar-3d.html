@@ -11,10 +11,35 @@ body.fullscreen header{display:none}body.fullscreen main{max-width:none;padding:
 @media(max-width:760px){h1{font-size:28px}header{padding:16px}.map-layout{grid-template-columns:1fr}.map-sidebar{padding:14px}.map-sidebar .legend{grid-template-columns:1fr 1fr;font-size:11px;gap:9px}.stage canvas{height:58vh;min-height:340px}.map-controls{gap:8px;padding:10px}.map-controls input[type=range]{width:85px}.map-controls label{flex-wrap:wrap}.instructions{max-width:calc(100% - 24px);left:12px;right:auto;font-size:9px}.toolbar label{font-size:11px}.toolbar select{max-width:165px}.map-sidebar .blockbuttons button{flex:1 0 14%}.camera-presets button{flex:1}.map-sidebar .selection{min-height:0}.map-summary{padding-bottom:0}}
 body.embedded .map-layout{grid-template-columns:1fr}body.embedded .map-sidebar{display:none}body.embedded .stage canvas{height:450px}body.embedded .camera-presets{display:none}body.fullscreen .stage canvas{height:calc(100dvh - 180px);min-height:350px}
 html[data-map-theme="dark"]{color-scheme:dark;color:#e2eee6;background:#14271e}html[data-map-theme="dark"] header,html[data-map-theme="dark"] .toolbar,html[data-map-theme="dark"] .map-sidebar,html[data-map-theme="dark"] .selection,html[data-map-theme="dark"] .map-controls,html[data-map-theme="dark"] .error{background:#1d3528;border-color:#4e6c5a}html[data-map-theme="dark"] button,html[data-map-theme="dark"] select{background:#263f31;color:#edf5ef;border-color:#6b8876}html[data-map-theme="dark"] button[aria-pressed="true"]{background:#367552;color:#fff;border-color:#94c7a5}html[data-map-theme="dark"] .stage{background:#192e22;border-color:#4e6c5a}html[data-map-theme="dark"] .instructions{background:rgba(24,46,33,.95)}html[data-map-theme="dark"] header p,html[data-map-theme="dark"] details,html[data-map-theme="dark"] .floor-caption,html[data-map-theme="dark"] .sun-readout,html[data-map-theme="dark"] .model-facts dt,html[data-map-theme="dark"] .map-summary,html[data-map-theme="dark"] .map-sidebar h2{color:#b8cec0}html[data-map-theme="dark"] a,html[data-map-theme="dark"] .selection strong{color:#a9dfbb}
+[hidden]{display:none!important}
+#street-controls{display:flex;flex-wrap:wrap;align-items:center;gap:8px;padding:9px 12px;background:#edf3ed;border-bottom:1px solid #d2ded5}
+#street-controls label{font-size:12px;font-weight:600}
+#street-controls select{min-height:40px;padding:5px 10px}
+.toolbar button:disabled{opacity:.5;cursor:default}
+.street-motion{position:absolute;bottom:12px;left:12px;display:flex;gap:7px}
+.street-motion button{min-width:46px;min-height:44px;background:#152d27eb;color:#fff;border-color:#9bae9e;font-size:17px}
+.stage.street .instructions{bottom:12px;right:12px;left:auto;max-width:45%}
+body.embedded .camera-presets{display:flex}
+html[data-map-theme="dark"] #street-controls{background:#20382e;border-color:#4e6c5a}
+@media(max-width:480px){
+ #street-controls{gap:6px}
+ .stage.street .instructions{font-size:10px;max-width:50%}
+ .camera-presets{margin-bottom:8px}
+ .camera-presets button{min-height:42px;white-space:nowrap;padding:6px 8px}
+}
 </style></head><body>
 <header><div><h1>Berlayar Rise · 3D site viewer</h1><p>Explore the estate and its surroundings. Select a block, stack and floor to see the view from a flat.</p></div><a href="/">Back to tracker</a></header>
 <main><div class="toolbar"><button id="orbit" aria-pressed="true">3D view</button><button id="top" aria-pressed="false">Top view</button><button id="minus" aria-label="Zoom out">−</button><button id="plus" aria-label="Zoom in">+</button><button id="reset">Reset view</button><button id="context" aria-pressed="true">Surroundings</button><button id="future" aria-pressed="true">Future sites</button><button id="busStops" aria-pressed="true">Bus stops</button><button id="area" aria-pressed="true">Neighbourhood view</button><label for="landmark">Landmark</label><select id="landmark"><option value="">Choose a landmark</option></select><label for="focus">Block</label><select id="focus"><option value="">All blocks</option><option>200A</option><option>200B</option><option>201A</option><option>201B</option><option>204A</option><option>204B</option></select></div>
-<div class="stage"><div class="map-controls" aria-label="Sun position controls"><strong style="font-size:12px">Sun position</strong><label>Month <select id="sun-month" aria-label="Sun month"><option value="1" >Jan</option><option value="2" >Feb</option><option value="3" >Mar</option><option value="4" >Apr</option><option value="5" >May</option><option value="6" >Jun</option><option value="7" >Jul</option><option value="8" >Aug</option><option value="9" >Sep</option><option value="10" selected>Oct</option><option value="11" >Nov</option><option value="12" >Dec</option></select></label><label>Day <select id="sun-day" aria-label="Day of month"><option value="1" >1</option><option value="2" >2</option><option value="3" >3</option><option value="4" >4</option><option value="5" >5</option><option value="6" >6</option><option value="7" >7</option><option value="8" >8</option><option value="9" >9</option><option value="10" >10</option><option value="11" >11</option><option value="12" >12</option><option value="13" >13</option><option value="14" >14</option><option value="15" selected>15</option><option value="16" >16</option><option value="17" >17</option><option value="18" >18</option><option value="19" >19</option><option value="20" >20</option><option value="21" >21</option><option value="22" >22</option><option value="23" >23</option><option value="24" >24</option><option value="25" >25</option><option value="26" >26</option><option value="27" >27</option><option value="28" >28</option><option value="29" >29</option><option value="30" >30</option><option value="31" >31</option></select></label><label>Time <input id="sun-time" aria-label="Sun time in Singapore" type="range" min="0" max="23.75" step=".25" value="15"><output id="sun-clock">15:00 SGT</output></label><button id="sun-play" aria-pressed="false">Play day</button><button id="sun-now">Now</button></div><canvas id="scene" tabindex="0" role="img" aria-label="Interactive 3D massing model of Berlayar Rise. Select a block using the Block menu. Arrow keys rotate, plus and minus zoom. The information panel describes the selected building."></canvas><div class="instructions">Drag to rotate · wheel / pinch to zoom · Shift-drag / two fingers to pan<br>Tap a building for details. Arrow keys rotate; + / − zoom.</div><div class="error" id="error">The site plan could not load. <a href="/assets/plans/site-plan.webp">Open the HDB site plan</a>.</div></div>
+<div class="stage"><div class="map-controls" aria-label="Sun position controls"><strong style="font-size:12px">Sun position</strong><label>Month <select id="sun-month" aria-label="Sun month"><option value="1" >Jan</option><option value="2" >Feb</option><option value="3" >Mar</option><option value="4" >Apr</option><option value="5" >May</option><option value="6" >Jun</option><option value="7" >Jul</option><option value="8" >Aug</option><option value="9" >Sep</option><option value="10" selected>Oct</option><option value="11" >Nov</option><option value="12" >Dec</option></select></label><label>Day <select id="sun-day" aria-label="Day of month"><option value="1" >1</option><option value="2" >2</option><option value="3" >3</option><option value="4" >4</option><option value="5" >5</option><option value="6" >6</option><option value="7" >7</option><option value="8" >8</option><option value="9" >9</option><option value="10" >10</option><option value="11" >11</option><option value="12" >12</option><option value="13" >13</option><option value="14" >14</option><option value="15" selected>15</option><option value="16" >16</option><option value="17" >17</option><option value="18" >18</option><option value="19" >19</option><option value="20" >20</option><option value="21" >21</option><option value="22" >22</option><option value="23" >23</option><option value="24" >24</option><option value="25" >25</option><option value="26" >26</option><option value="27" >27</option><option value="28" >28</option><option value="29" >29</option><option value="30" >30</option><option value="31" >31</option></select></label><label>Time <input id="sun-time" aria-label="Sun time in Singapore" type="range" min="0" max="23.75" step=".25" value="15"><output id="sun-clock">15:00 SGT</output></label><button id="sun-play" aria-pressed="false">Play day</button><button id="sun-now">Now</button></div><section id="street-controls" aria-label="Street-level route" hidden>
+<label for="street-route">Walk along</label>
+<select id="street-route"><option value="walkway">Estate walkway</option><option value="drive">Berlayar Drive</option><option value="highway">Telok Blangah Road</option></select>
+</section>
+<canvas id="street-scene" tabindex="0" role="img" aria-label="Street-level view. Drag to look. Up and down arrows move along the route." hidden></canvas>
+<div class="street-motion" id="street-motion" aria-label="Street movement" hidden>
+<button type="button" id="street-back" aria-label="Walk backwards">↓</button>
+<button type="button" id="street-forward" aria-label="Walk forwards">↑</button>
+</div>
+<canvas id="scene" tabindex="0" role="img" aria-label="Interactive 3D massing model of Berlayar Rise. Select a block using the Block menu. Arrow keys rotate, plus and minus zoom. The information panel describes the selected building."></canvas><div class="instructions">Drag to rotate · wheel / pinch to zoom · Shift-drag / two fingers to pan<br>Tap a building for details. Arrow keys rotate; + / − zoom.</div><div class="error" id="error">The site plan could not load. <a href="/assets/plans/site-plan.webp">Open the HDB site plan</a>.</div></div>
 <div class="legend"><span><i class="swatch" style="background:#dce4d5"></i>Berlayar Rise blocks (planned)</span><span><i class="swatch" style="background:#cf8338"></i>Selected block</span><span><i class="swatch" style="background:#668ead"></i>Berlayar Residences · U/C</span><span><i class="swatch" style="background:#8996a6"></i>Reflections · existing</span><span><i class="swatch" style="background:#748b97"></i>Facilities</span><span><i class="swatch" style="background:#3c7182"></i>Future bus stops</span><span><i class="swatch" style="background:#9d6ea9"></i>Reserved future sites</span></div>
 <div class="blockbuttons" id="blocks"></div><div class="selection" id="selection" role="status" aria-live="polite"></div>
 
@@ -25,6 +50,7 @@ import {telokBlangahBuildings} from "./assets/berlayar-aerial-context.js?v=2";
 import {stacksForBlock, unitSite} from "./assets/type-2-walkthrough-site.js?v=10";
 import {layoutLabels} from "./assets/walkthrough-layouts.js?v=3";
 import {drawMapGround, siteSceneryFaces, terrainAt} from "./assets/berlayar-map-rendering.js?v=2";
+import {createStreetView, PRECINCT_ROUTES} from "./assets/berlayar-street-view.js?v=1";
 const models=[...walkthroughBuildings,...telokBlangahBuildings];
 const reflectionsBridges=[];
 drawReflectionsBridges(walkthroughBuildings.map(b=>({...b,polygon:b.p})),0,1,(a,b,c,d,key,light)=>{
@@ -63,10 +89,92 @@ function mapDark(){return document.documentElement.dataset.mapTheme==='dark';}
 function syncMapTheme(){let theme;try{theme=parent.document.documentElement.dataset.trackerTheme;}catch(e){}document.documentElement.dataset.mapTheme=theme||(matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light');if(typeof state!=='undefined')render();}
 const query=new URLSearchParams(location.search);if(query.get('embed')==='1')document.body.classList.add('embedded');if(query.get('fullscreen')==='1')document.body.classList.add('fullscreen');document.addEventListener('keydown',e=>{if(e.key==='Escape'&&parent!==window)parent.postMessage('close-project-map',location.origin)});
 const canvas=document.getElementById('scene'),ctx=canvas.getContext('2d'),ground=new Image();let width=0,height=0,dpr=1,faces=[],hits=[],imageLoaded=false;
-const state={angle:-.33,tilt:.75,zoom:1,panX:0,panY:0,selected:models.some(b=>b.id===query.get('block'))?query.get('block'):'',context:true,future:true,busStops:true,area:"neighbourhood",floorCap:49,sunHour:15,sunMonth:10,sunDay:15,sunYear:2026,stack:"",floor:0};
+const state={angle:-.33,tilt:.75,zoom:1,panX:0,panY:0,selected:models.some(b=>b.id===query.get('block'))?query.get('block'):'',context:true,future:true,busStops:true,area:"neighbourhood",camera:"aerial",labels:true,floorCap:49,sunHour:15,sunMonth:10,sunDay:15,sunYear:2026,stack:"",floor:0};
 let fit={k:1,x:0,y:0};
+let street, streetFrame=0;
+const routeControl=document.getElementById('street-route');
+const routeState={distance:0,turn:0,pitch:.07};
+const streetInstructions=document.querySelector('.instructions');
+const mapInstructions=streetInstructions.textContent;
+function resetRoute(){
+ const route=PRECINCT_ROUTES[routeControl.value];
+ Object.assign(routeState,{distance:route.length*route.start,turn:route.turn,pitch:.07});
+}
+function drawStreet(solar){
+ if(streetFrame)return;
+ streetFrame=requestAnimationFrame(()=>{
+  streetFrame=0;
+  if(state.camera==='street')street.draw({route:PRECINCT_ROUTES[routeControl.value],...routeState,
+   solar:solarPosition(state.sunMonth,state.sunDay,state.sunHour,state.sunYear),
+   context:state.context,floorCap:state.floorCap,selected:state.selected});
+ });
+ updateSunReadout(solar);
+}
+function moveStreet(metres){
+ const route=PRECINCT_ROUTES[routeControl.value];
+ routeState.distance=Math.max(0,Math.min(route.length,routeState.distance+metres));
+ render();
+}
+function setupStreet(){
+ street=createStreetView(document.getElementById('street-scene'));
+ const view=street.canvas;
+ let pointer;
+ view.addEventListener('pointerdown',e=>{
+  view.setPointerCapture(e.pointerId);
+  pointer=[e.pointerId,e.clientX,e.clientY];
+ });
+ view.addEventListener('pointermove',e=>{
+  if(pointer?.[0]!==e.pointerId)return;
+  routeState.turn-=(e.clientX-pointer[1])*.0055;
+  routeState.pitch=Math.max(-.6,Math.min(1.1,routeState.pitch+(e.clientY-pointer[2])*.005));
+  pointer=[e.pointerId,e.clientX,e.clientY];
+  render();
+ });
+ view.addEventListener('lostpointercapture',()=>{pointer=undefined;});
+ view.addEventListener('keydown',e=>{
+  switch(e.key.length===1?e.key.toLowerCase():e.key){
+   case 'ArrowUp':case 'w': moveStreet(3);break;
+   case 'ArrowDown':case 's': moveStreet(-3);break;
+   case 'ArrowLeft':case 'a': routeState.turn-=.13;break;
+   case 'ArrowRight':case 'd': routeState.turn+=.13;break;
+   default:return;
+  }
+  e.preventDefault();render();
+ });
+ new ResizeObserver(()=>{if(state.camera==='street')render();}).observe(view);
+}
+function setStreet(active){
+ if(active&&!street)setupStreet();
+ streetInstructions.closest('.stage').classList.toggle('street',active);
+ canvas.hidden=active;
+ if(street)street.canvas.hidden=!active;
+ for(const id of ['street-controls','street-motion'])document.getElementById(id).hidden=!active;
+ for(const id of ['plus','minus','labels-toggle'])document.getElementById(id).hidden=active;
+ for(const id of ['future','busStops','area'])document.getElementById(id).disabled=active;
+ const hint=active?'Drag to look. Use the arrows to walk along the route.':mapInstructions;
+ if(streetInstructions.textContent!==hint)streetInstructions.textContent=hint;
+}
+routeControl.onchange=()=>{resetRoute();render();};
+document.getElementById('street-forward').onclick=()=>moveStreet(4);
+document.getElementById('street-back').onclick=()=>moveStreet(-4);
+resetRoute();
 function world(x,y,z=0){x-=485;y-=435;let c=Math.cos(state.angle),s=Math.sin(state.angle),X=x*c-y*s,Y=x*s+y*c;return[X,Y*Math.cos(state.tilt)-z*Math.sin(state.tilt),Y*Math.sin(state.tilt)+z*Math.cos(state.tilt)];}
-function fitScene(){const points=[[0,0],[973,0],[973,1000],[0,1000]].map(p=>world(...p));for(const b of models.filter(b=>state.context&&state.area==='neighbourhood'||b.kind==='tower'||b.kind==='facility'||b.id==='mrt'))for(const p of b.p)points.push(world(...p,elevationFor(b)*PIXELS_PER_METRE+siteBase(b)));const xs=points.map(p=>p[0]),ys=points.map(p=>p[1]),minX=Math.min(...xs),maxX=Math.max(...xs),minY=Math.min(...ys),maxY=Math.max(...ys);fit={k:Math.min((width-30)/(maxX-minX),(height-50)/(maxY-minY))*state.zoom,x:(minX+maxX)/2,y:(minY+maxY)/2};}
+function fitScene(){
+ const nearby=state.context&&state.area==='neighbourhood';
+ // Frame the six blocks together with the highway and waterfront. Panning and
+ // zooming out reveal the wider terrain and existing neighbourhood models.
+ const bounds=nearby?[-150,-110,1130,1190]:[64,44,885,962];
+ const [x,y,u,v]=bounds;
+ const points=[[x,y],[u,y],[u,v],[x,v]].map(p=>world(...p));
+ for(const b of models.filter(b=>b.kind==='tower'||b.kind==='facility'||b.id==='mrt')){
+  const z=elevationFor(b)*PIXELS_PER_METRE+siteBase(b);
+  for(const point of b.p)points.push(world(...point,z));
+ }
+ const xs=points.map(p=>p[0]),ys=points.map(p=>p[1]);
+ const minX=Math.min(...xs),maxX=Math.max(...xs),minY=Math.min(...ys),maxY=Math.max(...ys);
+ fit={k:Math.min((width-26)/(maxX-minX),(height-38)/(maxY-minY))*state.zoom,
+  x:(minX+maxX)/2,y:(minY+maxY)/2};
+}
 function project(x,y,z=0){const p=world(x,y,z);return [width/2+state.panX+(p[0]-fit.x)*fit.k,height/2-10+state.panY+(p[1]-fit.y)*fit.k,p[2]];}
 function path(points,close=true){ctx.beginPath();points.forEach((p,i)=>i?ctx.lineTo(p[0],p[1]):ctx.moveTo(p[0],p[1]));if(close)ctx.closePath();}
 function inside(p,poly){let v=false;for(let i=0,j=poly.length-1;i<poly.length;j=i++){const a=poly[i],b=poly[j];if((a[1]>p[1])!==(b[1]>p[1])&&p[0]<(b[0]-a[0])*(p[1]-a[1])/(b[1]-a[1])+a[0])v=!v;}return v;}
@@ -117,21 +225,51 @@ function drawFacade(face){
  const length=Math.hypot(c[0]-a[0],c[1]-a[1]);
  const bays=Math.max(1,Math.round(length/(b.kind==='landmark'?6.5:8)));
  const floorRise=rise/shownFloors(b);
- const verticalStride=fit.k*floorRise*Math.sin(state.tilt)<2.3?2:1;
+ const floorPixels=fit.k*floorRise*Math.sin(state.tilt);
+ const verticalStride=floorPixels<2?2:1;
  const horizontalStride=length*fit.k/bays<2.7?2:1;
  if(length<6||Math.sin(state.tilt)*rise*fit.k<12)return;
  const facePoint=(t,h)=>at([a[0]+(c[0]-a[0])*t,a[1]+(c[1]-a[1])*t],h);
- ctx.save();path(face.p);ctx.clip();ctx.beginPath();
+ ctx.save();path(face.p);ctx.clip();
+ const projectBays=[];
+ const near=fit.k*length>18&&['tower','construction','facility'].includes(b.kind);
+ if(near){
+  const band=ctx.createLinearGradient(...facePoint(0,low).slice(0,2),...facePoint(1,low).slice(0,2));
+  band.addColorStop(0,tint(m.line,1.15));band.addColorStop(.18,tint(m.wall,1.02));band.addColorStop(1,tint(m.wall,.98));
+  ctx.globalAlpha=.24;ctx.fillStyle=band;ctx.fill();ctx.globalAlpha=1;
+ }
+ ctx.beginPath();
  for(let floor=0;floor<shownFloors(b);floor+=verticalStride){
   const bottom=base+(floor+.28)*floorRise,top=base+(floor+.79)*floorRise;
   if(bottom<low||top>high)continue;
   for(let n=0;n<bays;n+=horizontalStride){
-   const l=(n+.15)/bays,r=(n+.80)/bays;
+   const l=(n+.16)/bays,r=(n+.84)/bays;
    const p=[facePoint(l,bottom),facePoint(r,bottom),facePoint(r,top),facePoint(l,top)];
    p.forEach(([x,y],j)=>j?ctx.lineTo(x,y):ctx.moveTo(x,y));ctx.closePath();
+   if(near)projectBays.push({p,floor,n});
   }
  }
- ctx.fillStyle=tint(m.glass,.77+.18*light);ctx.fill();
+ const parking=b.id==='201';
+ ctx.fillStyle=tint(parking?'#3f5150':m.glass,.77+.18*light);ctx.fill();
+ if(near){
+  for(const {p:[a,b,c,d],floor,n} of projectBays){
+   ctx.beginPath();
+   ctx.moveTo(a[0],a[1]);ctx.lineTo(b[0],b[1]);
+   if(!parking&&floorPixels>2.9){
+    ctx.moveTo((a[0]+b[0])/2,(a[1]+b[1])/2);ctx.lineTo((c[0]+d[0])/2,(c[1]+d[1])/2);
+   }
+   ctx.strokeStyle=(floor+2*n)%7===0?'#d9e7dc88':'#dae3db5c';
+   ctx.lineWidth=floorPixels>4?.85:.5;ctx.stroke();
+  }
+  ctx.beginPath();
+  for(let level=0;level<=shownFloors(b);level+=verticalStride){
+   const edge=base+level*floorRise;
+   if(edge<low||edge>high)continue;
+   const first=facePoint(0,edge),last=facePoint(1,edge);
+   ctx.moveTo(first[0],first[1]);ctx.lineTo(last[0],last[1]);
+  }
+  ctx.strokeStyle=parking?'#e7e5d1a8':'#f1f3e380';ctx.lineWidth=floorPixels>3?.9:.55;ctx.stroke();
+ }
  if(b.kind==='tower'&&length>10&&fit.k>.35){
   ctx.beginPath();
   const middle=(Math.floor(bays/2)+.05)/bays;
@@ -151,6 +289,17 @@ function drawRoof(face){
  path(inset);
  ctx.fillStyle=tint(b.kind==='facility'?'#8caa75':'#b9c7b0',face.light);ctx.fill();
  ctx.strokeStyle=tint(m.line,1.22);ctx.lineWidth=.7;ctx.stroke();
+ if(b.kind==='facility'||(b.kind==='tower'&&shownFloors(b)===b.floors)){
+  const spread=b.kind==='facility'?13:7;
+  for(let i=0;i<spread;i++){
+   const point=inset[Math.floor(i*inset.length/spread)];
+   const t=.40+i%3*.13;
+   const x=centre[0]+(point[0]-centre[0])*t,y=centre[1]+(point[1]-centre[1])*t;
+   const radius=Math.max(.8,fit.k*(b.kind==='facility'?4.4:2.5));
+   ctx.beginPath();ctx.ellipse(x,y,radius,radius*.66,0,0,Math.PI*2);
+   ctx.fillStyle=tint(i%2?'#668057':'#769465',face.light);ctx.fill();
+  }
+ }
  ctx.restore();
 }
 function drawScenery(face){
@@ -159,9 +308,19 @@ function drawScenery(face){
   if(radius<.55)return;
   ctx.strokeStyle=tint('#705c4e',face.light);ctx.lineWidth=Math.max(.5,radius*.22);
   ctx.beginPath();ctx.moveTo(base[0],base[1]);ctx.lineTo(x,y);ctx.stroke();
-  const gradient=ctx.createRadialGradient(x-radius*.3,y-radius*.26,0,x,y,radius);
-  gradient.addColorStop(0,tint('#a0b887',face.light));gradient.addColorStop(1,tint('#647f5d',face.light));
-  ctx.beginPath();ctx.ellipse(x,y,radius,radius*.79,0,0,Math.PI*2);ctx.fillStyle=gradient;ctx.fill();return;
+  const gradient=ctx.createRadialGradient(x-radius*.32,y-radius*.30,0,x,y,radius*1.2);
+  gradient.addColorStop(0,tint('#a6bc87',face.light));
+  gradient.addColorStop(.65,tint('#799966',face.light));
+  gradient.addColorStop(1,tint('#4c694e',face.light));
+   const crown=(cx,cy,rx,ry)=>{
+   ctx.beginPath();ctx.ellipse(cx,cy,rx,ry,0,0,Math.PI*2);ctx.fill();
+  };
+  ctx.fillStyle=gradient;
+  if(radius>1.2){
+   crown(x-radius*.43,y-radius*.18,radius*.62,radius*.49);
+   crown(x+radius*.42,y+radius*.16,radius*.60,radius*.47);
+  }
+  crown(x,y,radius,radius*.73);return;
  }
  path(face.p);ctx.fillStyle=tint(face.fill,face.light);ctx.fill();
 }
@@ -193,10 +352,20 @@ function drawSunCompass(){
  label([(sx+tx)/2,(sy+ty)/2-14],'Sunlight direction','#8e611c',true);
  }
  ctx.font='600 9px Manrope,Arial';ctx.fillStyle='#537263';ctx.fillText(mapText('Compass'),x,y+56);ctx.restore();
- const out=document.getElementById('sun-readout');if(out)out.textContent=sun.altitude>0?mapText('Bearing')+' '+Math.round(sun.azimuth)+'° · '+mapText('elevation')+' '+Math.round(sun.altitude)+'°':mapText('Sun below the horizon · no direct sunlight');
+ updateSunReadout(sun);
 }
-function render(){fitScene();ctx.setTransform(dpr,0,0,dpr,0,0);ctx.clearRect(0,0,width,height);
-const background=ctx.createLinearGradient(0,0,0,height);const solar=solarPosition(state.sunMonth,state.sunDay,state.sunHour,state.sunYear);
+function updateSunReadout(sun){
+ const out=document.getElementById('sun-readout');
+ if(!out)return;
+ const text=sun.altitude>0?mapText('Bearing')+' '+Math.round(sun.azimuth)+'° · '+mapText('elevation')+' '+Math.round(sun.altitude)+'°':mapText('Sun below the horizon · no direct sunlight');
+ if(out.textContent!==text)out.textContent=text;
+}
+function render(){
+const solar=solarPosition(state.sunMonth,state.sunDay,state.sunHour,state.sunYear);
+if(state.camera==='street'){drawStreet(solar);return;}
+if(!width||!height)return;
+fitScene();ctx.setTransform(dpr,0,0,dpr,0,0);ctx.clearRect(0,0,width,height);
+const background=ctx.createLinearGradient(0,0,0,height);
 const daylight=solar.altitude>0?.94+Math.sin(solar.altitude*Math.PI/180)*.09:.64;
 background.addColorStop(0,mapDark()?'#263c43':solar.altitude>0?'#d9e8e5':'#8898a5');background.addColorStop(1,mapDark()?'#425957':solar.altitude>0?'#e8eddd':'#aebdb9');ctx.fillStyle=background;ctx.fillRect(0,0,width,height);
 drawMapGround(ctx,project,{context:state.context,showTerrain:state.area==='neighbourhood',shade:(color,multiplier)=>tint(color,multiplier*daylight),zoom:fit.k});
@@ -255,10 +424,10 @@ for(const face of faces){
  if(face.roof&&state.tilt>.05)drawRoof(face);
  hits.push({p:face.p,hole:face.hole,b:face.b});
 }
-for(const b of models.filter(b=>b.kind==='tower')){const x=b.p.reduce((s,p)=>s+p[0],0)/b.p.length,y=b.p.reduce((s,p)=>s+p[1],0)/b.p.length;label(project(x,y,shownFloors(b)*STOREY_METRES*PIXELS_PER_METRE),b.id,isSelected(b)?'#896035':'#183c2c');}
-if(state.context){label(project(840,50,33),'West Coast Highway',state.selected==='highway'?'#896035':'#344e5a',true);
+if(state.labels)for(const b of models.filter(b=>b.kind==='tower')){const x=b.p.reduce((s,p)=>s+p[0],0)/b.p.length,y=b.p.reduce((s,p)=>s+p[1],0)/b.p.length;label(project(x,y,shownFloors(b)*STOREY_METRES*PIXELS_PER_METRE),b.id,isSelected(b)?'#896035':'#183c2c');}
+if(state.labels&&state.context){label(project(840,50,33),'West Coast Highway',state.selected==='highway'?'#896035':'#344e5a',true);
 label(project(-30,290,320),'Berlayar Residences · U/C',state.selected==='residences'?'#896035':'#54778b',true);label(project(880,1100,190),'Reflections at Keppel Bay',state.selected==='reflections'?'#896035':'#617483',true);label(project(651,66,15),'Telok Blangah MRT Station',state.selected==='mrt'?'#896035':'#617483',true);}
-if(state.future)for(const site of futureSites){const p=project(site.x,site.y);ctx.save();ctx.beginPath();ctx.arc(p[0],p[1],8,0,Math.PI*2);ctx.shadowColor='rgba(60,38,70,.18)';ctx.shadowBlur=4;ctx.fillStyle='#9576a4';ctx.fill();ctx.shadowBlur=0;ctx.strokeStyle='#fff';ctx.lineWidth=1.6;ctx.stroke();ctx.fillStyle='#fff';ctx.textAlign='center';ctx.font='600 9.35px Manrope,Arial';ctx.fillText('F',p[0],p[1]+3.3);ctx.restore();if(site.n.includes('upcoming condominium'))label([p[0],p[1]+26],site.n.split(' · ')[0]+' · future condo','#80698d',true);hits.push({marker:p,site});}
+if(state.future)for(const site of futureSites){const p=project(site.x,site.y);ctx.save();ctx.beginPath();ctx.arc(p[0],p[1],8,0,Math.PI*2);ctx.shadowColor='rgba(60,38,70,.18)';ctx.shadowBlur=4;ctx.fillStyle='#9576a4';ctx.fill();ctx.shadowBlur=0;ctx.strokeStyle='#fff';ctx.lineWidth=1.6;ctx.stroke();ctx.fillStyle='#fff';ctx.textAlign='center';ctx.font='600 9.35px Manrope,Arial';ctx.fillText('F',p[0],p[1]+3.3);ctx.restore();if(state.labels&&site.n.includes('upcoming condominium'))label([p[0],p[1]+26],site.n.split(' · ')[0]+' · future condo','#80698d',true);hits.push({marker:p,site});}
 if(state.busStops)for(const stop of futureBusStops){const p=project(stop.x,stop.y),active=state.selected==='bus-stops';ctx.save();ctx.beginPath();ctx.arc(p[0],p[1],11,0,Math.PI*2);ctx.fillStyle=active?'#b7864d':'#3c7182';ctx.shadowColor='rgba(25,54,60,.18)';ctx.shadowBlur=5;ctx.fill();ctx.shadowBlur=0;ctx.strokeStyle='#fff';ctx.lineWidth=1.5;ctx.stroke();ctx.fillStyle='#fff';ctx.beginPath();ctx.roundRect(p[0]-5,p[1]-6,10,10,2);ctx.fill();ctx.fillStyle=active?'#896035':'#3c7182';ctx.fillRect(p[0]-3.5,p[1]-4.5,7,4);ctx.fillStyle='#fff';for(const dx of [-3,3]){ctx.beginPath();ctx.arc(p[0]+dx,p[1]+5,1.4,0,Math.PI*2);ctx.fill();}ctx.restore();hits.push({marker:p,bus:true,stop});}
 drawStackMarkers();
 drawSunCompass();}
@@ -310,23 +479,41 @@ for(const b of models.filter(b=>b.kind==='tower')){const button=document.createE
 document.getElementById('focus').onchange=e=>select(e.target.value);
 for(const [id,name] of [['mrt','Telok Blangah MRT Station'],['residences','Berlayar Residences'],['reflections','Reflections at Keppel Bay'],['highway','West Coast Highway'],['bus-stops','Future bus stops']]){const option=document.createElement('option');option.value=id;option.textContent=name;document.getElementById('landmark').append(option);}
 for(let i=0;i<2;i++){const option=document.createElement('option');option.value='future-'+i;option.textContent=i===0?'Berlayar Drive':i===1?'Berlayar Close':futureSites[i].n;document.getElementById('landmark').append(option);}
-document.getElementById('landmark').onchange=e=>{state.area='neighbourhood';state.zoom=1;state.panX=state.panY=0;state.context=true;document.getElementById('context').setAttribute('aria-pressed','true');document.getElementById('area').setAttribute('aria-pressed','true');document.getElementById('area').textContent='Neighbourhood view';if(e.target.value.startsWith('future-')){const site=futureSites[Number(e.target.value.slice(7))];state.future=true;document.getElementById('future').setAttribute('aria-pressed','true');const panel=document.getElementById('selection');panel.replaceChildren();const h=document.createElement('strong');h.textContent=site.n;panel.classList.add('surrounding-selection');panel.append(h,document.createTextNode(site.note));render()}else{if(e.target.value==='bus-stops'){state.busStops=true;document.getElementById('busStops').setAttribute('aria-pressed','true');}select(e.target.value)}};
+document.getElementById('landmark').onchange=e=>{
+if(state.camera==='street')mode(false);
+state.area='neighbourhood';state.zoom=1;state.panX=state.panY=0;state.context=true;document.getElementById('context').setAttribute('aria-pressed','true');document.getElementById('area').setAttribute('aria-pressed','true');document.getElementById('area').textContent='Neighbourhood view';if(e.target.value.startsWith('future-')){const site=futureSites[Number(e.target.value.slice(7))];state.future=true;document.getElementById('future').setAttribute('aria-pressed','true');const panel=document.getElementById('selection');panel.replaceChildren();const h=document.createElement('strong');h.textContent=site.n;panel.classList.add('surrounding-selection');panel.append(h,document.createTextNode(site.note));render()}else{if(e.target.value==='bus-stops'){state.busStops=true;document.getElementById('busStops').setAttribute('aria-pressed','true');}select(e.target.value)}};
 document.getElementById('area').onclick=e=>{state.area=state.area==='neighbourhood'?'site':'neighbourhood';state.zoom=1;state.panX=state.panY=0;e.currentTarget.setAttribute('aria-pressed',String(state.area==='neighbourhood'));e.currentTarget.textContent=state.area==='neighbourhood'?'Neighbourhood view':'Site detail view';render()};
-function mode(top){state.tilt=top?0:.75;document.getElementById('top').setAttribute('aria-pressed',String(top));document.getElementById('orbit').setAttribute('aria-pressed',String(!top));render();}
+function mode(top){
+ state.camera=top?'plan':'aerial';
+ state.tilt=top?0:.75;
+ setStreet(false);
+ syncCameraButtons();
+ resize();
+}
+function syncCameraButtons(){
+ const view=state.camera;
+ document.getElementById('top').setAttribute('aria-pressed',String(view==='plan'));
+ document.getElementById('orbit').setAttribute('aria-pressed',String(view==='aerial'));
+ document.querySelectorAll('[data-camera]').forEach(button=>button.setAttribute('aria-pressed',String(button.dataset.camera===view)));
+}
 document.getElementById('top').onclick=()=>mode(true);document.getElementById('orbit').onclick=()=>mode(false);
-function zoom(factor){state.zoom=Math.max(.5,Math.min(8,state.zoom*factor));render();}
+function zoom(factor){
+ if(state.camera==='street'){moveStreet(factor>1?5:-5);return;}
+ state.zoom=Math.max(.5,Math.min(8,state.zoom*factor));render();}
 document.getElementById('plus').onclick=()=>zoom(1.2);document.getElementById('minus').onclick=()=>zoom(1/1.2);
-document.getElementById('reset').onclick=()=>{Object.assign(state,{angle:-.33,zoom:1,panX:0,panY:0});mode(false);};
+document.getElementById('reset').onclick=()=>{
+ if(state.camera==='street'){resetRoute();render();return;}
+ Object.assign(state,{angle:-.33,zoom:1,panX:0,panY:0});mode(false);};
 for(const name of ['context','future','busStops'])document.getElementById(name).onclick=e=>{state[name]=!state[name];e.currentTarget.setAttribute('aria-pressed',String(state[name]));render();};
 let pointers=new Map(),moved=false,gesture=null;
 function local(e){const r=canvas.getBoundingClientRect();return{x:e.clientX-r.left,y:e.clientY-r.top};}
 function gestureState(){const a=[...pointers.values()];return a.length>=2?{x:(a[0].x+a[1].x)/2,y:(a[0].y+a[1].y)/2,d:Math.hypot(a[0].x-a[1].x,a[0].y-a[1].y)}:null;}
 canvas.onpointerdown=e=>{canvas.setPointerCapture(e.pointerId);pointers.set(e.pointerId,local(e));moved=false;gesture=gestureState();};
-canvas.onpointermove=e=>{if(!pointers.has(e.pointerId))return;const old=pointers.get(e.pointerId),p=local(e),dx=p.x-old.x,dy=p.y-old.y;pointers.set(e.pointerId,p);if(Math.abs(dx)+Math.abs(dy)>2)moved=true;if(pointers.size>=2){const next=gestureState();if(gesture&&gesture.d>0){state.zoom=Math.max(.5,Math.min(8,state.zoom*next.d/gesture.d));state.panX+=next.x-gesture.x;state.panY+=next.y-gesture.y;}gesture=next;}else if(e.shiftKey||e.buttons===2){state.panX+=dx;state.panY+=dy;}else{state.angle+=dx*.006;state.tilt=Math.max(0,Math.min(1.25,state.tilt-dy*.005));}render();};
+canvas.onpointermove=e=>{if(!pointers.has(e.pointerId))return;const old=pointers.get(e.pointerId),p=local(e),dx=p.x-old.x,dy=p.y-old.y;pointers.set(e.pointerId,p);if(Math.abs(dx)+Math.abs(dy)>2)moved=true;if(pointers.size>=2){const next=gestureState();if(gesture&&gesture.d>0){state.zoom=Math.max(.5,Math.min(8,state.zoom*next.d/gesture.d));state.panX+=next.x-gesture.x;state.panY+=next.y-gesture.y;}gesture=next;}else if(e.shiftKey||e.buttons===2){state.panX+=dx;state.panY+=dy;}else{state.angle+=dx*.006;if(state.camera==='aerial')state.tilt=Math.max(.15,Math.min(1.25,state.tilt-dy*.005));}render();};
 canvas.onpointerup=e=>{const p=local(e);pointers.delete(e.pointerId);gesture=gestureState();if(moved)return;for(let i=hits.length-1;i>=0;i--){const hit=hits[i];if(hit.stack){if(Math.hypot(hit.marker[0]-p.x,hit.marker[1]-p.y)<11){chooseStack(hit.stack);return;}continue;}if(hit.bus&&Math.hypot(hit.marker[0]-p.x,hit.marker[1]-p.y)<22){select('bus-stops');return;}if(hit.marker&&Math.hypot(hit.marker[0]-p.x,hit.marker[1]-p.y)<22){const panel=document.getElementById('selection');panel.replaceChildren();const h=document.createElement('strong');h.textContent=hit.site.n;panel.classList.add('surrounding-selection');panel.append(h,document.createTextNode(hit.site.note));return;}if(hit.p&&inside([p.x,p.y],hit.p)&&!(hit.hole&&inside([p.x,p.y],hit.hole))){select(hit.b.id);return;}}};
 canvas.onpointercancel=e=>{pointers.delete(e.pointerId);gesture=gestureState();};canvas.oncontextmenu=e=>e.preventDefault();canvas.addEventListener('wheel',e=>{e.preventDefault();zoom(Math.exp(-e.deltaY*.0015));},{passive:false});
 canvas.onkeydown=e=>{if(!['ArrowLeft','ArrowRight','ArrowUp','ArrowDown','+','=','-'].includes(e.key))return;e.preventDefault();if(e.key==='ArrowLeft')state.angle-=.1;else if(e.key==='ArrowRight')state.angle+=.1;else if(e.key==='ArrowUp')state.tilt=Math.min(1.25,state.tilt+.08);else if(e.key==='ArrowDown')state.tilt=Math.max(0,state.tilt-.08);else{zoom(e.key==='-'?1/1.15:1.15);return;}render();};
-function resize(){const r=canvas.getBoundingClientRect();width=r.width;height=r.height;dpr=Math.min(devicePixelRatio||1,2);canvas.width=Math.round(width*dpr);canvas.height=Math.round(height*dpr);render();}new ResizeObserver(resize).observe(canvas);
+function resize(){const r=canvas.getBoundingClientRect();if(!r.width||!r.height)return;width=r.width;height=r.height;dpr=Math.min(devicePixelRatio||1,2);canvas.width=Math.round(width*dpr);canvas.height=Math.round(height*dpr);render();}new ResizeObserver(resize).observe(canvas);
 ground.onload=()=>{imageLoaded=true;render();};ground.onerror=()=>document.getElementById('error').style.display='block';ground.src='/assets/plans/site-plan.webp';select(state.selected);resize();
 
 // Precinct workspace: the original footprint data and corrected future-site markers are retained.
@@ -336,9 +523,34 @@ const mapColumn=document.createElement('section');mapColumn.className='map-colum
 const sidebar=document.createElement('aside');sidebar.className='map-sidebar';sidebar.setAttribute('aria-label','Map information and height controls');
 main.insertBefore(layout,stage);layout.append(mapColumn,sidebar);mapColumn.append(stage);
 const presets=document.createElement('div');presets.className='camera-presets';
-for(const [name,angle,tilt,area] of [['Aerial',-.33,.75,'neighbourhood'],['Site plan',0,0,'site'],['From Berlayar Drive',0,.95,'site'],['From Telok Blangah Road',Math.PI,.95,'site']]){
- const b=document.createElement('button');b.textContent=name;b.onclick=()=>{Object.assign(state,{angle,tilt,area,zoom:1,panX:0,panY:0});document.getElementById('top').setAttribute('aria-pressed',String(tilt===0));document.getElementById('orbit').setAttribute('aria-pressed',String(tilt!==0));const areaButton=document.getElementById('area');areaButton.textContent=area==='site'?'Site detail view':'Neighbourhood view';areaButton.setAttribute('aria-pressed',String(area==='neighbourhood'));presets.querySelectorAll('button').forEach(btn=>btn.setAttribute('aria-pressed',String(btn===b)));render();};presets.append(b);
-}mapColumn.insertBefore(presets,stage);
+presets.setAttribute('aria-label','Camera views');
+for(const [name,view] of [['Aerial','aerial'],['Site plan','plan'],['Street level','street']]){
+ const button=document.createElement('button');button.type='button';button.textContent=name;button.dataset.camera=view;
+ button.onclick=()=>{
+  if(view==='street'){
+   state.camera=view;
+   setStreet(true);
+   syncCameraButtons();
+   hits=[];
+   render();
+   return;
+  }
+  const area=view==='plan'?'site':'neighbourhood';
+  Object.assign(state,{angle:view==='plan'?0:-.33,area,zoom:1,panX:0,panY:0});
+  const areaButton=document.getElementById('area');
+  areaButton.textContent=area==='site'?'Site detail view':'Neighbourhood view';
+  areaButton.setAttribute('aria-pressed',String(area==='neighbourhood'));
+  mode(view==='plan');
+ };
+ presets.append(button);
+}
+const labels=document.createElement('button');
+labels.type='button';labels.id='labels-toggle';labels.textContent='Map labels';labels.setAttribute('aria-pressed','true');
+labels.onclick=()=>{state.labels=!state.labels;labels.setAttribute('aria-pressed',String(state.labels));render();};
+presets.append(labels);
+mapColumn.insertBefore(presets,stage);
+for(const id of ['top','orbit'])document.getElementById(id).hidden=true;
+syncCameraButtons();
 sidebar.innerHTML='<h2>Map layers</h2>';sidebar.append(document.querySelector('.legend'));
 const h=document.createElement('h2');h.textContent='Berlayar Rise blocks';sidebar.append(h,document.getElementById('blocks'));
 const heightControls=document.createElement('div');heightControls.innerHTML='<label for="floor-cut">Storeys shown <output id="floor-value">All</output></label><input id="floor-cut" type="range" min="1" max="49" value="49" aria-label="Berlayar Rise storeys shown"><p class="floor-caption">Cuts the six Berlayar Rise models at the selected storey. Nearby buildings retain their full height.</p><dl class="model-facts"><dt>Residential blocks</dt><dd>6</dd><dt>Published height range</dt><dd>33–49 storeys</dd><dt>Model floor height</dt><dd>3 m · assumed</dd></dl>';
@@ -357,7 +569,7 @@ stackControl.onchange=()=>chooseStack(stackControl.value);
 floorControl.onchange=()=>{state.floor=Number(floorControl.value);updateUnitLink();render();};
 syncUnitControls();
 const sunNote=document.createElement('p');sunNote.className='sun-readout';sunNote.id='sun-readout';sidebar.append(sunNote);
-const summary=document.createElement('p');summary.className='map-summary';summary.textContent='Sunlight arrow, wall lighting and ground shadows follow the chosen Singapore date and time. Ground shadows follow the selected sun position on the precinct’s flat reference plane. Distant terrain is illustrative context.';sidebar.append(summary);
+const summary=document.createElement('p');summary.className='map-summary';summary.textContent='Aerial shadows and wall lighting use the selected Singapore date and time. Façades, roofs, terrain and street-level sightlines are illustrative.';sidebar.append(summary);
 document.getElementById('floor-cut').oninput=e=>{state.floorCap=Number(e.target.value);document.getElementById('floor-value').textContent=state.floorCap===49?'All':state.floorCap;render();};
 let sunTimer=null;
 function stopSun(){cancelAnimationFrame(sunTimer);sunTimer=null;document.getElementById('sun-play').textContent='Play day';document.getElementById('sun-play').setAttribute('aria-pressed','false');}
@@ -368,4 +580,6 @@ document.getElementById('sun-time').oninput=e=>{stopSun();state.sunHour=Number(e
 document.getElementById('sun-play').onclick=()=>{if(sunTimer){stopSun();return;}state.sunHour=6;syncSun();document.getElementById('sun-play').textContent='Pause';document.getElementById('sun-play').setAttribute('aria-pressed','true');let last=performance.now();function tick(now){state.sunHour=Math.min(19.5,state.sunHour+(now-last)*.000625);last=now;syncSun();if(state.sunHour>=19.5){stopSun();return;}sunTimer=requestAnimationFrame(tick);}sunTimer=requestAnimationFrame(tick);};
 document.getElementById('sun-now').onclick=()=>{stopSun();const parts=new Intl.DateTimeFormat('en-GB',{timeZone:'Asia/Singapore',year:'numeric',month:'numeric',day:'numeric',hour:'numeric',minute:'numeric',hourCycle:'h23'}).formatToParts(new Date());const p=Object.fromEntries(parts.map(x=>[x.type,x.value]));Object.assign(state,{sunYear:Number(p.year),sunMonth:Number(p.month),sunDay:Number(p.day),sunHour:Math.floor((Number(p.hour)+Number(p.minute)/60)*4)/4});syncSun();};
 document.addEventListener('visibilitychange',()=>{if(document.hidden)stopSun();});syncMapTheme();try{if(parent!==window)new MutationObserver(syncMapTheme).observe(parent.document.documentElement,{attributes:true,attributeFilter:['data-tracker-theme']});}catch(e){}matchMedia('(prefers-color-scheme: dark)').addEventListener('change',syncMapTheme);document.fonts.ready.then(resize);document.getElementById('sun-now').onclick();resize();
-</script><script defer src="/assets/site-interior-bridge-v1.js?v=3"></script><script defer src="/assets/berlayar-5km-context-v1.js?v=1"></script><script defer src="/assets/geo-reference-v1.js?v=20261123"></script></body></html>
+if(query.get('view')==='street')presets.querySelector('[data-camera="street"]').click();
+if(query.get('view')==='plan')presets.querySelector('[data-camera="plan"]').click();
+</script><script defer src="/assets/site-interior-bridge-v1.js?v=4"></script><script defer src="/assets/berlayar-5km-context-v1.js?v=1"></script><script defer src="/assets/geo-reference-v1.js?v=20261123"></script></body></html>

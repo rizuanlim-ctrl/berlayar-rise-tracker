@@ -16,7 +16,7 @@ const schedule=(fn,ms)=>setTimeout(fn,reduced.matches?0:ms);
 const canonicalDate=(year,month,day)=>String(year).padStart(4,'0')+'-'+String(month).padStart(2,'0')+'-'+String(day).padStart(2,'0');
 const time=hour=>String(Math.floor(hour)).padStart(2,'0')+':'+String(Math.round((hour%1)*60)).padStart(2,'0');
 function snapshot(){
- const source=$('#scene');if(!(source instanceof HTMLCanvasElement))return '';
+ const source=$('#street-scene:not([hidden])')??$('#scene');if(!(source instanceof HTMLCanvasElement))return '';
  try{return source.toDataURL('image/jpeg',.83)}catch{return ''}
 }
 function portalOrigin(){

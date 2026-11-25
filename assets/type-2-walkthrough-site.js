@@ -103,8 +103,16 @@ export function unitSite(stack, centre=[3.135,4.845]) {
     ['Reflections at Keppel Bay',mean(reflections.map(building=>mean(building.polygon))),68],
     ['West Coast Highway',...highwayOutlook(highway,centre)],
   ];
+  return {...neighbourhoodLayers(toRoom),floors,buildings,centre,landmarks,highway,block:block.id,
+    sunVector(azimuth, altitude) {
+      const bearing=azimuth*Math.PI/180-block.angle;
+      return [Math.sin(bearing), Math.tan(altitude*Math.PI/180), -Math.cos(bearing)];
+    },
+  };
+}
+
+function neighbourhoodLayers(toRoom){
   return {
-    floors, buildings, centre, landmarks, highway, gardenPlanting, block: block.id,
     ground: landscape.map(polygon=>polygon.map(toRoom)),
     groves: aerialGroves.map(polygon=>polygon.map(toRoom)),
     pontoons: marinaPontoons.map(route=>({...route,path:route.path.map(toRoom)})),
@@ -115,9 +123,25 @@ export function unitSite(stack, centre=[3.135,4.845]) {
       const count = Math.max(1,Math.floor(Math.hypot(b[0]-a[0],b[1]-a[1])/spacing));
       return Array.from({length:count},(_,i)=>toRoom(a.map((v,j)=>v+(b[j]-v)*(i+.5)/count)));
     }),
-    sunVector(azimuth, altitude) {
-      const bearing=azimuth*Math.PI/180-block.angle;
-      return [Math.sin(bearing), Math.tan(altitude*Math.PI/180), -Math.cos(bearing)];
+  };
+}
+
+export function precinctSite({context,floorCap,selected}){
+  const toMetres=([x,y])=>[(x-485)/PIXELS_PER_METRE,(y-435)/PIXELS_PER_METRE];
+  const buildings=[...models,...telokBlangahBuildings].filter(model=>context||model.kind==='tower').map(model=>({
+    id:model.id, kind:model.kind,
+    selected:model.id===selected,
+    floors:model.kind==='tower'?Math.min(model.floors,floorCap):model.floors,
+    polygon:model.p.map(toMetres),hole:model.hole?.map(toMetres),
+  }));
+  const layers=neighbourhoodLayers(toMetres);
+  return {...layers,precinct:true,context,buildings,centre:[0,0],
+    streets:context?layers.streets:estateRoads.map(road=>({width:road.w/PIXELS_PER_METRE,path:road.p.map(toMetres)})),
+    highway:highwayCentreline.map(toMetres),
+    gardenPlanting:[[728,295],[723,327],[716,358],[708,389],[701,420],[700,455]].map(toMetres),
+    sunVector(azimuth){
+      const bearing=azimuth*Math.PI/180;
+      return [Math.sin(bearing),0,-Math.cos(bearing)];
     },
   };
 }
@@ -168,7 +192,7 @@ export function drawNeighbourhood(site, elevation, solar, draw, simplified=false
   const light = Math.max(.40, Math.min(1,.64+solar.altitude/92));
   const surface = (polygon, height, color, shade=light) => fillPolygon([polygon],height,draw,color,shade);
   surface([[-1450,-1250],[1450,-1250],[1450,1600],[-1450,1600]],ground,'terrain');
-  for(const polygon of site.water)fillPolygon(polygon,ground+.24,draw,'water',light);
+  if(site.context!==false)for(const polygon of site.water)fillPolygon(polygon,ground+.24,draw,'water',light);
   for (const patch of site.ground) surface(patch,ground+.045,'landscape');
   function paths(routes,y,material,extraWidth=0) {
     for(const {width,path} of routes) {
@@ -189,13 +213,16 @@ export function drawNeighbourhood(site, elevation, solar, draw, simplified=false
   }
   paths(site.streets,ground+.13,'kerb',1);
   paths(site.streets,ground+.17,'road');
+  if(site.precinct)paths(site.paths,ground+.184,'kerb',.46);
   paths(site.paths,ground+.19,'path');
-  paths(site.pontoons,ground+.45,'pontoon');
-  drawHighway(site.highway,ground,light,draw);
+  if(site.context!==false){
+    paths(site.pontoons,ground+.45,'pontoon');
+    drawHighway(site.highway,ground,light,draw);
+  }
 
   // Distant canopy uses broad patches and low-detail crowns to retain depth
   // cues through the windows without adding thousands of tree meshes.
-  for (const [index, grove] of site.groves.entries()) {
+  for (const [index, grove] of (site.context===false?[]:site.groves).entries()) {
     surface(grove,ground+.072,'grove',light*(.88+index%3*.05));
     const centre=mean(grove);
     for (const [j,[x,z]] of grove.entries()) {
@@ -213,7 +240,23 @@ export function drawNeighbourhood(site, elevation, solar, draw, simplified=false
   }
 
   const [sunX,,sunZ] = site.sunVector(solar.azimuth,solar.altitude);
-  const planting=[...site.trees.map(p=>[...p,0]),...site.gardenPlanting.map(p=>[...p,18])];
+  const planting=[...site.trees.map(p=>[...p,0]),...(site.context===false?[]:site.gardenPlanting).map(p=>[...p,18])];
+  if(site.precinct){
+    const walkway=site.paths[2].path;
+    for(let i=1;i<walkway.length;i++){
+      const [x,z]=walkway[i-1],[u,v]=walkway[i],len=Math.hypot(u-x,v-z);
+      const nx=(v-z)/len,nz=(x-u)/len;
+      for(let d=5;d<len-4;d+=5.8){
+        for(const side of [-1,1]){
+          const a=x+(u-x)*d/len+nx*side*3.65,b=z+(v-z)*d/len+nz*side*3.65;
+          const r=.47+((i*13+Math.floor(d))%5)*.07;
+          const rim=[[a-r,ground+.01,b],[a,ground+.01,b-r],[a+r,ground+.01,b],[a,ground+.01,b+r]];
+          const crest=[a+.08,ground+.32+r*.56,b-.07];
+          for(let n=0;n<4;n++)draw(rim[n],rim[(n+1)%4],crest,crest,n%2?'tree':'treeLight',light*.85);
+        }
+      }
+    }
+  }
   for(const [i,[x,z,elevationOffset]] of planting.entries()){
     const level=ground+elevationOffset;
     const size=(1.4+(i*17%9)*.19)*(elevationOffset?.55:1), crown=level+size*1.55+.8;
@@ -240,7 +283,7 @@ export function drawNeighbourhood(site, elevation, solar, draw, simplified=false
     for(let j=0;j<count;j++)draw(canopy[j],canopy[(j+1)%count],top,top,'treeLight',light*.99);
   }
 
-  drawReflectionsBridges(site.buildings,ground,light,draw);
+  if(site.context!==false)drawReflectionsBridges(site.buildings,ground,light,draw);
   for (const building of site.buildings) {
     const {polygon,hole,kind,floors}=building;
     const height=ground+elevationFor(building), risePerStorey=(height-ground)/floors;
@@ -263,28 +306,35 @@ export function drawNeighbourhood(site, elevation, solar, draw, simplified=false
         if(len<.12)return;
         const nx=outward*(v-z)/len,nz=outward*(x-u)/len;
         // The viewer stays inside the flat. Skip façades that face away from the whole unit.
-        if((centreX-x)*nx+(centreZ-z)*nz < -9)return;
+        if(!site.precinct&&(centreX-x)*nx+(centreZ-z)*nz < -9)return;
         const shade=light*(.76+.22*Math.max(0,nx*sunX+nz*sunZ));
-        const wall=kind==='tower'||kind==='construction'
+        const wall=building.selected?'selectedFacade':kind==='tower'||kind==='construction'
           ? (i%5===0?'facadeAccent':'facade')
           : kind==='landmark' ? (curved?'facadeGlass':'remoteFacade') : 'facility';
         const distance=Math.hypot((x+u)/2-centreX,(z+v)/2-centreZ);
         const face=(a,b,low,high,color,brightness,offset=0)=>{
           const at=(t,y)=>[x+(u-x)*t+nx*offset,y,z+(v-z)*t+nz*offset];
-          shaped(at(a,low),at(b,low),at(b,high),at(a,high),color,brightness);
+          const polygon=[at(a,low),at(b,low),at(b,high),at(a,high)];
+          if(site.precinct)draw(...polygon.map(shape),color,brightness,paintOrder,[nx,nz]);
+          else shaped(...polygon,color,brightness);
         };
         if(len<1.5||kind==='existing'||ring===hole){
           face(0,1,ground,height,wall,shade);
           return;
         }
         if(simplified){
-          const stride=distance>300?4:distance>125?2:1;
-          const bays=Math.max(1,Math.round(len/(distance>125?6.6:3.6)));
+          const stride=site.precinct?(distance>310?5:distance>155?3:distance>80?2:1):(distance>300?4:distance>125?2:1);
+          const bayWidth=site.precinct?(distance>155?10:distance>80?6.2:3.8):(distance>125?6.6:3.6);
+          const bays=Math.max(1,Math.round(len/bayWidth));
           for(let level=0;level<floors;level+=stride){
             const y=ground+level*risePerStorey, rise=Math.min(stride,floors-level)*risePerStorey;
             for(let bay=0;bay<bays;bay++){
               const a=bay/bays,b=(bay+1)/bays;
               face(a,b,y,y+rise,wall,shade*(.96+(bay+level)%3*.02));
+              if(site.precinct&&distance<80&&kind!=='context'){
+                const band=building.id==='201'?.25:.13;
+                face(a,b,y+.035,y+.035+rise*band,'facadeLedge',shade*.97,.045);
+              }
               const low=y+rise*.31,high=y+rise*.72,pad=(b-a)*.20;
               const tint=shade*(.84+((bay*3+level+i)%5)*.05);
               face(a+pad,b-pad,low,high,building.id==='201'?'deckVoid':'facadeGlass',tint,.22);
