@@ -30,6 +30,16 @@ with sync_playwright() as playwright:
         birthDate='1979-08-01',frs55='230000',sa55='120000')
     for field, value in standard.items():
         set_input(field,value)
+    assert page.locator('#raise').input_value() == ''
+    zero_growth = page.evaluate('financeMetrics')
+    assert zero_growth['annualSalaryIncrement'] == '0%'
+    set_input('raise','2.5')
+    growth = page.evaluate('financeMetrics')
+    assert growth['annualSalaryIncrement'] == '2.5%'
+    assert abs(growth['monthlyOAAtKeys'] / zero_growth['monthlyOAAtKeys'] - 1.025 ** 5) < 1e-8
+    assert growth['conservativeMonthlyOAAtKeys'] == zero_growth['conservativeMonthlyOAAtKeys']
+    assert page.evaluate("plannerConfig().gross") == 4200
+    assert growth['maximum'] > zero_growth['maximum']
     metrics = page.evaluate('financeMetrics')
     assert metrics['maximum'] > metrics['conservativeMaximum'] > 0
     assert metrics['conservativeCash'] >= 0
@@ -48,7 +58,9 @@ with sync_playwright() as playwright:
     download = capture.value
     with ZipFile(download.path()) as workbook:
         assert workbook.testzip() is None
-        assert b'Conservative maximum price' in workbook.read('xl/worksheets/sheet2.xml')
+        summary = workbook.read('xl/worksheets/sheet2.xml')
+        assert b'Conservative maximum price' in summary
+        assert b'Applied annual salary increment' in summary and b'2.5%' in summary
         comparison = workbook.read('xl/worksheets/sheet3.xml')
         assert b'Cash shortfall' in comparison and comparison.count(b'Blk ') == 3
     page.locator('[data-tab=planner]').click()
