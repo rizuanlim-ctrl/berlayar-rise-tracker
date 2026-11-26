@@ -30,6 +30,22 @@ with sync_playwright() as playwright:
         birthDate='1979-08-01',frs55='230000',sa55='120000')
     for field, value in standard.items():
         set_input(field,value)
+    assert page.locator('#payment-summary').get_by_role('heading', name='Monthly loan repayment').is_visible()
+    assert page.locator('#affordability-outlook').get_attribute('open') is None
+    scenario_amounts = page.evaluate('''() => {
+        const result = compute(nv('price'));
+        return [result.cashKeyHDB, result.cashKeyPrice, result.cashKeyHDB-result.cashKeyPrice,
+            result.loan, result.afterKeys, result.install, result.monthlyCPF, result.monthCash].map(money);
+    }''')
+    ids = ['ckey','stageKeyTopup','stageKeyCosts','stageKeyLoan','stageKeyOA','mmonthly','stageMonthlyOA','mcashmonth']
+    assert [page.locator('#'+field).text_content() for field in ids] == scenario_amounts
+    set_input('availableCash','')
+    assert page.locator('#maxPrice').text_content() == '—'
+    assert page.locator('#mmonthly').text_content() == scenario_amounts[5]
+    page.locator('#affordability-outlook > summary').click()
+    assert 'cash available at booking' in page.locator('#outlookNote').text_content()
+    page.locator('#affordability-outlook > summary').click()
+    set_input('availableCash','30000')
     assert page.locator('#raise').input_value() == ''
     zero_growth = page.evaluate('financeMetrics')
     assert zero_growth['annualSalaryIncrement'] == '0%'
