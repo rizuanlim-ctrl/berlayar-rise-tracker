@@ -80,21 +80,27 @@ export function drawMapGround(ctx,project,{context,showTerrain,shade,zoom}){
   }
   fill([[0,-10],[974,-10],[974,1000],[0,1000]],shade('#d6dec7',1));
   for(const polygon of landscape)fill(polygon.map(p=>[...p,.15]),shade('#a2b990',1));
-  function paths(routes,color,baseWidth){
+  function paths(routes,color,baseWidth,extraWidth=0,dashed=false){
     ctx.lineJoin='round';ctx.lineCap='round';
+    ctx.setLineDash(dashed?[Math.max(2,5*zoom),Math.max(3,7*zoom)]:[]);
     for(const {w,path,p} of routes){
       ctx.beginPath();
       (path??p).forEach(([x,y],i)=>{
         const point=project(x,y,showTerrain?terrainAt(x,y)+.7:.7);
         if(i)ctx.lineTo(point[0],point[1]);else ctx.moveTo(point[0],point[1]);
       });
-      ctx.strokeStyle=color;ctx.lineWidth=Math.max(.65,(w??baseWidth)*zoom);ctx.stroke();
+      ctx.strokeStyle=color;ctx.lineWidth=Math.max(.65,(dashed?.65:(w??baseWidth)+extraWidth)*zoom);ctx.stroke();
     }
   }
-  if(context){
-    paths(localRoads,shade('#939e9a',1),6);
-    paths(marinaPontoons,shade('#d1cfbb',1),4.8);
-  }else paths(estateRoads,shade('#939e9a',1),6);
+  const roads=context?localRoads:estateRoads;
+  if(zoom>.21)paths(roads,shade('#c6c5b6',1),6,2.4);
+  paths(roads,shade('#7f8987',1),6);
+  if(zoom>.68){
+    paths(roads.filter(({w})=>w>=11),shade('#c9cbd0',1),6,0,true);
+    ctx.setLineDash([]);
+  }
+  if(context)paths(marinaPontoons,shade('#d1cfbb',1),4.8);
+  if(zoom>.28)paths(estatePaths,shade('#aab498',1),5,1.4);
   paths(estatePaths,shade('#e0d3b9',1),5);
   if(context)for(const {points,fill:color,light,marking} of highwaySurface){
     if(marking&&zoom<.26)continue;

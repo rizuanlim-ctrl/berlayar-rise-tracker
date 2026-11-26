@@ -1,7 +1,9 @@
 import {PRECINCT_ROUTES, streetCamera} from './berlayar-street-routes.js?v=1';
-import {drawNeighbourhood, precinctSite} from './type-2-walkthrough-site.js?v=11';
+import {drawNeighbourhood, precinctSite} from './type-2-walkthrough-site.js?v=12';
 import {PIXELS_PER_METRE} from './berlayar-site-model.js?v=2';
 import {terrainGrid} from './berlayar-terrain.js?v=1';
+
+import {exteriorMaterial, materialShader} from './berlayar-materials.js?v=1';
 
 export {PRECINCT_ROUTES};
 
@@ -43,27 +45,31 @@ function webglRenderer(canvas){
     uniform vec3 eye, front, right, up;
     uniform vec2 scale;
     varying mediump vec3 tint;
-    varying mediump float depth, grain;
-    varying mediump vec2 ground;
+    varying mediump float depth, finish;
+    varying mediump vec3 world;
     void main(){
       vec3 v=point-eye;
       float z=dot(v,front);
       tint=colour;
       depth=z;
-      grain=surface;
-      ground=point.xz;
+      finish=surface;
+      world=point;
       gl_Position=vec4(dot(v,right)*scale.x,dot(v,up)*scale.y,1.0003*z-.44,z);
     }
   `;
   const fragment=`
+    #ifdef GL_FRAGMENT_PRECISION_HIGH
+    precision highp float;
+    #else
     precision mediump float;
-    varying vec3 tint;
-    varying float depth, grain;
-    varying vec2 ground;
+    #endif
+    varying mediump vec3 tint;
+    varying mediump float depth, finish;
+    varying mediump vec3 world;
     uniform vec3 haze;
+    ${materialShader}
     void main(){
-      float texture=sin(ground.x*.75+sin(ground.y*.23)*2.0)*sin(ground.y*.58);
-      vec3 local=tint*(1.0+texture*grain*(1.0-smoothstep(40.0,240.0,depth)));
+      vec3 local=tint*surfaceTone(finish,world,depth);
       float mist=smoothstep(90.0,760.0,depth)*.69;
       gl_FragColor=vec4(mix(local,haze,mist),1.);
     }
@@ -93,11 +99,11 @@ function webglRenderer(canvas){
     upload(faces){
       const vertices=new Float32Array(faces.length*42);
       let offset=0;
-      for(const {points,colour,grain} of faces){
+      for(const {points,colour,finish} of faces){
         for(const index of [0,1,2,0,2,3]){
           vertices.set(points[index],offset);
           vertices.set(colour,offset+3);
-          vertices[offset+6]=grain;
+          vertices[offset+6]=finish;
           offset+=7;
         }
       }
@@ -178,9 +184,9 @@ function streetFaces(site,solar){
     const points=[a,b,c,d],centre=[0,0,0];
     for(const point of points)for(let i=0;i<3;i++)centre[i]+=point[i]/4;
     const radius=Math.max(...points.map(p=>Math.hypot(p[0]-centre[0],p[1]-centre[1],p[2]-centre[2])));
-    const grain=['terrain','landscape','water','northTerrain'].includes(key)?.065:0;
+    const finish=exteriorMaterial(key);
     const colour=palette[key==='northTerrain'?'grove':key].map(channel=>Math.min(1,channel*light));
-    faces.push({points,centre,radius,grain,colour,normal,layer:groundLayers[key]??layer??0});
+    faces.push({points,centre,radius,finish,colour,normal,layer:groundLayers[key]??layer??0});
   };
   drawNeighbourhood(site,0,solar,add,true);
   if(site.context){

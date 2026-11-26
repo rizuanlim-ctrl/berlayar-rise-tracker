@@ -47,10 +47,10 @@ html[data-map-theme="dark"] #street-controls{background:#20382e;border-color:#4e
 import {PIXELS_PER_METRE, STOREY_METRES, walkthroughBuildings, solarPosition} from "./assets/berlayar-site-model.js?v=2";
 import {buildingProfile, drawReflectionsBridges, elevationFor, isReflectionsTower} from "./assets/berlayar-building-shapes.js?v=1";
 import {telokBlangahBuildings} from "./assets/berlayar-aerial-context.js?v=2";
-import {stacksForBlock, unitSite} from "./assets/type-2-walkthrough-site.js?v=10";
+import {stacksForBlock, unitSite} from "./assets/type-2-walkthrough-site.js?v=12";
 import {layoutLabels} from "./assets/walkthrough-layouts.js?v=3";
-import {drawMapGround, siteSceneryFaces, terrainAt} from "./assets/berlayar-map-rendering.js?v=2";
-import {createStreetView, PRECINCT_ROUTES} from "./assets/berlayar-street-view.js?v=1";
+import {drawMapGround, siteSceneryFaces, terrainAt} from "./assets/berlayar-map-rendering.js?v=3";
+import {createStreetView, PRECINCT_ROUTES} from "./assets/berlayar-street-view.js?v=2";
 const models=[...walkthroughBuildings,...telokBlangahBuildings];
 const reflectionsBridges=[];
 drawReflectionsBridges(walkthroughBuildings.map(b=>({...b,polygon:b.p})),0,1,(a,b,c,d,key,light)=>{
@@ -226,18 +226,22 @@ function drawFacade(face){
  const bays=Math.max(1,Math.round(length/(b.kind==='landmark'?6.5:8)));
  const floorRise=rise/shownFloors(b);
  const floorPixels=fit.k*floorRise*Math.sin(state.tilt);
- const verticalStride=floorPixels<2?2:1;
- const horizontalStride=length*fit.k/bays<2.7?2:1;
+ const bayPixels=length*fit.k/bays;
+ const verticalStride=Math.max(1,Math.ceil(2.4/Math.max(.2,floorPixels)));
+ const horizontalStride=Math.max(1,Math.ceil(2.7/Math.max(.2,bayPixels)));
  if(length<6||Math.sin(state.tilt)*rise*fit.k<12)return;
  const facePoint=(t,h)=>at([a[0]+(c[0]-a[0])*t,a[1]+(c[1]-a[1])*t],h);
  ctx.save();path(face.p);ctx.clip();
  const projectBays=[];
- const near=fit.k*length>18&&['tower','construction','facility'].includes(b.kind);
+ const near=floorPixels>2.75&&bayPixels>3.1&&fit.k*length>18;
  if(near){
   const band=ctx.createLinearGradient(...facePoint(0,low).slice(0,2),...facePoint(1,low).slice(0,2));
   band.addColorStop(0,tint(m.line,1.15));band.addColorStop(.18,tint(m.wall,1.02));band.addColorStop(1,tint(m.wall,.98));
   ctx.globalAlpha=.24;ctx.fillStyle=band;ctx.fill();ctx.globalAlpha=1;
  }
+ const pathPart=points=>{
+  points.forEach(([x,y],j)=>j?ctx.lineTo(x,y):ctx.moveTo(x,y));ctx.closePath();
+ };
  ctx.beginPath();
  for(let floor=0;floor<shownFloors(b);floor+=verticalStride){
   const bottom=base+(floor+.28)*floorRise,top=base+(floor+.79)*floorRise;
@@ -245,21 +249,30 @@ function drawFacade(face){
   for(let n=0;n<bays;n+=horizontalStride){
    const l=(n+.16)/bays,r=(n+.84)/bays;
    const p=[facePoint(l,bottom),facePoint(r,bottom),facePoint(r,top),facePoint(l,top)];
-   p.forEach(([x,y],j)=>j?ctx.lineTo(x,y):ctx.moveTo(x,y));ctx.closePath();
+   pathPart(p);
    if(near)projectBays.push({p,floor,n});
   }
  }
  const parking=b.id==='201';
  ctx.fillStyle=tint(parking?'#3f5150':m.glass,.77+.18*light);ctx.fill();
  if(near){
-  for(const {p:[a,b,c,d],floor,n} of projectBays){
+  // Draw pane reflections and frame lines in batches for smooth orbiting.
+  for(const reflected of [false,true]){
    ctx.beginPath();
-   ctx.moveTo(a[0],a[1]);ctx.lineTo(b[0],b[1]);
-   if(!parking&&floorPixels>2.9){
-    ctx.moveTo((a[0]+b[0])/2,(a[1]+b[1])/2);ctx.lineTo((c[0]+d[0])/2,(c[1]+d[1])/2);
+   for(const {p,floor,n} of projectBays){
+    if(((floor+2*n)%7===0)!==reflected)continue;
+    const [a,b,c,d]=p;
+    if(reflected&&!parking){
+     pathPart([d,c,[(b[0]+c[0])/2,(b[1]+c[1])/2],[(a[0]+d[0])/2,(a[1]+d[1])/2]]);
+    }else{
+     ctx.moveTo(...a);ctx.lineTo(...b);
+     if(!parking&&bayPixels>4){
+      ctx.moveTo((a[0]+b[0])/2,(a[1]+b[1])/2);ctx.lineTo((c[0]+d[0])/2,(c[1]+d[1])/2);
+     }
+    }
    }
-   ctx.strokeStyle=(floor+2*n)%7===0?'#d9e7dc88':'#dae3db5c';
-   ctx.lineWidth=floorPixels>4?.85:.5;ctx.stroke();
+   if(reflected&&!parking){ctx.fillStyle='#b9d3d267';ctx.fill();}
+   else{ctx.strokeStyle='#dae3db66';ctx.lineWidth=floorPixels>4?.85:.5;ctx.stroke();}
   }
   ctx.beginPath();
   for(let level=0;level<=shownFloors(b);level+=verticalStride){
@@ -289,6 +302,19 @@ function drawRoof(face){
  path(inset);
  ctx.fillStyle=tint(b.kind==='facility'?'#8caa75':'#b9c7b0',face.light);ctx.fill();
  ctx.strokeStyle=tint(m.line,1.22);ctx.lineWidth=.7;ctx.stroke();
+ if(fit.k>.46 && (b.kind!=='tower'||shownFloors(b)===b.floors)){
+  if(b.kind==='facility'){
+   path(inset.map(([x,y])=>[centre[0]+(x-centre[0])*.7,centre[1]+(y-centre[1])*.68]));
+   ctx.strokeStyle=tint('#d7d1b8',face.light);ctx.lineWidth=Math.min(2.4,fit.k*2);ctx.stroke();
+  }else{
+   const plantRoom=inset.map(([x,y])=>[centre[0]+(x-centre[0])*.48,centre[1]+(y-centre[1])*.43]);
+   path(plantRoom.map(([x,y])=>[x+fit.k,y+fit.k]));
+   ctx.fillStyle=tint('#818c7c',face.light);ctx.fill();
+   path(plantRoom);
+   ctx.fillStyle=tint('#e2e1d1',face.light);ctx.fill();
+   ctx.strokeStyle=tint(m.line,1.14);ctx.lineWidth=.65;ctx.stroke();
+  }
+ }
  if(b.kind==='facility'||(b.kind==='tower'&&shownFloors(b)===b.floors)){
   const spread=b.kind==='facility'?13:7;
   for(let i=0;i<spread;i++){
@@ -513,7 +539,7 @@ canvas.onpointermove=e=>{if(!pointers.has(e.pointerId))return;const old=pointers
 canvas.onpointerup=e=>{const p=local(e);pointers.delete(e.pointerId);gesture=gestureState();if(moved)return;for(let i=hits.length-1;i>=0;i--){const hit=hits[i];if(hit.stack){if(Math.hypot(hit.marker[0]-p.x,hit.marker[1]-p.y)<11){chooseStack(hit.stack);return;}continue;}if(hit.bus&&Math.hypot(hit.marker[0]-p.x,hit.marker[1]-p.y)<22){select('bus-stops');return;}if(hit.marker&&Math.hypot(hit.marker[0]-p.x,hit.marker[1]-p.y)<22){const panel=document.getElementById('selection');panel.replaceChildren();const h=document.createElement('strong');h.textContent=hit.site.n;panel.classList.add('surrounding-selection');panel.append(h,document.createTextNode(hit.site.note));return;}if(hit.p&&inside([p.x,p.y],hit.p)&&!(hit.hole&&inside([p.x,p.y],hit.hole))){select(hit.b.id);return;}}};
 canvas.onpointercancel=e=>{pointers.delete(e.pointerId);gesture=gestureState();};canvas.oncontextmenu=e=>e.preventDefault();canvas.addEventListener('wheel',e=>{e.preventDefault();zoom(Math.exp(-e.deltaY*.0015));},{passive:false});
 canvas.onkeydown=e=>{if(!['ArrowLeft','ArrowRight','ArrowUp','ArrowDown','+','=','-'].includes(e.key))return;e.preventDefault();if(e.key==='ArrowLeft')state.angle-=.1;else if(e.key==='ArrowRight')state.angle+=.1;else if(e.key==='ArrowUp')state.tilt=Math.min(1.25,state.tilt+.08);else if(e.key==='ArrowDown')state.tilt=Math.max(0,state.tilt-.08);else{zoom(e.key==='-'?1/1.15:1.15);return;}render();};
-function resize(){const r=canvas.getBoundingClientRect();if(!r.width||!r.height)return;width=r.width;height=r.height;dpr=Math.min(devicePixelRatio||1,2);canvas.width=Math.round(width*dpr);canvas.height=Math.round(height*dpr);render();}new ResizeObserver(resize).observe(canvas);
+function resize(){const r=canvas.getBoundingClientRect();if(!r.width||!r.height)return;width=r.width;height=r.height;dpr=Math.min(devicePixelRatio||1,matchMedia('(pointer:coarse)').matches?1.5:2);canvas.width=Math.round(width*dpr);canvas.height=Math.round(height*dpr);render();}new ResizeObserver(resize).observe(canvas);
 ground.onload=()=>{imageLoaded=true;render();};ground.onerror=()=>document.getElementById('error').style.display='block';ground.src='/assets/plans/site-plan.webp';select(state.selected);resize();
 
 // Precinct workspace: the original footprint data and corrected future-site markers are retained.

@@ -72,7 +72,7 @@ function updateViewer(){
  if(!stack.value)return;
  const level=Number(floor.value);
  if(!Number.isInteger(level))return;
- const target='/stack-139-walkthrough-mobile.html?embedded=1&stack='+encodeURIComponent(stack.value)+'&floor='+level+'&v=8';
+ const target='/stack-139-walkthrough-mobile.html?embedded=1&stack='+encodeURIComponent(stack.value)+'&floor='+level+'&v=materials-1';
  if(tour.getAttribute('src')!==target)tour.src=target;
  const u=new URL(location.href);u.searchParams.set('room',room.value);u.searchParams.set('block',block.value);u.searchParams.set('stack',stack.value);u.searchParams.set('floor',String(level));history.replaceState(null,'',u);
 }

@@ -266,8 +266,11 @@ export function drawNeighbourhood(site, elevation, solar, draw, simplified=false
       const [a,b]=corners[j],[c,d]=corners[(j+1)%4];
       draw([x+a,level,z+b],[x+c,level,z+d],[x+c,crown,z+d],[x+a,crown,z+b],'bark',light*(.78+j*.05));
     }
-    const count=simplified?7:10;
-    const rings=[[.35,-.53],[.86,-.22],[1,.16],[.65,.59],[.13,.91]].map(([radius,height],row)=>
+    const distance=Math.hypot(x-centreX,z-centreZ);
+    const count=distance>180?5:simplified||distance>85?7:10;
+    const profile=distance>180?[[.48,-.47],[1,.10],[.55,.65]]:
+      [[.35,-.53],[.86,-.22],[1,.16],[.65,.59],[.13,.91]];
+    const rings=profile.map(([radius,height],row)=>
       Array.from({length:count},(_,j)=>{
         const angle=j*2*Math.PI/count;
         const spread=radius*size*(.93+(i*7+row*5+j*13)%11*.015);
@@ -343,8 +346,8 @@ export function drawNeighbourhood(site, elevation, solar, draw, simplified=false
           return;
         }
         const distant=distance>225;
-        const stride=distant?2:1;
-        const bays=Math.max(1,Math.round(len/(distant?6.4:3.25)));
+        const stride=distance>475?4:distant?2:1;
+        const bays=Math.max(1,Math.round(len/(distance>475?9.5:distant?6.4:3.25)));
         const setback=.065+distance*.00024;
         for(let level=0;level<floors;level+=stride){
           const y=ground+level*risePerStorey;
