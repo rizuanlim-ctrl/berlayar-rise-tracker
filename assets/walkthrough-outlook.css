@@ -1,0 +1,9 @@
+.outlook-overlay{position:absolute;inset:0;z-index:1;pointer-events:none;font:600 12px system-ui,sans-serif}
+.outlook-overlay [hidden],.outlook-overlay[hidden]{display:none}
+.outlook-compass,.outlook-pin{background:#102831ed;color:#f4faf6;border:1px solid #c9e2d4;border-radius:8px;line-height:1.2}
+.outlook-compass{position:absolute;top:12px;right:12px;padding:7px 8px;white-space:nowrap}
+.outlook-pin{position:absolute;padding:4px 6px;white-space:nowrap;transform:translateY(-50%)}
+.outlook-pin.planned{border-style:dashed;background:#422f52ed}
+html.outlook-comparison main{padding:0}
+html.outlook-comparison header,html.outlook-comparison .conditions,html.outlook-comparison .bar,html.outlook-comparison main>.note,html.outlook-comparison .landmarks,html.outlook-comparison .scene .viewlabel{display:none}
+html.outlook-comparison .scene{height:100svh;border:0;border-radius:0}

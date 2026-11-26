@@ -36,3 +36,9 @@ export function solarPosition(month,day,hour,year=2026){
  const azimuth=(Math.atan2(Math.sin(ha),Math.cos(ha)*Math.sin(lat)-Math.tan(dec)*Math.cos(lat))/rad+180+360)%360;
  return {altitude,azimuth};
 }
+
+// Reference locations for the planned housing sites shown in the precinct map.
+export const plannedHousingSiteLocations = [
+  {x:314,y:960,name:'Berlayar Drive'},
+  {x:940,y:410,name:'Berlayar Close'},
+];

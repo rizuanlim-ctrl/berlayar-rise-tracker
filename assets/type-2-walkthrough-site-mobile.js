@@ -104,7 +104,7 @@ export function unitSite(stack, centre=[3.135,4.845]) {
     ['West Coast Highway',...highwayOutlook(highway,centre)],
   ];
   return {
-    floors, buildings, centre, landmarks, highway, gardenPlanting, block: block.id,
+    floors, buildings, centre, landmarks, highway, gardenPlanting, block: block.id, toRoom,
     ground: landscape.map(polygon=>polygon.map(toRoom)),
     groves: aerialGroves.map(polygon=>polygon.map(toRoom)),
     pontoons: marinaPontoons.map(route=>({...route,path:route.path.map(toRoom)})),

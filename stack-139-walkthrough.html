@@ -32,6 +32,7 @@ html.unit-explorer .map{width:clamp(66px,11vw,116px);opacity:.9}
  html.unit-explorer .conditions{margin-top:10px}
 }
 </style>
+<link rel="stylesheet" href="/assets/walkthrough-outlook.css?v=1">
 <main><header><div><small id="layout-title">Berlayar Rise</small><h1 id="stack-title">Stack 139</h1></div><div><button id="window-view">Living window</button> <button id="walk" aria-pressed="true">Walk inside</button> <button id="overview" aria-pressed="false">3D overview</button> <button id="outlook" aria-pressed="false">Outlook</button> <button id="explore-outside" aria-pressed="false">Explore outside</button> <button id="focus" aria-pressed="false">Immersive view</button> <button id="play-tour" class="tour-button" aria-controls="tour-controls">Play Tour</button></div></header>
 <div class="conditions" aria-label="Window view and daylight settings">
 <label id="floor-control">View floor <select id="view-floor"></select></label>
@@ -52,13 +53,15 @@ html.unit-explorer .map{width:clamp(66px,11vw,116px);opacity:.9}
 <p class="note" id="light-status" aria-live="polite"></p>
 <p class="note">Layouts and nearby blocks follow HDB plans. Coastline, woodland and marina details are based on <a style="color:inherit" href="https://www.arcgis.com/home/item.html?id=10df2279f9684e4a9f6a7f08febac2a9" target="_blank" rel="noopener noreferrer">Esri World Imagery</a> and maps. The elevated West Coast Highway and the surface roads use approximate dimensions and road markings. Finishes, terrain heights and sightlines are approximate. Future buildings on reserved sites may change the view. Nearby map features and coastline © <a style="color:inherit" href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener noreferrer">OpenStreetMap contributors</a>.</p></main>
 <script type="module">
+import {createOutlookOverlay, reportExplorerView} from "./assets/walkthrough-outlook.js?v=1";
 import {interiorMaterial, exteriorMaterial, materialShader} from "./assets/berlayar-materials.js?v=1";
 import {walkthroughLayouts as layouts, layoutLabels, unitTemplates} from "./assets/walkthrough-layouts.js?v=3";
 import {solarPosition} from "./assets/berlayar-site-model.js?v=1";
-import {unitSite, floorElevation, sunBlocked, drawNeighbourhood} from "./assets/type-2-walkthrough-site.js?v=12";
+import {unitSite, floorElevation, sunBlocked, drawNeighbourhood} from "./assets/type-2-walkthrough-site.js?v=13";
 import {roomSpot, buildTour, tourFrame, loungeFurniture, tableFurniture} from "./assets/walkthrough-presentation.js?v=1";
 const $=id=>document.getElementById(id);
 const params=new URLSearchParams(location.search);
+document.documentElement.classList.toggle('outlook-comparison',window.parent!==window&&params.get('compare')==='1');
 const stack=layouts.has(params.get('stack'))?params.get('stack'):'139';
 const {kind,flips:[flipX,flipZ]}=layouts.get(stack);
 const template=unitTemplates[kind];
@@ -89,7 +92,7 @@ function readSolar(){
 let solar=readSolar();
 const updateSolar=()=>{
  const position=readSolar();
- if(position){solar=position;dirty=true}
+ if(position){solar=position;dirty=true;reportView()}
 };
 solarDate.addEventListener('input',updateSolar);
 solarTime.addEventListener('input',updateSolar);
@@ -600,6 +603,12 @@ function clear(x,z){
 function nearest(){let best=.95, result;for(const o of [...doors,...windows]){const d=distance(player.x,player.z,o.a,o.b);if(d<best){best=d;result=o}}return result}
 const reduceMotion=matchMedia('(prefers-reduced-motion: reduce)');
 const scene=document.querySelector('.scene');
+const drawOutlookOverlay=createOutlookOverlay(scene,site);
+let explorerMode='walk';
+function reportView(mode=explorerMode){
+ explorerMode=mode;
+ reportExplorerView(inUnitExplorer,mode,solarDate.value,solarTime.value);
+}
 const windowRows=new Map();
 function showWindows(show){
  $('window-panel').classList.toggle('hide',!show);
@@ -629,6 +638,7 @@ function setMode(value,outlook=false){
  overview=value;
  outside=outlook;
  dirty=true;
+ reportView(tour?'tour':outdoorFlight?'exterior':outside?'outlook':overview?'overview':'walk');
  scene.classList.toggle('outside',outside);
  const exploring=!overview&&!outside&&!tour;
  $('explore-outside').setAttribute('aria-pressed',outdoorFlight);
@@ -735,9 +745,11 @@ function framedWindow(){
   const u=x-dx*range-dz*side,v=z-dz*range+dx*side;
   if(u<a||u>c||v<b||v>d||!clear(X(u),Z(v)))continue;
   jump([mainWindow.name,u,v,Math.atan2(x-u,z-v),-.105]);
+  reportView('window');
   return;
  }
  jump(windowView(mainWindow));
+ reportView('window');
 }
 $('window-view').onclick=framedWindow;
 const landmarks=new Map([['Window outlook',null],...site.landmarks.map(([name,...target])=>[name,target])]);
@@ -908,6 +920,7 @@ function frame(t){
   lookout.x=Math.max(-400,Math.min(400,lookout.x));lookout.z=Math.max(-400,Math.min(400,lookout.z));
   $('use').classList.add('hide');
  }else $('use').classList.add('hide');
+ if(!canvas.clientWidth||!canvas.clientHeight){requestAnimationFrame(frame);return;}
  const ratio=Math.min(devicePixelRatio||1,gl?(touch?1.6:2):1.2),w=Math.round(canvas.clientWidth*ratio),h=Math.round(canvas.clientHeight*ratio);
  if(canvas.width!==w||canvas.height!==h){canvas.width=w;canvas.height=h}
  for(const opening of windows){
@@ -953,6 +966,7 @@ function frame(t){
     gl.depthMask(true);gl.disable(gl.BLEND);
    }
   }
+  drawOutlookOverlay({active:outside&&!tour,eye,basis:b,altitude:floorElevation(floor),aspect,focal,width:canvas.clientWidth,height:canvas.clientHeight});
   if(!outside&&!tour)drawMap();
  }
  lastView=view;
@@ -961,14 +975,18 @@ function frame(t){
 showFurniture(true);
 jump(rooms[1]);
 player.pitch=-.15;
-if(inUnitExplorer&&['139','112'].includes(stack))framedWindow();
+if(inUnitExplorer&&!params.has('view')&&['139','112'].includes(stack))framedWindow();
 if(inUnitExplorer){
  const content=document.querySelector('main');
  new ResizeObserver(()=>{
   window.parent.postMessage({type:'unit-explorer-size',height:Math.ceil(content.getBoundingClientRect().height)},location.origin);
  }).observe(content);
 }
-if(params.get('view')==='outlook')$('outlook').click();
-if(params.get('view')==='exterior')$('explore-outside').click();
+const initialView=params.get('view');
+if(initialView==='outlook')$('outlook').click();
+if(initialView==='exterior')$('explore-outside').click();
+if(initialView==='overview')$('overview').click();
+if(initialView==='tour')$('play-tour').click();
+if(initialView==='window')framedWindow();
 requestAnimationFrame(frame);
 </script></html>

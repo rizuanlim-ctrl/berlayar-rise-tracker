@@ -103,7 +103,7 @@ export function unitSite(stack, centre=[3.135,4.845]) {
     ['Reflections at Keppel Bay',mean(reflections.map(building=>mean(building.polygon))),68],
     ['West Coast Highway',...highwayOutlook(highway,centre)],
   ];
-  return {...neighbourhoodLayers(toRoom),floors,buildings,centre,landmarks,highway,gardenPlanting,block:block.id,
+  return {...neighbourhoodLayers(toRoom),floors,buildings,centre,landmarks,highway,gardenPlanting,block:block.id,toRoom,
     sunVector(azimuth, altitude) {
       const bearing=azimuth*Math.PI/180-block.angle;
       return [Math.sin(bearing), Math.tan(altitude*Math.PI/180), -Math.cos(bearing)];

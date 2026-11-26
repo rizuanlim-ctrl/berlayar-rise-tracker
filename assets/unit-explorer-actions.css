@@ -1,0 +1,30 @@
+[hidden]{display:none!important}
+.explorer-actions{display:flex;flex-wrap:wrap;align-items:center;gap:6px 8px;margin-top:8px}
+.explorer-actions button,#unit-comparison button,.share-link-fallback button{
+ min-height:40px;padding:7px 12px;border:1px solid #799582;border-radius:9px;
+ background:#fff;color:#173b29;font:700 13px Manrope,Arial,sans-serif;cursor:pointer
+}
+.explorer-actions button:focus-visible,#unit-comparison button:focus-visible,.share-link-fallback button:focus-visible{outline:3px solid #bf7d30;outline-offset:2px}
+.explorer-actions button[aria-expanded=true],#unit-comparison .comparison-toggle button[aria-pressed=true]{background:#254d39;color:#fff;border-color:#254d39}
+#share-status{font-size:13px}
+.share-link-fallback{display:flex;gap:8px;align-items:end;margin:8px 0}
+.share-link-fallback label{flex:1;min-width:0}
+#unit-comparison{margin-top:10px;padding:12px;border:1px solid #a5baa9;border-radius:13px;background:#eaf2ec}
+.comparison-heading{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;margin-bottom:10px}
+.comparison-heading h2{margin:0;font-size:clamp(17px,3vw,23px)}
+.comparison-settings>summary{display:none;cursor:pointer;margin:0 0 8px;padding:8px 4px;font-size:14px;font-weight:700}
+.comparison-settings>summary:focus-visible{outline:3px solid #bf7d30;outline-offset:2px}
+.comparison-fields{display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:8px}
+.comparison-sun{display:flex;gap:8px;flex-wrap:wrap;margin:10px 0}
+.comparison-sun label{min-width:0}
+.comparison-toggle{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:8px}
+.comparison-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.comparison-card{min-width:0;overflow:hidden;border:1px solid #a3bba9;border-radius:11px;background:#17191b;color:#f4faf6}
+.comparison-card h3{margin:0;padding:8px 10px;font-size:14px}
+.comparison-card iframe{height:clamp(340px,61svh,660px)}
+@media(max-width:760px), (pointer:coarse) and (max-width:900px){
+ .comparison-settings>summary{display:list-item}
+ .comparison-fields{grid-template-columns:repeat(2,minmax(0,1fr))}
+ .comparison-grid{grid-template-columns:minmax(0,1fr)}
+ .comparison-card iframe{height:clamp(340px,61svh,540px)}
+}
