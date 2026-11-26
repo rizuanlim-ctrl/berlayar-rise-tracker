@@ -104,6 +104,18 @@ with sync_playwright() as playwright:
         assert page.evaluate('document.documentElement.scrollWidth === innerWidth'), width
         height = page.locator('#availableCash').evaluate('(element)=>element.getBoundingClientRect().height')
         assert height == 44, height
+        assert page.locator('#buyer-profile .formgrid').evaluate("""grid => {
+            const firstLeft = grid.firstElementChild.getBoundingClientRect().left;
+            let rowTop;
+            return [...grid.querySelectorAll('label.field')].every(field => {
+                const control = field.querySelector('input, select').getBoundingClientRect();
+                if (Math.abs(field.getBoundingClientRect().left - firstLeft) < 1) rowTop = control.top;
+                const note = field.querySelector('small');
+                return Math.abs(control.top - rowTop) < 1 && control.height === 44
+                    && (!note || note.getBoundingClientRect().top >= control.bottom);
+            });
+        }"""), width
+
     page.locator('#finance-exit').click()
     page.wait_for_url(base+'/')
     page.go_back()

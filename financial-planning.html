@@ -79,6 +79,13 @@ html[data-finance-theme="light"] #cashlarge{color:#245c40!important}
 .formgrid>label.field>input[type=date]::-webkit-datetime-edit{padding:0;min-width:0;line-height:22px}
 .formgrid>label.field>input[type=date]::-webkit-date-and-time-value{text-align:left;min-width:0}
 .formgrid>p.sub,.formgrid>div.sub{grid-column:1/-1;min-width:0;margin:0}
+/* Keep the label, control and help text in separate shared rows. */
+@supports (grid-template-rows:subgrid){
+ #buyer-profile>.formgrid>label.field{display:grid;grid-row:span 3;grid-template-rows:subgrid}
+ #buyer-profile>.formgrid>label.field>input,
+ #buyer-profile>.formgrid>label.field>select{grid-row:2;margin:0}
+ #buyer-profile>.formgrid>label.field>small{grid-row:3}
+}
 #grantTable{max-width:100%;overflow-x:auto}
 
 #selection-outlook{margin-top:12px}
