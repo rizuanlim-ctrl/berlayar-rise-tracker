@@ -4,6 +4,7 @@
 *{box-sizing:border-box}body{margin:0;background:#17191b;color:#f5f4ed;font:16px system-ui,sans-serif}main{max-width:1480px;margin:auto;padding:clamp(12px,3vw,38px)}header{display:flex;justify-content:space-between;align-items:end;gap:12px;flex-wrap:wrap;margin-bottom:18px}small{color:#b8cec3}h1{font-size:clamp(29px,5vw,52px);line-height:1;margin:6px 0 0;letter-spacing:-.055em}button{cursor:pointer;background:#273137;color:#edf3ee;border:1px solid #53605e;border-radius:9px;padding:9px 12px;font:inherit;font-size:14px;touch-action:none}button[aria-pressed=true]{background:#f0eee9;color:#182822;border-color:#f0eee9}button:focus-visible{outline:3px solid #f0be83}.scene{position:relative;height:clamp(375px,72svh,800px);border:1px solid #566765;border-radius:17px;overflow:hidden;background:#29363c}#world{width:100%;height:100%;display:block;touch-action:none;cursor:grab}.map{position:absolute;right:12px;top:12px;width:clamp(80px,16vw,145px);background:#152126e8;border:1px solid #748883;border-radius:10px;padding:5px;pointer-events:none}.map canvas{display:block;width:100%;height:auto}.viewlabel{position:absolute;top:12px;left:12px;background:#152126e8;padding:8px 11px;border-radius:9px;font-size:14px;pointer-events:none}.pad{position:absolute;bottom:12px;left:12px;display:grid;grid-template-columns:repeat(3,40px);gap:3px}.pad button{padding:8px 0;background:#172329e8}.pad button:first-child{grid-column:2}.pad button:nth-child(2){grid-column:1}.actions{position:absolute;bottom:12px;right:12px;display:grid;gap:4px;text-align:right}.actions button{background:#172329e8;color:#edf3ee}.actions button[aria-pressed=true]{background:#f0eee9;color:#182822}.bar{margin-top:12px;display:flex;gap:6px;flex-wrap:wrap}.note{color:#c7d3cb;font-size:14px;margin-bottom:0}.error{padding:24px}.hide{display:none!important}
 .scene.immersive{position:fixed;inset:0;height:100dvh;border:0;border-radius:0;z-index:5}.scene.immersive .map,.scene.immersive .viewlabel,.scene.immersive #furn{display:none}.exit{position:absolute;top:12px;right:12px;background:#1c2024e8}.reticle{position:absolute;left:50%;top:50%;width:4px;height:4px;border-radius:50%;background:#fff8;box-shadow:0 0 2px #0008;pointer-events:none}.scene.immersive .pad{bottom:max(16px,env(safe-area-inset-bottom))}@media(pointer:coarse){.pad{grid-template-columns:repeat(3,46px)}.pad button{min-height:42px}}html.embedded main{padding:12px}html.embedded header small,html.embedded header h1{display:none}html.embedded header{margin-bottom:10px}html.embedded .scene{height:clamp(300px,65svh,760px)}html.embedded .scene.immersive{height:100dvh}
 .conditions{display:flex;gap:8px 14px;flex-wrap:wrap;align-items:end;margin-bottom:10px}
+.conditions [hidden]{display:none!important}
 .conditions label{display:grid;gap:4px;color:#b8cec3;font-size:13px}
 .conditions select,.conditions input{min-height:40px;max-width:100%;border:1px solid #53605e;border-radius:8px;padding:6px 9px;background:#222c30;color:#edf3ee;color-scheme:dark;font:inherit;font-size:14px}
 .conditions select:focus-visible,.conditions input:focus-visible{outline:3px solid #f0be83}
@@ -17,10 +18,20 @@
 .landmarks,.tour-controls{position:absolute;bottom:max(12px,env(safe-area-inset-bottom));left:50%;transform:translateX(-50%);z-index:2;width:max-content;max-width:calc(100% - 20px);display:flex;justify-content:center;align-items:center;gap:6px;flex-wrap:wrap}.landmarks button,.tour-controls button{background:#18272cf5}.landmarks button:disabled{opacity:.48;cursor:default}.landmarks button[aria-pressed=true]{background:#f0eee9;color:#182822}
 .tour-controls{padding:7px;background:#18272cf5;border-radius:10px}.tour-controls progress{width:clamp(66px,19vw,175px);accent-color:#b8d8c4}.tour-fade{position:absolute;inset:0;pointer-events:none;background:#171c1e;opacity:0}
 .scene.outside .actions,.scene.touring .actions,.scene.touring .map,.scene.outside .map{display:none}.scene.touring .viewlabel,.scene.outside .viewlabel{display:block}.scene.immersive .viewlabel{max-width:calc(100% - 180px)}.viewlabel{z-index:1}.scene.immersive .exit{z-index:3}
+html.unit-explorer main{padding:8px}
+html.unit-explorer header{display:block;margin-bottom:5px}
+html.unit-explorer .mode-controls{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:5px}
+html.unit-explorer .mode-controls button{min-height:44px;padding:6px 3px}
+html.unit-explorer .scene:not(.immersive){height:clamp(340px,105vw,560px)}
+.viewer-options{margin-bottom:6px}
+.viewer-options summary{width:max-content;cursor:pointer;padding:6px 4px;color:#dbe8de;font-size:13px;min-height:34px}
+.viewer-options summary:focus-visible{outline:3px solid #f0be83}
+.viewer-options .secondary-controls{display:flex;flex-wrap:wrap;gap:5px;margin:4px 0 8px}
+.viewer-options .secondary-controls button{min-height:44px}
 </style>
 <main><header><div><small id="layout-title">Berlayar Rise</small><h1 id="stack-title">Stack 139</h1></div><div><button id="walk" aria-pressed="true">Walk inside</button> <button id="overview" aria-pressed="false">3D overview</button> <button id="outlook" aria-pressed="false">Outlook</button> <button id="explore-outside" aria-pressed="false">Explore outside</button> <button id="focus" aria-pressed="false">Immersive view</button> <button id="play-tour" class="tour-button" aria-controls="tour-controls">Play Tour</button></div></header>
 <div class="conditions" aria-label="Window view and daylight settings">
-<label>View floor <select id="view-floor"></select></label>
+<label id="view-floor-wrap">View floor <select id="view-floor"></select></label>
 <label>Sun date <input id="sun-date" type="date" value="2031-12-21"></label>
 <label>Time (SGT) <input id="sun-time" type="time" value="16:00"></label><label id="flight-height-wrap" hidden>Camera height <input id="flight-height" type="range" min="2" max="160" step="1" value="60"><output id="flight-height-label">60 m</output></label>
 </div>
@@ -99,6 +110,30 @@ $('layout-title').textContent='Berlayar Rise · Block '+site.block+' · '+layout
 document.title='Berlayar Rise · #'+renderUnit(floor);
 const embedded=window.parent!==window&&params.has('embedded');
 document.documentElement.classList.toggle('embedded',embedded);
+const inUnitExplorer=embedded&&params.get('explorer')==='1';
+if(inUnitExplorer){
+ document.documentElement.classList.add('unit-explorer');
+ $('view-floor-wrap').hidden=true;
+ const primary=$('walk').parentElement;
+ primary.classList.add('mode-controls');
+ const options=document.createElement('details');
+ options.className='viewer-options';
+ const summary=document.createElement('summary');
+ summary.textContent='More controls';
+ const secondary=document.createElement('div');
+ secondary.className='secondary-controls';
+ secondary.append($('explore-outside'),$('focus'),$('play-tour'));
+ const conditions=document.querySelector('.conditions');
+ conditions.before(options);
+ options.append(summary,secondary,conditions);
+ addEventListener('message',event=>{
+  if(event.origin!==location.origin||event.source!==window.parent||event.data?.type!=='unit-explorer-floor')return;
+  const level=event.data.floor;
+  if(level===floor||!site.floors.includes(level))return;
+  $('view-floor').value=String(level);
+  $('view-floor').dispatchEvent(new Event('change'));
+ });
+}
 const canvas=$('world'), gl=canvas.getContext('webgl',{antialias:true,alpha:true});
 const flat=gl?null:canvas.getContext('2d');
 let uniforms;
@@ -584,7 +619,7 @@ function setMode(value,outlook=false){
  $('pad').classList.toggle('hide',!exploring&&!outdoorFlight);
  $('landmarks').classList.toggle('hide',!outside||!!tour);
  $('help').textContent=tour?'The tour moves between furnished rooms. Use Pause tour or End tour at any time.'
-  :outside?'Drag to pan from the living-room windows. Dimmed landmarks are outside this facing. Change View floor to compare sightlines.'
+  :outside?'Drag to pan from the living-room windows. Dimmed landmarks are outside this facing. Change the floor to compare sightlines.'
   :overview?'Drag to orbit. Choose a room to jump inside.'
   :'Drag to look. Use the direction pad or WASD to move. Choose Windows to look through or operate a window.';
 }
@@ -893,5 +928,12 @@ jump(rooms[1]);
 player.pitch=-.15;
 if(params.get('view')==='outlook')$('outlook').click();
 if(params.get('view')==='exterior')$('explore-outside').click();
+if(inUnitExplorer){
+ const content=document.querySelector('main');
+ new ResizeObserver(()=>{
+  if(scene.classList.contains('immersive'))return;
+  window.parent.postMessage({type:'unit-explorer-size',height:Math.ceil(content.getBoundingClientRect().height)},location.origin);
+ }).observe(content);
+}
 requestAnimationFrame(frame);
 </script></html>
